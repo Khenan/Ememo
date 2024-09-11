@@ -25,5 +25,23 @@ public class FightManager : Singleton<FightManager>
     public void LaunchFight(FightData _fightData)
     {
         currentMap = FightMapManager.Instance.GetMap(_fightData.AreaId);
+        InitCharcterPosition();
+        // Générer la barre d'initiative
+        // On affiche le jeu
+    }
+
+    private void InitCharcterPosition()
+    {
+        // Placer aléatoirement les characters sur les cases de départ de l'équipe en question
+        currentMap.GetStartTiles().ForEach(tile => {
+            if (tile.TeamId == 0)
+            {
+                // Placer un personnage de l'équipe 0
+            }
+            else
+            {
+                // Placer un personnage de l'équipe 1
+            }
+        });
     }
 }
