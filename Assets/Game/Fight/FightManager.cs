@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEngine;
 
 public class FightManager : Singleton<FightManager>
 {
@@ -16,8 +17,13 @@ public class FightManager : Singleton<FightManager>
 
     // On fini le combat si il ne reste plus que une équipe en vie
 
-    public void LaunchFight()
+    [SerializeField] private FightData fightData;
+    private FightMap currentMap;
+    private void Start() {
+        LaunchFight(fightData);
+    }
+    public void LaunchFight(FightData _fightData)
     {
-
+        currentMap = MapManager.Instance.GetMap(_fightData.AreaId);
     }
 }
