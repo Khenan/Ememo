@@ -1,4 +1,4 @@
-// 
+// On pourrait acceder a tout ce que possede un spell via le SpellData et quelque fonctions que je considere mieux d'avoir en acces libre
 public abstract class Spell
 {
     protected SpellData spellData;
