@@ -1,9 +1,33 @@
+// 
 public abstract class Spell
 {
     protected SpellData spellData;
+    public SpellData SpellData => spellData;
+    public Spell(SpellData spellData)
+    {
+        this.spellData = spellData;
+    }
 
-    public abstract void Effect();
+    public virtual void Effect(Character _target)
+    {
+
+    }
+    public virtual (int, int) DisplayRange()
+    {
+        return (spellData.RangeMin, spellData.RangeMax);
+    }
+    public virtual string DisplayDescription()
+    {
+        return spellData.Description;
+    }
+    public virtual string DisplayName()
+    {
+        return spellData.Name;
+    }
 }
+
+// QUESTION ???
+// Pourquoi pas des scriptable Object a inserer directement dans le spell qui finalement fait la meme chose mais tout change selon les data
 public class SpellData
 {
     private readonly string name;
