@@ -53,6 +53,4 @@ public class PlayerController : MonoBehaviour
     {
         _action?.Invoke(_context);
     }
-
-
 }
