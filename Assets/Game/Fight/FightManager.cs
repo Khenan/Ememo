@@ -24,6 +24,6 @@ public class FightManager : Singleton<FightManager>
     }
     public void LaunchFight(FightData _fightData)
     {
-        currentMap = MapManager.Instance.GetMap(_fightData.AreaId);
+        currentMap = FightMapManager.Instance.GetMap(_fightData.AreaId);
     }
 }
