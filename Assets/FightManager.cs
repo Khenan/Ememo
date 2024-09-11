@@ -1,5 +1,4 @@
 using System.Collections;
-using UnityEngine;
 
 public class FightManager : Singleton<FightManager>
 {
@@ -16,4 +15,9 @@ public class FightManager : Singleton<FightManager>
     // On sait qui est le personnage qui joue actuellement
 
     // On fini le combat si il ne reste plus que une équipe en vie
+
+    public void LaunchFight()
+    {
+
+    }
 }
