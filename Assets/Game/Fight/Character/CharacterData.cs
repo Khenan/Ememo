@@ -1,22 +1,24 @@
 using UnityEngine;
 
+[System.Serializable]
 public class CharacterData
 {
+    [Header("Level")]
+    [SerializeField] internal int level = 1;
+
     [Header("Health")]
-    private int defaultHealth = 10;
-    private int currentHealth;
+    [SerializeField] internal int defaultHealth = 10;
+    internal int currentHealth;
     
     [Header("Initiative")]
-    private int defaultInitiative = 0;
-    private int currentInitiative;
+    [SerializeField] internal int defaultInitiative = 0;
+    internal int currentInitiative;
     
     [Header("Action Points")]
-    private int defaultActionPoints = 6;
-    private int currentActionPoints;
+    [SerializeField] internal int defaultActionPoints = 6;
+    internal int currentActionPoints;
     
     [Header("Movement Points")]
-    private int defaultMovementPoints = 3;
-    private int currentMovementPoints;
-
-    private int level = 1;
+    [SerializeField] internal int defaultMovementPoints = 3;
+    internal int currentMovementPoints;
 }
