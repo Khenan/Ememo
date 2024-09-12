@@ -7,6 +7,7 @@ public class FightMapTile : MonoBehaviour
 {
     private Vector3 position;
     public Vector3 Position => position;
+    [SerializeField] public int tileID;
     [SerializeField] private bool isWalkable;
     public bool IsWalkable => isWalkable;
     [SerializeField] private bool isOccupied;
