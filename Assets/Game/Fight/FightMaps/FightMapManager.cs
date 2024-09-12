@@ -9,13 +9,27 @@ public class FightMapManager : Singleton<FightMapManager>
     [SerializeField] private List<FightMap> maps;
     [SerializeField] private Color floorColor1, floorColor2, teamColor0, teamColor1;
     [SerializeField] private Camera cam;
+    [SerializeField] private FightMapTile floor, wall, hole;
 
     private void Start()
     {
+        //GenerateMap(14,14);
+        
         InitMap(GetMap(0));
-        cam.transform.position = new Vector3(24, 21, -11);
+        cam.transform.position = new Vector3(23, 13, -10);
         cam.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
+
+    // private void GenerateMap(int _sizeX, int _sizeZ)
+    // {
+    //     for (int x = 0; x<_sizeX; x++)
+    //     {
+    //         for (int z = 0; z<_sizeZ; z++)
+    //         {
+    //             Instantiate(floor, new Vector3(x, 0, z), Quaternion.identity);
+    //         }
+    //     }
+    // }
 
     internal FightMap GetMap(int _areaId)
     {

@@ -51,3 +51,6 @@ MonoBehaviour:
   teamColor0: {r: 1, g: 0, b: 0, a: 1}
   teamColor1: {r: 0, g: 0.49014425, b: 1, a: 1}
   cam: {fileID: 0}
+  floor: {fileID: 1035682791545254160, guid: 1b56661589300c543b8ea4ee11f841c7, type: 3}
+  wall: {fileID: 1878282756284106221, guid: 23e7e552f169f07499e6705db1ec4968, type: 3}
+  hole: {fileID: 8073755790221048550, guid: 77c0260600a466a49a8238b9e8ff0ea0, type: 3}
