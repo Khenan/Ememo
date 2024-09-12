@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -99,13 +97,12 @@ public class FightManager : Singleton<FightManager>
             _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
             _teamTiles[_randomTileIndex].character = _character;
             _character.CurrentTile = _teamTiles[_randomTileIndex];
-
             SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
 
             _characters.RemoveAt(_randomCharacterIndex);
             _teamTiles.RemoveAt(_randomTileIndex);
 
-            if(_teamTiles.Count == 0)
+            if (_teamTiles.Count == 0)
             {
                 Debug.LogError("Not enough tiles for characters", this);
                 return;
