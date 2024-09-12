@@ -48,4 +48,6 @@ MonoBehaviour:
   - {fileID: 3127251833083927552, guid: 4c05fd5d1fdc7704e980b79a8a22521f, type: 3}
   floorColor1: {r: 1, g: 1, b: 1, a: 1}
   floorColor2: {r: 0.9150943, g: 0.9150943, b: 0.9150943, a: 1}
+  teamColor0: {r: 1, g: 0, b: 0, a: 1}
+  teamColor1: {r: 0, g: 0.49014425, b: 1, a: 1}
   cam: {fileID: 0}

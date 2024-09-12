@@ -72,7 +72,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -99,7 +99,7 @@ PrefabInstance:
     - target: {fileID: 2934233592071123807, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: highlight
       value: 
-      objectReference: {fileID: 5469447980950078838}
+      objectReference: {fileID: 1374799988837976111}
     - target: {fileID: 2934233592071123807, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: isWalkable
       value: 1

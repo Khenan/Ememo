@@ -15,8 +15,8 @@ public class FightMapTile : MonoBehaviour
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
     public int TeamId => teamId;
-    [SerializeField] private GameObject highlight;
-    public GameObject Highlight => highlight;
+    [SerializeField] private SpriteRenderer highlight;
+    public SpriteRenderer Highlight => highlight;
 
     public Character character;
 
