@@ -20,7 +20,8 @@ public class FightManager : Singleton<FightManager>
 
     // On fini le combat si il ne reste plus que une équipe en vie
 
-    List<Character> initiativeList = new List<Character>();
+    List<Character> characters = new();
+    private Character currentCharacter;
 
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
@@ -28,15 +29,25 @@ public class FightManager : Singleton<FightManager>
     {
         LaunchFight(fightData);
     }
+
     public void LaunchFight(FightData _fightData)
     {
+        characters.Clear();
         currentMap = FightMapManager.Instance.GetMap(_fightData.AreaId);
-        InitCharcterPosition();
+        InitCharacterPosition();
         // Générer la barre d'initiative
+        InitInitiativeList();
         // On affiche le jeu
     }
 
-    private void InitCharcterPosition()
+    private void InitInitiativeList()
+    {
+        // On trie les personnages par initiative
+        characters = characters.OrderByDescending(character => character.Data.currentInitiative).ToList();
+        // On affiche la barre d'initiative
+    }
+
+    private void InitCharacterPosition()
     {
         // List des startTiles
         List<FightMapTile> _tiles = currentMap.GetStartTiles();
@@ -101,11 +112,12 @@ public class FightManager : Singleton<FightManager>
             _character.CurrentTile = _teamTiles[_randomTileIndex];
 
             SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
+            characters.Add(_character);
 
             _characters.RemoveAt(_randomCharacterIndex);
             _teamTiles.RemoveAt(_randomTileIndex);
 
-            if(_teamTiles.Count == 0)
+            if (_teamTiles.Count == 0)
             {
                 Debug.LogError("Not enough tiles for characters", this);
                 return;
@@ -116,5 +128,24 @@ public class FightManager : Singleton<FightManager>
     private void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
     {
         FightMapManager.Instance.SetCharacterOnTile(_character, _fightMapTile, _map);
+    }
+
+    public void EndTurn(Character _character)
+    {
+        _character.isMyTurn = false;
+
+        int _currentCharacterIndex = characters.IndexOf(_character);
+        int _nextCharacterIndex = _currentCharacterIndex + 1;
+        if (_nextCharacterIndex >= characters.Count)
+        {
+            _nextCharacterIndex = 0;
+        }
+
+        characters[_nextCharacterIndex].isMyTurn = true;
+
+        if(characters[_nextCharacterIndex].isHumanController) {
+            System.Timers.Timer _timer = new(1000);
+            _timer.Elapsed += (sender, e) => { EndTurn(currentCharacter); };
+        }
     }
 }
