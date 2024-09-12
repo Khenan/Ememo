@@ -1,15 +1,9 @@
-// On pourrait acceder a tout ce que possede un spell via le SpellData et quelque fonctions que je considere mieux d'avoir en acces libre
+using UnityEngine;
 
-public class Spell
+public class Spell : MonoBehaviour
 {
-    protected SpellData data;
+    [SerializeField] private SpellData data;
     public SpellData Data => data;
-
-    public Spell(SpellData spellData)
-    {
-        this.data = spellData;
-    }
-
     public void Effect(Character target)
     {
         target.Data.currentHealth -= Data.damage;
@@ -18,6 +12,15 @@ public class Spell
             target.Data.currentHealth = 0;
         }
     }
+
+    // gapCase = (Nombre de case entre personnage lanceur et case survolée par la souris)
+    //public bool CanBeLaunch()
+    //{
+    //    return data.rangeMin <= gapCase && data.rangeMax >= gapCase;
+    //}
+
+
+
     public (int, int) DisplayRange()
     {
         return (data.rangeMin, data.rangeMax);
