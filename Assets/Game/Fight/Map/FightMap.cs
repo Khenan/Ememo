@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 
 public class FightMap : MonoBehaviour
 {
-    internal int areaId;
+    [SerializeField] internal int areaId;
     [SerializeField] private List<FightMapTile> tiles;
     private int teamCount = 2;
 
