@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Character characterToInstantiate;
     public Character CharacterToInstantiate => characterToInstantiate;
 
+    [SerializeField] private bool isLocalPlayer;
+
     private Character character;
     public Character Character => character;
 
@@ -46,6 +48,8 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        if(!isLocalPlayer) return;
+        
         actionAsset.Enable();
 
         leftClick.performed += _context => InputActivation(OnLeftClick, _context);
@@ -80,6 +84,13 @@ public class PlayerController : MonoBehaviour
             if(_hit.collider.TryGetComponent(out FightMapTile _tile))
             {
                 Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
+
+                // Si c'est une StartTile de ton équipe
+                if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
+                {
+                    Debug.Log("StartTile de ta team");
+                    FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+                }
                 return _tile;
             }
         }

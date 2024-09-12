@@ -39,7 +39,7 @@ public class FightManager : Singleton<FightManager>
     public void InitFight(FightData _fightData)
     {
         characters.Clear();
-        currentMap = FightMapManager.Instance.GetMap(_fightData.AreaId);
+        currentMap = FightMapManager.Instance.InitMap(_fightData.AreaId);
         InitCharacterPosition();
         InitInitiativeList();
         LaunchFight();
