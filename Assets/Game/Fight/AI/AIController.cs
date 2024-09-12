@@ -18,7 +18,7 @@ public class AIController : MonoBehaviour
         // Si non, on s'approche d'un ennemi
 
         // On choisi une action possible aléatoire
-        List<Spell> _possibleSpells = character.Spells.FindAll(spell => spell.SpellData.Cost <= _pa);
+        List<Spell> _possibleSpells = character.Spells.FindAll(spell => spell.Data.cost <= _pa);
         // On effectue l'action
         Spell _spell = _possibleSpells[Random.Range(0, _possibleSpells.Count)];
         // On regarde si on peut encore jouer

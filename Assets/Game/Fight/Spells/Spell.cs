@@ -2,27 +2,32 @@
 
 public class Spell
 {
-    protected SpellData spellData;
-    public SpellData SpellData => spellData;
+    protected SpellData data;
+    public SpellData Data => data;
+
     public Spell(SpellData spellData)
     {
-        this.spellData = spellData;
+        this.data = spellData;
     }
 
-    public void Effect(Character _target)
+    public void Effect(Character target)
     {
-
+        target.Data.currentHealth -= Data.damage;
+        if (target.Data.currentHealth <= 0)
+        {
+            target.Data.currentHealth = 0;
+        }
     }
     public (int, int) DisplayRange()
     {
-        return (spellData.RangeMin, spellData.RangeMax);
+        return (data.rangeMin, data.rangeMax);
     }
     public string DisplayDescription()
     {
-        return spellData.Description;
+        return data.description;
     }
     public string DisplayName()
     {
-        return spellData.Name;
+        return data.name;
     }
 }
