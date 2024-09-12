@@ -16,4 +16,11 @@ public class Character : MonoBehaviour
 
     public bool isMyTurn = false;
     public bool isHumanController = false;
+
+    [SerializeField] private GameObject isMyTurnArrow;
+
+    private void Update()
+    {
+        isMyTurnArrow.SetActive(isMyTurn);
+    }
 }

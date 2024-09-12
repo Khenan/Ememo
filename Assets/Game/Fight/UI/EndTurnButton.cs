@@ -18,7 +18,7 @@ public class ButtonBehaviour : MonoBehaviour
 
     private void Update()
     {
-        gameObject.SetActive(playerController.Character.isMyTurn);
+        button.interactable = playerController.Character.isMyTurn;
     }
 
     private void OnClick()

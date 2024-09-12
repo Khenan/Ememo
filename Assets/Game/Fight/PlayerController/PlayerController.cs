@@ -5,7 +5,10 @@ using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Character character;
+    [SerializeField] private Character characterToInstantiate;
+    public Character CharacterToInstantiate => characterToInstantiate;
+
+    private Character character;
     public Character Character => character;
 
     private PlayerActionController actionAsset;
