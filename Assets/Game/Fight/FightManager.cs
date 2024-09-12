@@ -22,7 +22,8 @@ public class FightManager : Singleton<FightManager>
 
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
-    private void Start() {
+    private void Start()
+    {
         LaunchFight(fightData);
     }
     public void LaunchFight(FightData _fightData)
@@ -35,33 +36,74 @@ public class FightManager : Singleton<FightManager>
 
     private void InitCharcterPosition()
     {
-        // List des character à placer autre que les joueurs
-        List<FightCharacter> _charactersToInstantiate = new List<FightCharacter>(fightData.CharactersToInstantiate);
-
         // List des startTiles
         List<FightMapTile> _tiles = currentMap.GetStartTiles();
 
+        if (_tiles.Count == 0)
+        {
+            Debug.LogError("No start tiles found", this);
+            return;
+        }
+
+        SetAllCharacters(_tiles);
+        SetAllPlayers(_tiles);
+    }
+
+    private void SetAllCharacters(List<FightMapTile> _tiles)
+    {
         int _teamCount = _tiles.Max(tile => tile.TeamId) + 1;
 
-        for (int i = 0; i < _teamCount; i++)
+        for (int i = 1; i < _teamCount; i++)
         {
             List<FightCharacter> _teamCharacters = fightData.CharactersToInstantiate.Where(fCharacter => fCharacter.teamId == i).ToList();
             List<FightMapTile> _teamTiles = _tiles.Where(tile => tile.TeamId == i).ToList();
-            SetAllCharacterOfTeam(_teamCharacters, _teamTiles);
+            SetAllFightCharactersOfTeam(_teamCharacters, _teamTiles);
         }
     }
 
-    private void SetAllCharacterOfTeam(List<FightCharacter> _fCharacters, List<FightMapTile> _tiles)
+    private void SetAllPlayers(List<FightMapTile> _tiles)
     {
-        while (_fCharacters.Count > 0)
+        List<PlayerController> _players = FindObjectsOfType<PlayerController>().ToList();
+        List<Character> _characters = new();
+        foreach (PlayerController _player in _players)
         {
-            int _randomTileIndex = UnityEngine.Random.Range(0, _tiles.Count);
-            int _randomCharacterIndex = UnityEngine.Random.Range(0, _fCharacters.Count);
+            _characters.Add(_player.Character);
+        }
+        List<FightMapTile> _teamPlayerTiles = _tiles.Where(tile => tile.TeamId == 0).ToList();
+        SetAllCharactersOfTeam(_characters, _teamPlayerTiles);
+    }
 
-            _fCharacters[_randomCharacterIndex].character.transform.position = _tiles[_randomTileIndex].transform.position;
+    private void SetAllFightCharactersOfTeam(List<FightCharacter> _fCharacters, List<FightMapTile> _tiles)
+    {
+        List<Character> _teamCharacters = new();
+        foreach (FightCharacter _fCharacter in _fCharacters)
+        {
+            _teamCharacters.Add(_fCharacter.character);
+        }
+        SetAllCharactersOfTeam(_teamCharacters, _tiles);
+    }
 
-            _fCharacters.RemoveAt(_randomCharacterIndex);
-            _tiles.RemoveAt(_randomTileIndex);
+    private void SetAllCharactersOfTeam(List<Character> _characters, List<FightMapTile> _tiles)
+    {
+        List<FightMapTile> _teamTiles = new List<FightMapTile>(_tiles);
+        while (_characters.Count > 0)
+        {
+            int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
+            int _randomCharacterIndex = UnityEngine.Random.Range(0, _characters.Count);
+
+            Debug.Log(_characters[_randomCharacterIndex].CharacterName);
+
+            Character _character = Instantiate(_characters[_randomCharacterIndex]);
+            _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
+
+            _characters.RemoveAt(_randomCharacterIndex);
+            _teamTiles.RemoveAt(_randomTileIndex);
+
+            if(_teamTiles.Count == 0)
+            {
+                Debug.LogError("Not enough tiles for characters", this);
+                return;
+            }
         }
     }
 }
