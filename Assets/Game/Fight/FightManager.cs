@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -110,7 +108,6 @@ public class FightManager : Singleton<FightManager>
             _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
             _teamTiles[_randomTileIndex].character = _character;
             _character.CurrentTile = _teamTiles[_randomTileIndex];
-
             SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
             characters.Add(_character);
 
