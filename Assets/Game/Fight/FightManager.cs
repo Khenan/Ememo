@@ -20,6 +20,8 @@ public class FightManager : Singleton<FightManager>
 
     // On fini le combat si il ne reste plus que une équipe en vie
 
+    List<Character> initiativeList = new List<Character>();
+
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
     private void Start()
@@ -98,10 +100,10 @@ public class FightManager : Singleton<FightManager>
             _teamTiles[_randomTileIndex].character = _character;
             _character.CurrentTile = _teamTiles[_randomTileIndex];
 
+            SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
+
             _characters.RemoveAt(_randomCharacterIndex);
             _teamTiles.RemoveAt(_randomTileIndex);
-
-            SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
 
             if(_teamTiles.Count == 0)
             {
