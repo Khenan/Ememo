@@ -93,4 +93,26 @@ public class FightMapManager : Singleton<FightMapManager>
     {
         _map.GetTiles().Find(tile => tile.Position == _fightMapTile.Position).character = _character;
     }
+
+    internal void SwitchTileCharacter(Character character, FightMapTile tile)
+    {
+        FightMapTile _oldTile = character.CurrentTile;
+        Character _oldCharacter = tile.character;
+
+        character.CurrentTile = tile;
+        tile.character = character;
+
+        if (_oldCharacter != null)
+        {
+            _oldCharacter.CurrentTile = _oldTile;
+        }
+        _oldTile.character = _oldCharacter;
+
+        character.transform.position = tile.transform.position;
+        
+        if (_oldCharacter != null)
+        {
+            _oldCharacter.transform.position = _oldTile.transform.position;
+        }
+    }
 }
