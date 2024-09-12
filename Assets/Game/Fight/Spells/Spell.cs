@@ -1,32 +1,36 @@
-public abstract class Spell
+using UnityEngine;
+
+public class Spell : MonoBehaviour
 {
-    protected SpellData spellData;
-
-    public abstract void Effect();
-}
-public class SpellData
-{
-    private readonly string name;
-    private readonly string description;
-    private readonly int cost;
-    private readonly int level;
-    private readonly int rangeMin;
-    private readonly int rangeMax;
-
-    public string Name => name;
-    public string Description => description;
-    public int Cost => cost;
-    public int Level => level;
-    public int RangeMin => rangeMin;
-    public int RangeMax => rangeMax;
-
-    public SpellData(string name, string description, int cost, int level, int rangeMin, int rangeMax)
+    [SerializeField] private SpellData data;
+    public SpellData Data => data;
+    public void Effect(Character target)
     {
-        this.name = name;
-        this.description = description;
-        this.cost = cost;
-        this.level = level;
-        this.rangeMin = rangeMin;
-        this.rangeMax = rangeMax;
+        target.Data.currentHealth -= Data.damage;
+        if (target.Data.currentHealth <= 0)
+        {
+            target.Data.currentHealth = 0;
+        }
+    }
+
+    // gapCase = (Nombre de case entre personnage lanceur et case survolée par la souris)
+    //public bool CanBeLaunch()
+    //{
+    //    return data.rangeMin <= gapCase && data.rangeMax >= gapCase;
+    //}
+
+
+
+    public (int, int) DisplayRange()
+    {
+        return (data.rangeMin, data.rangeMax);
+    }
+    public string DisplayDescription()
+    {
+        return data.description;
+    }
+    public string DisplayName()
+    {
+        return data.name;
     }
 }

@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6d580a09c8631947bdc5e71a054d066, type: 3}
-  m_Name: Goblin
+  m_Script: {fileID: 11500000, guid: 9d6a599df5bdfc0478f104dd8247cb00, type: 3}
+  m_Name: SpellFist
   m_EditorClassIdentifier: 
-  characterName: Goblin
-  data:
-    level: 2
-    defaultHealth: 20
-    defaultInitiative: 2
-    defaultActionPoints: 9
-    defaultMovementPoints: 1
+  name: Fist
+  description: Une bonne patate y'a rien de mieux
+  cost: 2
+  level: 1
+  rangeMin: 0
+  rangeMax: 0
+  damage: 5

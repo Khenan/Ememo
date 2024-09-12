@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6d580a09c8631947bdc5e71a054d066, type: 3}
-  m_Name: Elfe
+  m_Script: {fileID: 11500000, guid: 9d6a599df5bdfc0478f104dd8247cb00, type: 3}
+  m_Name: SpellFireBall
   m_EditorClassIdentifier: 
-  characterName: Elfe
-  data:
-    level: 1
-    defaultHealth: 10
-    defaultInitiative: 5
-    defaultActionPoints: 6
-    defaultMovementPoints: 3
+  name: FireBall
+  description: Une boule de feu
+  cost: 5
+  level: 1
+  rangeMin: 1
+  rangeMax: 5
+  damage: 11
