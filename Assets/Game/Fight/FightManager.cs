@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class FightManager : Singleton<FightManager>
@@ -32,16 +35,33 @@ public class FightManager : Singleton<FightManager>
 
     private void InitCharcterPosition()
     {
-        // Placer aléatoirement les characters sur les cases de départ de l'équipe en question
-        currentMap.GetStartTiles().ForEach(tile => {
-            if (tile.TeamId == 0)
-            {
-                // Placer un personnage de l'équipe 0
-            }
-            else
-            {
-                // Placer un personnage de l'équipe 1
-            }
-        });
+        // List des character à placer autre que les joueurs
+        List<FightCharacter> _charactersToInstantiate = new List<FightCharacter>(fightData.CharactersToInstantiate);
+
+        // List des startTiles
+        List<FightMapTile> _tiles = currentMap.GetStartTiles();
+
+        int _teamCount = _tiles.Max(tile => tile.TeamId) + 1;
+
+        for (int i = 0; i < _teamCount; i++)
+        {
+            List<FightCharacter> _teamCharacters = fightData.CharactersToInstantiate.Where(fCharacter => fCharacter.teamId == i).ToList();
+            List<FightMapTile> _teamTiles = _tiles.Where(tile => tile.TeamId == i).ToList();
+            SetAllCharacterOfTeam(_teamCharacters, _teamTiles);
+        }
+    }
+
+    private void SetAllCharacterOfTeam(List<FightCharacter> _fCharacters, List<FightMapTile> _tiles)
+    {
+        while (_fCharacters.Count > 0)
+        {
+            int _randomTileIndex = UnityEngine.Random.Range(0, _tiles.Count);
+            int _randomCharacterIndex = UnityEngine.Random.Range(0, _fCharacters.Count);
+
+            _fCharacters[_randomCharacterIndex].character.transform.position = _tiles[_randomTileIndex].transform.position;
+
+            _fCharacters.RemoveAt(_randomCharacterIndex);
+            _tiles.RemoveAt(_randomTileIndex);
+        }
     }
 }
