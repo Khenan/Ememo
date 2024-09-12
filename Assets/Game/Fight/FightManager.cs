@@ -95,9 +95,13 @@ public class FightManager : Singleton<FightManager>
 
             Character _character = Instantiate(_characters[_randomCharacterIndex]);
             _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
+            _teamTiles[_randomTileIndex].character = _character;
+            _character.CurrentTile = _teamTiles[_randomTileIndex];
 
             _characters.RemoveAt(_randomCharacterIndex);
             _teamTiles.RemoveAt(_randomTileIndex);
+
+            SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
 
             if(_teamTiles.Count == 0)
             {
@@ -105,5 +109,10 @@ public class FightManager : Singleton<FightManager>
                 return;
             }
         }
+    }
+
+    private void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
+    {
+        FightMapManager.Instance.SetCharacterOnTile(_character, _fightMapTile, _map);
     }
 }

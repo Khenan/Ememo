@@ -10,5 +10,7 @@ public class Character : MonoBehaviour
     [SerializeField] protected CharacterData data;
     public CharacterData Data => data;
 
+    public FightMapTile CurrentTile { get; set; }
+
     public int CurrentActionPoints => data.currentActionPoints;
 }
