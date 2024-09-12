@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 public class FightMapTile : MonoBehaviour
 {
-    private Vector2 position;
-    public Vector2 Position => position;
+    private Vector3 position;
+    public Vector3 Position => position;
     [SerializeField] private bool isWalkable;
     public bool IsWalkable => isWalkable;
     [SerializeField] private bool isOccupied;
@@ -14,4 +15,13 @@ public class FightMapTile : MonoBehaviour
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
     public int TeamId => teamId;
+    [SerializeField] private SpriteRenderer highlight;
+    public SpriteRenderer Highlight => highlight;
+
+    public Character character;
+
+    private void Start() {
+        position = gameObject.transform.position;
+    }
+
 }
