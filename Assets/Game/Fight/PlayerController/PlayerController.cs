@@ -4,6 +4,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    private Character character;
+
     [SerializeField] private PlayerActionController actionAsset;
 
     [SerializeField] private InputAction leftClick;
@@ -47,6 +49,11 @@ public class PlayerController : MonoBehaviour
         shortCut_5.performed += _context => InputActivation(OnShortcut_05, _context);
         ctrlBar.performed += _context => InputActivation(OnCtrlBar, _context);
         shiftBar.performed += _context => InputActivation(OnShiftBar, _context);
+    }
+
+    public void SetCharacter(Character _character)
+    {
+        character = _character;
     }
 
     private void InputActivation(Action<InputAction.CallbackContext> _action, InputAction.CallbackContext _context)
