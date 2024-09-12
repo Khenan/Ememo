@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Character", menuName = "Character")]
-public class Character : ScriptableObject
+public class Character : MonoBehaviour
 {
-    [SerializeField] private string characterName;
-    [SerializeField] private List<Spell> spells;
+    [SerializeField] protected string characterName;
+    [SerializeField] protected List<Spell> spells;
     public List<Spell> Spells => spells;
-    [SerializeField] private CharacterData data;
+    [SerializeField] protected CharacterData data;
     public CharacterData Data => data;
 
     public int CurrentActionPoints => data.currentActionPoints;
