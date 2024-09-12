@@ -15,6 +15,8 @@ public class FightMapTile : MonoBehaviour
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
     public int TeamId => teamId;
+    [SerializeField] private SpriteRenderer visualTop;
+    public SpriteRenderer VisualTop => visualTop;
     [SerializeField] private SpriteRenderer highlight;
     public SpriteRenderer Highlight => highlight;
 
@@ -23,5 +25,7 @@ public class FightMapTile : MonoBehaviour
     private void Start() {
         position = gameObject.transform.position;
     }
+
+
 
 }
