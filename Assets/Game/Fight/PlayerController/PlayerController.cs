@@ -4,18 +4,19 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private Character character;
+    [SerializeField] private Character character;
+    public Character Character => character;
 
-    [SerializeField] private PlayerActionController actionAsset;
+    private PlayerActionController actionAsset;
 
-    [SerializeField] private InputAction leftClick;
-    [SerializeField] private InputAction shortCut_1;
-    [SerializeField] private InputAction shortCut_2;
-    [SerializeField] private InputAction shortCut_3;
-    [SerializeField] private InputAction shortCut_4;
-    [SerializeField] private InputAction shortCut_5;
-    [SerializeField] private InputAction ctrlBar;
-    [SerializeField] private InputAction shiftBar;
+    private InputAction leftClick;
+    private InputAction shortCut_1;
+    private InputAction shortCut_2;
+    private InputAction shortCut_3;
+    private InputAction shortCut_4;
+    private InputAction shortCut_5;
+    private InputAction ctrlBar;
+    private InputAction shiftBar;
 
     public Action<InputAction.CallbackContext> OnLeftClick;
     public Action<InputAction.CallbackContext> OnShortcut_01;
