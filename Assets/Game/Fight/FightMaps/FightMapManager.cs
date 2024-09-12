@@ -27,6 +27,7 @@ public class FightMapManager : Singleton<FightMapManager>
     private void InitMap(FightMap _map)
     {
         FightMap _currentMap = Instantiate(_map);
+        _map.SetTileIDs();
         SetMapColor(_map);
         ShowStartTiles(_map);
     }
@@ -36,16 +37,13 @@ public class FightMapManager : Singleton<FightMapManager>
         List<FightMapTile> _floorTiles = _map.GetWalkableTiles();
         foreach (FightMapTile _floorTile in _floorTiles)
         {
-            Debug.Log("0");
             if ((_floorTile.transform.position.x + _floorTile.transform.position.z) % 2 == 1)
             {
                 _floorTile.VisualTop.color = floorColor1;
-                Debug.Log("1");
             }
             else
             {
                 _floorTile.VisualTop.color = floorColor2;
-                Debug.Log("2");
             }
         }
     }
