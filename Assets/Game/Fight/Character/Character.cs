@@ -13,4 +13,7 @@ public class Character : MonoBehaviour
     public FightMapTile CurrentTile { get; set; }
 
     public int CurrentActionPoints => data.currentActionPoints;
+
+    public bool isMyTurn = false;
+    public bool isHumanController = false;
 }
