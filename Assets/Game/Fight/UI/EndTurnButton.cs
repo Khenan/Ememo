@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class ButtonBehaviour : MonoBehaviour
 {
     private Button button;
+    [SerializeField] private PlayerController playerController;
 
     private void Awake()
     {
@@ -15,8 +16,13 @@ public class ButtonBehaviour : MonoBehaviour
         button.onClick.AddListener(OnClick);
     }
 
+    private void Update()
+    {
+        gameObject.SetActive(playerController.Character.isMyTurn);
+    }
+
     private void OnClick()
     {
-
+        FightManager.Instance.EndTurn(playerController.Character);
     }
 }
