@@ -20,10 +20,26 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 636254518066657192, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 636254518066657192, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 636254518066657192, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1254592051341145280, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: m_Name
       value: FightMapTile_Hole
       objectReference: {fileID: 0}
+    - target: {fileID: 3702393626836357443, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 3739e562a03fc0b4982d8aa66cc50865, type: 3}
     - target: {fileID: 7094299921221513896, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
