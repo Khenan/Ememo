@@ -12,6 +12,15 @@ public class FightMap : MonoBehaviour
     {
         return tiles;
     }
+    internal void SetTileIDs()
+    {
+        int _id = 0;
+        foreach (FightMapTile _tile in tiles)
+        {
+            _tile.tileID = _id;
+            _id++;
+        }
+    }
     internal List<FightMapTile>  GetWalkableTiles()
     {
         return tiles.FindAll(tile => tile.IsWalkable);
