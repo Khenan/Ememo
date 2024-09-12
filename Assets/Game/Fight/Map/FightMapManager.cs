@@ -13,8 +13,8 @@ public class FightMapManager : Singleton<FightMapManager>
     private void Start()
     {
         InitMap(GetMap(0));
-        cam.transform.position = new Vector3(22, -9, -16);
-        cam.transform.rotation = Quaternion.Euler(-35, -45, 60);
+        cam.transform.position = new Vector3(24, 21, -11);
+        cam.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
 
     internal FightMap GetMap(int _areaId)
@@ -34,18 +34,18 @@ public class FightMapManager : Singleton<FightMapManager>
     private void SetMapColor(FightMap _map)
     {
         List<FightMapTile> _floorTiles = _map.GetWalkableTiles();
-        SpriteRenderer _tileSprite;
         foreach (FightMapTile _floorTile in _floorTiles)
         {
-            _tileSprite = _floorTile.GetComponent<SpriteRenderer>();
-            if ((_floorTile.transform.position.x + _floorTile.transform.position.y) % 2 == 1)
+            Debug.Log("0");
+            if ((_floorTile.transform.position.x + _floorTile.transform.position.z) % 2 == 1)
             {
-                _tileSprite.color = floorColor1;
+                _floorTile.VisualTop.color = floorColor1;
+                Debug.Log("1");
             }
             else
             {
-                _tileSprite.color = floorColor2;
-
+                _floorTile.VisualTop.color = floorColor2;
+                Debug.Log("2");
             }
         }
     }
