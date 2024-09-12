@@ -74,4 +74,8 @@ public class FightMapManager : Singleton<FightMapManager>
         }
     }
 
+    internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
+    {
+        _map.GetTiles().Find(tile => tile.Position == _fightMapTile.Position).character = _character;
+    }
 }
