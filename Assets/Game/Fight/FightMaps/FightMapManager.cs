@@ -11,11 +11,11 @@ public class FightMapManager : Singleton<FightMapManager>
     [SerializeField] private Camera cam;
     [SerializeField] private FightMapTile floor, wall, hole;
 
-    private void Start()
+    private FightMap currentMap;
+    public FightMap CurrentMap => currentMap;
+
+    private void SetCameraPosition()
     {
-        //GenerateMap(14,14);
-        
-        InitMap(GetMap(0));
         cam.transform.position = new Vector3(23, 13, -10);
         cam.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
@@ -38,12 +38,15 @@ public class FightMapManager : Singleton<FightMapManager>
     }
     // Génère une map
 
-    private void InitMap(FightMap _map)
+    public FightMap InitMap(int _areaId)
     {
-        FightMap _currentMap = Instantiate(_map);
-        _map.SetTileIDs();
-        SetMapColor(_map);
-        ShowStartTiles(_map);
+        List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
+        currentMap = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
+        currentMap.SetTileIDs();
+        SetMapColor(currentMap);
+        ShowStartTiles(currentMap);
+        SetCameraPosition();
+        return currentMap;
     }
 
     private void SetMapColor(FightMap _map)
