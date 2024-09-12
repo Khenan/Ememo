@@ -10,10 +10,11 @@ public class FightMapManager : Singleton<FightMapManager>
     [SerializeField] private Color floorColor1, floorColor2, teamColor0, teamColor1;
     [SerializeField] private Camera cam;
 
-    private void Start() {
+    private void Start()
+    {
         InitMap(GetMap(0));
-        cam.transform.position = new Vector3(22,-9,-16);
-        cam.transform.rotation = Quaternion.Euler(-35,-45,60);
+        cam.transform.position = new Vector3(22, -9, -16);
+        cam.transform.rotation = Quaternion.Euler(-35, -45, 60);
     }
 
     internal FightMap GetMap(int _areaId)
@@ -49,28 +50,28 @@ public class FightMapManager : Singleton<FightMapManager>
         }
     }
 
-    private void ShowStartTiles(FightMap _map) 
-        {
-            SpriteRenderer _highlightSprite;
+    private void ShowStartTiles(FightMap _map)
+    {
+        SpriteRenderer _highlightSprite;
 
-            List<FightMapTile> _startTiles = _map.GetStartTiles();
-            foreach (FightMapTile _startTile in _startTiles)
+        List<FightMapTile> _startTiles = _map.GetStartTiles();
+        foreach (FightMapTile _startTile in _startTiles)
+        {
+            _startTile.Highlight.gameObject.SetActive(true);
+            _highlightSprite = _startTile.Highlight;
+            if (_startTile.TeamId == 0)
             {
-                _startTile.Highlight.SetActive(true);
-                _highlightSprite = _startTile.GetComponentInChildren<SpriteRenderer>();
-                if (_startTile.TeamId == 0)
-                {
-                    _highlightSprite.color = teamColor0;
-                }
-                else if (_startTile.TeamId == 1)
-                {
-                    _highlightSprite.color = teamColor1;
-                }
-                else 
-                {
-                    Debug.LogError("Undefined team");
-                }
+                _highlightSprite.color = teamColor0;
+            }
+            else if (_startTile.TeamId == 1)
+            {
+                _highlightSprite.color = teamColor1;
+            }
+            else
+            {
+                Debug.LogError("Undefined team");
             }
         }
+    }
 
 }
