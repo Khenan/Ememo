@@ -215,7 +215,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   areaId: 0
   charactersToInstantiate:
-  - {fileID: 9197754968490218722, guid: ddc6976090d145249ad43961de5a4785, type: 3}
+  - teamId: 0
+    character: {fileID: 9197754968490218722, guid: ddc6976090d145249ad43961de5a4785, type: 3}
 --- !u!4 &897286971
 Transform:
   m_ObjectHideFlags: 0

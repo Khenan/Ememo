@@ -9,6 +9,7 @@ public class FightData : MonoBehaviour
     public List<FightCharacter> CharactersToInstantiate => charactersToInstantiate;
 }
 
+[System.Serializable]
 public struct FightCharacter
 {
     public int teamId;
