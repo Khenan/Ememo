@@ -104,6 +104,7 @@ public class FightManager : Singleton<FightManager>
         currentCharacter.isMyTurn = true;
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
         UpdateInitiativeUI();
+        if(FightMapManager.Instance != null) FightMapManager.Instance.StartFight();
     }
 
     private void LockAllPlayersOnFight()
