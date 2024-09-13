@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,11 +6,13 @@ using UnityEngine.UI;
 public class ButtonBehaviour : MonoBehaviour
 {
     private Button button;
+    private TextMeshProUGUI textMeshProUGUI;
     [SerializeField] private PlayerController playerController;
 
     private void Awake()
     {
         button = GetComponent<Button>();
+        textMeshProUGUI = GetComponentInChildren<TextMeshProUGUI>();
     }
     private void Start()
     {
@@ -18,11 +21,32 @@ public class ButtonBehaviour : MonoBehaviour
 
     private void Update()
     {
-        button.interactable = playerController.Character.isMyTurn;
+        if (playerController.onFight && !playerController.lockOnFight)
+        {
+            textMeshProUGUI.text = "Ready";
+            button.interactable = true;
+        }
+        else if (playerController.onFight && playerController.lockOnFight)
+        {
+            textMeshProUGUI.text = "End Turn";
+            button.interactable = playerController.Character.isMyTurn;
+        }
+        else
+        {
+            textMeshProUGUI.text = "Waiting...";
+            button.interactable = false;
+        }
     }
 
     private void OnClick()
     {
-        FightManager.Instance.EndTurn(playerController.Character);
+        if (playerController.onFight && !playerController.IsReadyToFight)
+        {
+            playerController.ReadyToFight();
+        }
+        else if (playerController.onFight && playerController.lockOnFight)
+        {
+            FightManager.Instance.EndTurn(playerController.Character);
+        }
     }
 }

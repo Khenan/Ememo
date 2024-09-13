@@ -5,12 +5,24 @@ using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private bool isLocalPlayer;
+
     [SerializeField] private Character characterToInstantiate;
     public Character CharacterToInstantiate => characterToInstantiate;
-
     private Character character;
     public Character Character => character;
 
+    // Fight
+    public bool onFight = false;
+    internal bool lockOnFight = false;
+    private bool isReadyToFight = false;
+    public bool IsReadyToFight => isReadyToFight;
+    public Action OnPlayerReady;
+
+    // Spell 
+    private SpellData currentSpellSelected;
+
+    #region Inputs
     private PlayerActionController actionAsset;
 
     private InputAction leftClick;
@@ -30,8 +42,20 @@ public class PlayerController : MonoBehaviour
     public Action<InputAction.CallbackContext> OnShortcut_05;
     public Action<InputAction.CallbackContext> OnCtrlBar;
     public Action<InputAction.CallbackContext> OnShiftBar;
+    #endregion
 
     private void Awake()
+    {
+        InitActionAssets();
+    }
+    private void Start()
+    {
+        if (!isLocalPlayer) return;
+        AssignInputActions();
+        AssignInputActivations();
+    }
+
+    private void InitActionAssets()
     {
         actionAsset = new();
         leftClick = actionAsset.asset.FindAction("LeftClick");
@@ -43,8 +67,7 @@ public class PlayerController : MonoBehaviour
         ctrlBar = actionAsset.asset.FindAction("CtrlBar");
         shiftBar = actionAsset.asset.FindAction("ShiftBar");
     }
-
-    private void Start()
+    private void AssignInputActions()
     {
         actionAsset.Enable();
 
@@ -56,8 +79,12 @@ public class PlayerController : MonoBehaviour
         shortCut_5.performed += _context => InputActivation(OnShortcut_05, _context);
         ctrlBar.performed += _context => InputActivation(OnCtrlBar, _context);
         shiftBar.performed += _context => InputActivation(OnShiftBar, _context);
-
+    }
+    private void AssignInputActivations()
+    {
         OnLeftClick += context => GetTileUnderMouseWithRaycast(context);
+        OnShortcut_01 += context => SelectionSpell(context, 0);
+        OnShortcut_02 += context => SelectionSpell(context, 1);
     }
 
     public void SetCharacter(Character _character)
@@ -71,18 +98,94 @@ public class PlayerController : MonoBehaviour
         _action?.Invoke(_context);
     }
 
+    private void SelectionSpell(InputAction.CallbackContext _context, int _spellIndex)
+    {
+        currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
+    }
+
     private FightMapTile GetTileUnderMouseWithRaycast(InputAction.CallbackContext _context)
     {
+        FightMapManager.Instance.lastTileSelected = null;
+
         Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit _hit;
+
         if (Physics.Raycast(_ray, out _hit))
         {
-            if(_hit.collider.TryGetComponent(out FightMapTile _tile))
+            if (_hit.collider.TryGetComponent(out FightMapTile _tile))
             {
-                Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
+                // Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
+                // Debug.Log("ID: " + _tile.tileID + " | matrixPosition: " + _tile.MatrixPosition);
+
+                if (lockOnFight)
+                {
+                    if (currentSpellSelected != null)
+                    {
+                        CastSpellOnTile(_tile);
+                    }
+                    else
+                    {
+                        MoveOnTile(_tile);
+                    }
+                }
+                else
+                {
+                    SwitchCharacterPositionOnTile(_tile);
+                }
+
+                FightMapManager.Instance.lastTileSelected = _tile;
                 return _tile;
             }
         }
         return null;
+    }
+
+    private void MoveOnTile(FightMapTile _tile)
+    {
+        if (character.isMyTurn && _tile.IsWalkable)
+        {
+            if (character.CurrentData.currentMovementPoints > 0)
+            {
+                int _tileDistance = FightMapManager.Instance.DistanceBetweenTiles(character.CurrentTile, _tile);
+                if (_tileDistance <= character.CurrentData.currentMovementPoints)
+                {
+                    character.CurrentData.currentMovementPoints -= _tileDistance;
+                    FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+                }
+            }
+        }
+    }
+    private void CastSpellOnTile(FightMapTile _tile)
+    {
+        if (character.isMyTurn && _tile.IsWalkable)
+        {
+            if (currentSpellSelected != null)
+            {
+                if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
+                {
+                    character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
+                    FightManager.Instance.CastSpell(currentSpellSelected, _tile);
+                }
+                currentSpellSelected = null;
+            }
+        }
+    }
+
+    private void SwitchCharacterPositionOnTile(FightMapTile _tile)
+    {
+        if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
+        {
+            FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+        }
+    }
+
+    internal void ReadyToFight()
+    {
+        isReadyToFight = true;
+        OnPlayerReady?.Invoke();
+    }
+    internal void EndFight()
+    {
+        isReadyToFight = false;
     }
 }
