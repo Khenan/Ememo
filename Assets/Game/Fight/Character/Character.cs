@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -36,12 +35,12 @@ public class Character : MonoBehaviour
 
     internal void TakeDamage(int damage)
     {
-        Debug.Log("Character " + characterName + " takes " + damage + " damage");
+        //Debug.Log("Character " + characterName + " takes " + damage + " damage");
         currentData.currentHealth -= damage;
         currentData.currentHealth = Mathf.Clamp(currentData.currentHealth, 0, currentData.maxHealth);
         if (currentData.currentHealth <= 0)
         {
-            Debug.Log("Character " + characterName + " is dead");
+            //Debug.Log("Character " + characterName + " is dead");
         }
     }
 }

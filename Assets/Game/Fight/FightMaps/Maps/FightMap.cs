@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +13,11 @@ public class FightMap : MonoBehaviour
         SetTileIDs();
         SetTileMatrixPositions();
     }
-    internal List<FightMapTile>  GetTiles()
+    internal int GetMapTileCount()
+    {
+        return tiles.Count;
+    }
+    internal List<FightMapTile> GetTiles()
     {
         return tiles;
     }
@@ -39,7 +42,7 @@ public class FightMap : MonoBehaviour
             }
         }
     }
-    internal List<FightMapTile>  GetWalkableTiles()
+    internal List<FightMapTile> GetWalkableTiles()
     {
         return tiles.FindAll(tile => tile.IsWalkable);
     }
