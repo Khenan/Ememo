@@ -103,6 +103,8 @@ public class FightManager : Singleton<FightManager>
         currentCharacter = characters.First();
         currentCharacter.StartTurn();
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
+        UpdateInitiativeUI();
+        if(FightMapManager.Instance != null) FightMapManager.Instance.StartFight();
     }
 
     private void LockAllPlayersOnFight()
@@ -126,6 +128,7 @@ public class FightManager : Singleton<FightManager>
         // On trie les personnages par initiative
         characters = characters.OrderByDescending(character => character.CurrentData.currentInitiative).ToList();
         // On affiche la barre d'initiative
+        if(InitiativeUIManager.Instance != null) InitiativeUIManager.Instance.Init(characters);
     }
 
     private void InitAllCharactersAndPlayers()
@@ -252,7 +255,13 @@ public class FightManager : Singleton<FightManager>
         _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
 
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
-        currentCharacter.StartTurn();
+        currentCharacter.isMyTurn = true;
+        UpdateInitiativeUI();
+    }
+
+    private void UpdateInitiativeUI()
+    {
+        if(InitiativeUIManager.Instance != null) InitiativeUIManager.Instance.UpdateTurn(characters.IndexOf(currentCharacter));
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)

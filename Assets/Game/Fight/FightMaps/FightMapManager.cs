@@ -92,6 +92,19 @@ public class FightMapManager : Singleton<FightMapManager>
             }
         }
     }
+    private void HideStartTiles(FightMap _map)
+    {
+        List<FightMapTile> _startTiles = _map.GetStartTiles();
+        foreach (FightMapTile _startTile in _startTiles)
+        {
+            _startTile.Highlight.gameObject.SetActive(false);
+        }
+    }
+
+    public void StartFight()
+    {
+        HideStartTiles(currentMap);
+    }
 
     internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
     {
