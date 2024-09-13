@@ -99,25 +99,39 @@ public class FightMapManager : Singleton<FightMapManager>
         _map.GetTiles().Find(tile => tile.Position == _fightMapTile.Position).character = _character;
     }
 
-    internal void SwitchTileCharacter(Character character, FightMapTile tile)
+    internal void SwitchTileCharacter(Character character, FightMapTile tile, bool _canSwitch = false)
     {
         FightMapTile _oldTile = character.CurrentTile;
         Character _oldCharacter = tile.character;
 
+        if(!_canSwitch && _oldCharacter != null)
+        {
+            return;
+        }
+
         character.CurrentTile = tile;
         tile.character = character;
 
-        if (_oldCharacter != null)
+        if (_canSwitch)
         {
-            _oldCharacter.CurrentTile = _oldTile;
+            if (_oldCharacter != null)
+            {
+                _oldCharacter.CurrentTile = _oldTile;
+            }
+            _oldTile.character = _oldCharacter;
         }
-        _oldTile.character = _oldCharacter;
 
         character.transform.position = tile.transform.position;
 
-        if (_oldCharacter != null)
+        if (_canSwitch)
         {
-            _oldCharacter.transform.position = _oldTile.transform.position;
+            if (_oldCharacter != null)
+            {
+                _oldCharacter.transform.position = _oldTile.transform.position;
+            }
+        }
+        else {
+            _oldTile.character = null;
         }
     }
 

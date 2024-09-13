@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class FightManager : Singleton<FightManager>
 {
-    // Demande au MapManager de générer une map
-    // Il va donner une map parmi la liste des maps possibles
-
-    // Génère les ennemis avec le FightData
-
     // Met la barre d'initiative des personnages pour le visuel
 
     // Si tout le monde est prêt (bouton), on lance le combat
@@ -20,14 +15,21 @@ public class FightManager : Singleton<FightManager>
     // On fini le combat si il ne reste plus que une équipe en vie
 
     // Timer
-    private float timerMax = 1f;
+    private float timerMax = 0.5f;
     private float currentTimer = 0f;
 
-    List<Character> characters = new();
+    // Characters
+    private List<Character> characters = new();
     private Character currentCharacter;
+
+    // Players
+    private List<PlayerController> players = new();
+
+    private bool onFight = false;
 
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
+
     private void Start()
     {
         InitFight(fightData);
@@ -37,10 +39,18 @@ public class FightManager : Singleton<FightManager>
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            EndTurn(currentCharacter);
+            if (!onFight)
+            {
+                players.ForEach(player => player.ReadyToFight());
+                CheckAllPlayersReady();
+            }
+            else
+            {
+                if (currentCharacter != null && currentCharacter.isHumanController) EndTurn(currentCharacter);
+            }
         }
 
-        if (!currentCharacter.isHumanController)
+        if (currentCharacter != null && !currentCharacter.isHumanController)
         {
             currentTimer += Time.deltaTime;
             if (currentTimer >= timerMax)
@@ -55,17 +65,52 @@ public class FightManager : Singleton<FightManager>
     {
         characters.Clear();
         currentMap = FightMapManager.Instance.InitMap(_fightData.AreaId);
-        InitCharacterPosition();
+        InitAllCharactersAndPlayers();
+        InitPlayerActions();
         InitAllCharacterDatas();
         InitInitiativeList();
-        LaunchFight();
+        SetPlayersOnFight();
+    }
+
+    private void SetPlayersOnFight()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.onFight = true;
+        }
+    }
+
+    private void InitPlayerActions()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.OnPlayerReady += CheckAllPlayersReady;
+        }
+    }
+
+    private void CheckAllPlayersReady()
+    {
+        onFight = players.All(player => player.IsReadyToFight);
+        if (onFight)
+        {
+            LaunchFight();
+        }
     }
 
     public void LaunchFight()
     {
+        LockAllPlayersOnFight();
         currentCharacter = characters.First();
         currentCharacter.isMyTurn = true;
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
+    }
+
+    private void LockAllPlayersOnFight()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.lockOnFight = true;
+        }
     }
 
     private void InitAllCharacterDatas()
@@ -83,9 +128,8 @@ public class FightManager : Singleton<FightManager>
         // On affiche la barre d'initiative
     }
 
-    private void InitCharacterPosition()
+    private void InitAllCharactersAndPlayers()
     {
-        // List des startTiles
         List<FightMapTile> _tiles = currentMap.GetStartTiles();
 
         if (_tiles.Count == 0)
@@ -112,9 +156,9 @@ public class FightManager : Singleton<FightManager>
 
     private void SetAllPlayers(List<FightMapTile> _tiles)
     {
-        List<PlayerController> _players = FindObjectsOfType<PlayerController>().ToList();
+        players = FindObjectsOfType<PlayerController>().ToList();
         List<FightMapTile> _teamPlayerTiles = _tiles.Where(tile => tile.TeamId == 0).ToList();
-        SetAllCharactersOfPlayerTeam(_players, _teamPlayerTiles);
+        SetAllCharactersOfPlayerTeam(players, _teamPlayerTiles);
     }
     private void SetAllFightCharactersOfTeam(List<FightCharacter> _fCharacters, List<FightMapTile> _tiles)
     {

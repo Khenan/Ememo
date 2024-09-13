@@ -5,14 +5,21 @@ using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Character characterToInstantiate;
-    public Character CharacterToInstantiate => characterToInstantiate;
-
     [SerializeField] private bool isLocalPlayer;
 
+    [SerializeField] private Character characterToInstantiate;
+    public Character CharacterToInstantiate => characterToInstantiate;
     private Character character;
     public Character Character => character;
 
+    // Fight
+    public bool onFight = false;
+    internal bool lockOnFight = false;
+    private bool isReadyToFight = false;
+    public bool IsReadyToFight => isReadyToFight;
+    public Action OnPlayerReady;
+
+    #region Inputs
     private PlayerActionController actionAsset;
 
     private InputAction leftClick;
@@ -32,8 +39,20 @@ public class PlayerController : MonoBehaviour
     public Action<InputAction.CallbackContext> OnShortcut_05;
     public Action<InputAction.CallbackContext> OnCtrlBar;
     public Action<InputAction.CallbackContext> OnShiftBar;
+    #endregion
 
     private void Awake()
+    {
+        InitActionAssets();
+    }
+    private void Start()
+    {
+        if (!isLocalPlayer) return;
+        AssignInputActions();
+        AssignInputActivations();
+    }
+
+    private void InitActionAssets()
     {
         actionAsset = new();
         leftClick = actionAsset.asset.FindAction("LeftClick");
@@ -45,11 +64,8 @@ public class PlayerController : MonoBehaviour
         ctrlBar = actionAsset.asset.FindAction("CtrlBar");
         shiftBar = actionAsset.asset.FindAction("ShiftBar");
     }
-
-    private void Start()
+    private void AssignInputActions()
     {
-        if (!isLocalPlayer) return;
-
         actionAsset.Enable();
 
         leftClick.performed += _context => InputActivation(OnLeftClick, _context);
@@ -60,7 +76,9 @@ public class PlayerController : MonoBehaviour
         shortCut_5.performed += _context => InputActivation(OnShortcut_05, _context);
         ctrlBar.performed += _context => InputActivation(OnCtrlBar, _context);
         shiftBar.performed += _context => InputActivation(OnShiftBar, _context);
-
+    }
+    private void AssignInputActivations()
+    {
         OnLeftClick += context => GetTileUnderMouseWithRaycast(context);
     }
 
@@ -77,8 +95,11 @@ public class PlayerController : MonoBehaviour
 
     private FightMapTile GetTileUnderMouseWithRaycast(InputAction.CallbackContext _context)
     {
+        FightMapManager.Instance.lastTileSelected = null;
+
         Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit _hit;
+
         if (Physics.Raycast(_ray, out _hit))
         {
             if (_hit.collider.TryGetComponent(out FightMapTile _tile))
@@ -86,19 +107,31 @@ public class PlayerController : MonoBehaviour
                 // Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
                 // Debug.Log("ID: " + _tile.tileID + " | matrixPosition: " + _tile.MatrixPosition);
 
-                FightMapManager.Instance.lastTileSelected = _tile;
+                if (!lockOnFight) SwitchCharacterPositionOnTile(_tile);
 
-                if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
-                {
-                    FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
-                }
+                FightMapManager.Instance.lastTileSelected = _tile;
                 return _tile;
-            }
-            else
-            {
-                FightMapManager.Instance.lastTileSelected = null;
             }
         }
         return null;
+    }
+
+    private void SwitchCharacterPositionOnTile(FightMapTile _tile)
+    {
+        if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
+        {
+            FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+        }
+    }
+
+    internal void ReadyToFight()
+    {
+        isReadyToFight = true;
+        OnPlayerReady?.Invoke();
+    }
+
+    internal void EndFight()
+    {
+        isReadyToFight = false;
     }
 }
