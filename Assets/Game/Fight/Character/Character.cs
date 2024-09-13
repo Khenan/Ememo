@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,5 +23,10 @@ public class Character : MonoBehaviour
     private void Update()
     {
         isMyTurnArrow.SetActive(isMyTurn);
+    }
+
+    internal void InitData()
+    {
+        data.Init();
     }
 }

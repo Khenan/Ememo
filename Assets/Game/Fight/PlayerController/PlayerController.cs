@@ -83,12 +83,10 @@ public class PlayerController : MonoBehaviour
         {
             if(_hit.collider.TryGetComponent(out FightMapTile _tile))
             {
-                Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
-
-                // Si c'est une StartTile de ton équipe
+                // Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
+                // Debug.Log("ID: " + _tile.tileID + " | matrixPosition: " + _tile.MatrixPosition);
                 if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
                 {
-                    Debug.Log("StartTile de ta team");
                     FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
                 }
                 return _tile;

@@ -1,13 +1,20 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class FightMap : MonoBehaviour
 {
     [SerializeField] internal int areaId;
+    [SerializeField] internal Vector2 size;
+    public Vector2 Size => size;
     [SerializeField] private List<FightMapTile> tiles;
     private int teamCount = 2;
 
+    internal void Init()
+    {
+        SetTileIDs();
+        SetTileMatrixPositions();
+    }
     internal List<FightMapTile>  GetTiles()
     {
         return tiles;
@@ -19,6 +26,18 @@ public class FightMap : MonoBehaviour
         {
             _tile.tileID = _id;
             _id++;
+        }
+    }
+    internal void SetTileMatrixPositions()
+    {
+        int _tileCount = tiles.Count;
+        while (_tileCount > 0)
+        {
+            foreach (FightMapTile _tile in tiles)
+            {
+                _tile.MatrixPosition = new Vector3(_tile.tileID % (int)size.x, _tile.tileID / (int)size.x, 0);
+                _tileCount--;
+            }
         }
     }
     internal List<FightMapTile>  GetWalkableTiles()

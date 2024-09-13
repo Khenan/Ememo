@@ -42,7 +42,7 @@ public class FightMapManager : Singleton<FightMapManager>
     {
         List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
         currentMap = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
-        currentMap.SetTileIDs();
+        currentMap.Init();
         SetMapColor(currentMap);
         ShowStartTiles(currentMap);
         SetCameraPosition();
@@ -54,14 +54,8 @@ public class FightMapManager : Singleton<FightMapManager>
         List<FightMapTile> _floorTiles = _map.GetWalkableTiles();
         foreach (FightMapTile _floorTile in _floorTiles)
         {
-            if ((_floorTile.transform.position.x + _floorTile.transform.position.z) % 2 == 1)
-            {
-                _floorTile.VisualTop.color = floorColor1;
-            }
-            else
-            {
-                _floorTile.VisualTop.color = floorColor2;
-            }
+            bool _odd = (_floorTile.MatrixPosition.x + _floorTile.MatrixPosition.y) % 2 == 0;
+            _floorTile.VisualTop.color = _odd ? floorColor1 : floorColor2;
         }
     }
 
@@ -109,7 +103,7 @@ public class FightMapManager : Singleton<FightMapManager>
         _oldTile.character = _oldCharacter;
 
         character.transform.position = tile.transform.position;
-        
+
         if (_oldCharacter != null)
         {
             _oldCharacter.transform.position = _oldTile.transform.position;

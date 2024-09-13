@@ -21,4 +21,11 @@ public class CharacterData
     [Header("Movement Points")]
     [SerializeField] internal int defaultMovementPoints = 3;
     internal int currentMovementPoints;
+
+    public void Init() {
+        currentHealth = defaultHealth;
+        currentInitiative = defaultInitiative;
+        currentActionPoints = defaultActionPoints;
+        currentMovementPoints = defaultMovementPoints;
+    }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,6 +19,10 @@ public class FightManager : Singleton<FightManager>
 
     // On fini le combat si il ne reste plus que une équipe en vie
 
+    // Timer
+    private float timerMax = 1f;
+    private float currentTimer = 0f;
+
     List<Character> characters = new();
     private Character currentCharacter;
 
@@ -34,6 +39,16 @@ public class FightManager : Singleton<FightManager>
         {
             EndTurn(currentCharacter);
         }
+
+        if (!currentCharacter.isHumanController)
+        {
+            currentTimer += Time.deltaTime;
+            if (currentTimer >= timerMax)
+            {
+                EndTurn(currentCharacter);
+                currentTimer = 0f;
+            }
+        }
     }
 
     public void InitFight(FightData _fightData)
@@ -41,6 +56,7 @@ public class FightManager : Singleton<FightManager>
         characters.Clear();
         currentMap = FightMapManager.Instance.InitMap(_fightData.AreaId);
         InitCharacterPosition();
+        InitAllCharacterDatas();
         InitInitiativeList();
         LaunchFight();
     }
@@ -52,10 +68,18 @@ public class FightManager : Singleton<FightManager>
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
     }
 
+    private void InitAllCharacterDatas()
+    {
+        foreach (Character _character in characters)
+        {
+            _character.InitData();
+        }
+    }
+
     private void InitInitiativeList()
     {
         // On trie les personnages par initiative
-        characters = characters.OrderBy(character => character.Data.currentInitiative).ToList();
+        characters = characters.OrderByDescending(character => character.Data.currentInitiative).ToList();
         // On affiche la barre d'initiative
     }
 
@@ -110,8 +134,6 @@ public class FightManager : Singleton<FightManager>
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             int _randomCharacterIndex = UnityEngine.Random.Range(0, _characters.Count);
 
-            Debug.Log(_characters[_randomCharacterIndex].CharacterName);
-
             Character _character = Instantiate(_characters[_randomCharacterIndex]);
             _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
             _teamTiles[_randomTileIndex].character = _character;
@@ -139,8 +161,6 @@ public class FightManager : Singleton<FightManager>
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             Character _character = InstantiateCharacter(_teamPlayers[0].CharacterToInstantiate, _teamTiles, _randomTileIndex);
             characters.Add(_character);
-
-            Debug.Log("Player : " + _teamPlayers[0], _teamPlayers[0]);
             _teamPlayers[0].SetCharacter(_character);
 
             _teamPlayers.RemoveAt(0);
@@ -171,7 +191,7 @@ public class FightManager : Singleton<FightManager>
 
     public void EndTurn(Character _character)
     {
-        Debug.Log("EndTurn " + _character.CharacterName);
+        Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.Data.currentInitiative + " | IsHuman: " + _character.isHumanController);
         _character.isMyTurn = false;
 
         int _currentCharacterIndex = characters.IndexOf(_character);
@@ -180,14 +200,10 @@ public class FightManager : Singleton<FightManager>
         {
             _nextCharacterIndex = 0;
         }
-        Debug.Log("StartTurn " + characters[_nextCharacterIndex].CharacterName);
-        characters[_nextCharacterIndex].isMyTurn = true;
 
         currentCharacter = characters[_nextCharacterIndex];
 
-        // if (!characters[_nextCharacterIndex].isHumanController)
-        // {
-        //     EndTurn(currentCharacter);
-        // }
+        Debug.Log("StartTurn " + currentCharacter.CharacterName);
+        currentCharacter.isMyTurn = true;
     }
 }

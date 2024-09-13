@@ -1318,6 +1318,14 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8168988379650836688, guid: 4ace7ca04a527d146ae73dcfae5ff854, type: 3}
+      propertyPath: size.x
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: -8168988379650836688, guid: 4ace7ca04a527d146ae73dcfae5ff854, type: 3}
+      propertyPath: size.y
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: -8168988379650836688, guid: 4ace7ca04a527d146ae73dcfae5ff854, type: 3}
       propertyPath: tiles.Array.size
       value: 196
       objectReference: {fileID: 0}
