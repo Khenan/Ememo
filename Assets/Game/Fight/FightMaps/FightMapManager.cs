@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class FightMapManager : Singleton<FightMapManager>
@@ -12,6 +11,7 @@ public class FightMapManager : Singleton<FightMapManager>
 
     public FightMapTile lastTileSelected;
     [SerializeField] private Transform tileSelectorVisual;
+    private List<FightMapTile> lastTilesHighlighted = new();
 
     private FightMap currentMap;
     public FightMap CurrentMap => currentMap;
@@ -69,41 +69,56 @@ public class FightMapManager : Singleton<FightMapManager>
         }
     }
 
+
+    private void ShowHighlight(FightMapTile _tile, bool _show = true)
+    {
+        if (_tile != null)
+            _tile.DisplayHighlight(_show);
+    }
+
     private void ShowStartTiles(FightMap _map)
     {
-        SpriteRenderer _highlightSprite;
-
         List<FightMapTile> _startTiles = _map.GetStartTiles();
         foreach (FightMapTile _startTile in _startTiles)
         {
-            _startTile.Highlight.gameObject.SetActive(true);
-            _highlightSprite = _startTile.Highlight;
-            if (_startTile.TeamId == 0)
+            ShowHighlight(_startTile);
+            switch (_startTile.TeamId)
             {
-                _highlightSprite.color = teamColor0;
-            }
-            else if (_startTile.TeamId == 1)
-            {
-                _highlightSprite.color = teamColor1;
-            }
-            else
-            {
-                Debug.LogError("Undefined team");
-            }
+                case 0:
+                    _startTile.ChangeColorHighlight(teamColor0);
+                    break;
+                case 1:
+                    _startTile.ChangeColorHighlight(teamColor1);
+                    break;
+                default:
+                    Debug.LogError("Undefined team");
+                    break;
+            };
         }
     }
-    private void HideStartTiles(FightMap _map)
+
+    public void ShowTileList(List<FightMapTile> _tiles = null, bool _show = true)
     {
-        List<FightMapTile> _startTiles = _map.GetStartTiles();
-        foreach (FightMapTile _startTile in _startTiles)
+        if (lastTilesHighlighted != null)
         {
-            _startTile.Highlight.gameObject.SetActive(false);
+            foreach (FightMapTile _tile in lastTilesHighlighted)
+            {
+                ShowHighlight(_tile, false);
+            }
         }
+        if (_tiles != null)
+        {
+            foreach (FightMapTile _tile in _tiles)
+            {
+                ShowHighlight(_tile, _show);
+            }
+        }
+        lastTilesHighlighted = _tiles;
     }
 
     public void StartFight()
     {
-        HideStartTiles(currentMap);
+        ShowTileList(currentMap.GetStartTiles());
     }
 
     internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
@@ -116,7 +131,7 @@ public class FightMapManager : Singleton<FightMapManager>
         FightMapTile _oldTile = character.CurrentTile;
         Character _oldCharacter = tile.character;
 
-        if(!_canSwitch && _oldCharacter != null)
+        if (!_canSwitch && _oldCharacter != null)
         {
             return;
         }
@@ -142,14 +157,20 @@ public class FightMapManager : Singleton<FightMapManager>
                 _oldCharacter.transform.position = _oldTile.transform.position;
             }
         }
-        else {
+        else
+        {
             _oldTile.character = null;
         }
     }
 
     internal FightMapTile GetTileByMatrixPosition(Vector2 _matrixPosition)
     {
-        return currentMap.GetTiles()[(int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x];
+        int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x;
+        if (indexPos >= 0 && indexPos < currentMap.GetMapTileCount())
+            return currentMap.GetTiles()[indexPos];
+        else
+            Debug.Log("This tile don't exist. Out of bounds of currentMap.GetTiles()");
+        return null;
     }
 
     internal int DistanceBetweenTiles(FightMapTile currentTile, FightMapTile tile)

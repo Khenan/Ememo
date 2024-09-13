@@ -37,6 +37,15 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""RightClick"",
+                    ""type"": ""Button"",
+                    ""id"": ""dbe5d672-9122-49d6-977e-cfd2d96ae81d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Shortcut_1"",
                     ""type"": ""Button"",
                     ""id"": ""ceb49d25-a0ed-4fa9-b3da-6a4af449e705"",
@@ -208,6 +217,17 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
                     ""action"": ""MousePosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3217f533-7b33-4671-9949-c7018a596685"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard/Mouse"",
+                    ""action"": ""RightClick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -234,6 +254,7 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
         // InputActionPlayer
         m_InputActionPlayer = asset.FindActionMap("InputActionPlayer", throwIfNotFound: true);
         m_InputActionPlayer_LeftClick = m_InputActionPlayer.FindAction("LeftClick", throwIfNotFound: true);
+        m_InputActionPlayer_RightClick = m_InputActionPlayer.FindAction("RightClick", throwIfNotFound: true);
         m_InputActionPlayer_Shortcut_1 = m_InputActionPlayer.FindAction("Shortcut_1", throwIfNotFound: true);
         m_InputActionPlayer_Shortcut_2 = m_InputActionPlayer.FindAction("Shortcut_2", throwIfNotFound: true);
         m_InputActionPlayer_Shortcut_3 = m_InputActionPlayer.FindAction("Shortcut_3", throwIfNotFound: true);
@@ -304,6 +325,7 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
     private readonly InputActionMap m_InputActionPlayer;
     private List<IInputActionPlayerActions> m_InputActionPlayerActionsCallbackInterfaces = new List<IInputActionPlayerActions>();
     private readonly InputAction m_InputActionPlayer_LeftClick;
+    private readonly InputAction m_InputActionPlayer_RightClick;
     private readonly InputAction m_InputActionPlayer_Shortcut_1;
     private readonly InputAction m_InputActionPlayer_Shortcut_2;
     private readonly InputAction m_InputActionPlayer_Shortcut_3;
@@ -317,6 +339,7 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
         private @PlayerActionController m_Wrapper;
         public InputActionPlayerActions(@PlayerActionController wrapper) { m_Wrapper = wrapper; }
         public InputAction @LeftClick => m_Wrapper.m_InputActionPlayer_LeftClick;
+        public InputAction @RightClick => m_Wrapper.m_InputActionPlayer_RightClick;
         public InputAction @Shortcut_1 => m_Wrapper.m_InputActionPlayer_Shortcut_1;
         public InputAction @Shortcut_2 => m_Wrapper.m_InputActionPlayer_Shortcut_2;
         public InputAction @Shortcut_3 => m_Wrapper.m_InputActionPlayer_Shortcut_3;
@@ -337,6 +360,9 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
             @LeftClick.started += instance.OnLeftClick;
             @LeftClick.performed += instance.OnLeftClick;
             @LeftClick.canceled += instance.OnLeftClick;
+            @RightClick.started += instance.OnRightClick;
+            @RightClick.performed += instance.OnRightClick;
+            @RightClick.canceled += instance.OnRightClick;
             @Shortcut_1.started += instance.OnShortcut_1;
             @Shortcut_1.performed += instance.OnShortcut_1;
             @Shortcut_1.canceled += instance.OnShortcut_1;
@@ -368,6 +394,9 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
             @LeftClick.started -= instance.OnLeftClick;
             @LeftClick.performed -= instance.OnLeftClick;
             @LeftClick.canceled -= instance.OnLeftClick;
+            @RightClick.started -= instance.OnRightClick;
+            @RightClick.performed -= instance.OnRightClick;
+            @RightClick.canceled -= instance.OnRightClick;
             @Shortcut_1.started -= instance.OnShortcut_1;
             @Shortcut_1.performed -= instance.OnShortcut_1;
             @Shortcut_1.canceled -= instance.OnShortcut_1;
@@ -421,6 +450,7 @@ public partial class @PlayerActionController: IInputActionCollection2, IDisposab
     public interface IInputActionPlayerActions
     {
         void OnLeftClick(InputAction.CallbackContext context);
+        void OnRightClick(InputAction.CallbackContext context);
         void OnShortcut_1(InputAction.CallbackContext context);
         void OnShortcut_2(InputAction.CallbackContext context);
         void OnShortcut_3(InputAction.CallbackContext context);
