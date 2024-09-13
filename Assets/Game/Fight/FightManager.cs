@@ -255,7 +255,7 @@ public class FightManager : Singleton<FightManager>
         _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
 
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
-        currentCharacter.isMyTurn = true;
+        currentCharacter.StartTurn();
         UpdateInitiativeUI();
     }
 
