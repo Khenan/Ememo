@@ -48,8 +48,8 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        if(!isLocalPlayer) return;
-        
+        if (!isLocalPlayer) return;
+
         actionAsset.Enable();
 
         leftClick.performed += _context => InputActivation(OnLeftClick, _context);
@@ -81,15 +81,22 @@ public class PlayerController : MonoBehaviour
         RaycastHit _hit;
         if (Physics.Raycast(_ray, out _hit))
         {
-            if(_hit.collider.TryGetComponent(out FightMapTile _tile))
+            if (_hit.collider.TryGetComponent(out FightMapTile _tile))
             {
                 // Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
                 // Debug.Log("ID: " + _tile.tileID + " | matrixPosition: " + _tile.MatrixPosition);
+
+                FightMapManager.Instance.lastTileSelected = _tile;
+
                 if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
                 {
                     FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
                 }
                 return _tile;
+            }
+            else
+            {
+                FightMapManager.Instance.lastTileSelected = null;
             }
         }
         return null;

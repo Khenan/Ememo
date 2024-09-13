@@ -11,8 +11,20 @@ public class FightMapManager : Singleton<FightMapManager>
     [SerializeField] private Camera cam;
     [SerializeField] private FightMapTile floor, wall, hole;
 
+    public FightMapTile lastTileSelected;
+    [SerializeField] private Transform tileSelectorVisual;
+
     private FightMap currentMap;
     public FightMap CurrentMap => currentMap;
+
+    private void Update()
+    {
+        tileSelectorVisual.gameObject.SetActive(lastTileSelected != null);
+        if (lastTileSelected != null && tileSelectorVisual != null)
+        {
+            tileSelectorVisual.position = lastTileSelected.transform.position;
+        }
+    }
 
     private void SetCameraPosition()
     {
@@ -36,7 +48,6 @@ public class FightMapManager : Singleton<FightMapManager>
         List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
         return possibleMaps[Random.Range(0, possibleMaps.Count)];
     }
-    // Génère une map
 
     public FightMap InitMap(int _areaId)
     {
@@ -108,5 +119,10 @@ public class FightMapManager : Singleton<FightMapManager>
         {
             _oldCharacter.transform.position = _oldTile.transform.position;
         }
+    }
+
+    internal FightMapTile GetTileByMatrixPosition(Vector2 _matrixPosition)
+    {
+        return currentMap.GetTiles()[(int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x];
     }
 }
