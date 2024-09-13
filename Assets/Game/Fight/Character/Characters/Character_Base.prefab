@@ -215,7 +215,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Jean
-  spells: []
+  spells:
+  - {fileID: 11400000, guid: 3fdbe2ab52a2ed742bfe92e1c170043a, type: 2}
+  - {fileID: 11400000, guid: 9d83f14ab7baf944c85ab18ba1d313ff, type: 2}
   data:
     level: 1
     defaultHealth: 10

@@ -1,14 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class FightManager : Singleton<FightManager>
 {
-    // Demande au MapManager de générer une map
-    // Il va donner une map parmi la liste des maps possibles
-
-    // Génère les ennemis avec le FightData
-
     // Met la barre d'initiative des personnages pour le visuel
 
     // Si tout le monde est prêt (bouton), on lance le combat
@@ -18,11 +14,22 @@ public class FightManager : Singleton<FightManager>
 
     // On fini le combat si il ne reste plus que une équipe en vie
 
-    List<Character> characters = new();
+    // Timer
+    private float timerMax = 0.5f;
+    private float currentTimer = 0f;
+
+    // Characters
+    private List<Character> characters = new();
     private Character currentCharacter;
+
+    // Players
+    private List<PlayerController> players = new();
+
+    private bool onFight = false;
 
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
+
     private void Start()
     {
         InitFight(fightData);
@@ -32,7 +39,25 @@ public class FightManager : Singleton<FightManager>
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            EndTurn(currentCharacter);
+            if (!onFight)
+            {
+                players.ForEach(player => player.ReadyToFight());
+                CheckAllPlayersReady();
+            }
+            else
+            {
+                if (currentCharacter != null && currentCharacter.isHumanController) EndTurn(currentCharacter);
+            }
+        }
+
+        if (currentCharacter != null && !currentCharacter.isHumanController)
+        {
+            currentTimer += Time.deltaTime;
+            if (currentTimer >= timerMax)
+            {
+                EndTurn(currentCharacter);
+                currentTimer = 0f;
+            }
         }
     }
 
@@ -40,28 +65,71 @@ public class FightManager : Singleton<FightManager>
     {
         characters.Clear();
         currentMap = FightMapManager.Instance.InitMap(_fightData.AreaId);
-        InitCharacterPosition();
+        InitAllCharactersAndPlayers();
+        InitPlayerActions();
+        InitAllCharacterDatas();
         InitInitiativeList();
-        LaunchFight();
+        SetPlayersOnFight();
+    }
+
+    private void SetPlayersOnFight()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.onFight = true;
+        }
+    }
+
+    private void InitPlayerActions()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.OnPlayerReady += CheckAllPlayersReady;
+        }
+    }
+
+    private void CheckAllPlayersReady()
+    {
+        onFight = players.All(player => player.IsReadyToFight);
+        if (onFight)
+        {
+            LaunchFight();
+        }
     }
 
     public void LaunchFight()
     {
+        LockAllPlayersOnFight();
         currentCharacter = characters.First();
         currentCharacter.isMyTurn = true;
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
     }
 
+    private void LockAllPlayersOnFight()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.lockOnFight = true;
+        }
+    }
+
+    private void InitAllCharacterDatas()
+    {
+        foreach (Character _character in characters)
+        {
+            _character.InitData();
+        }
+    }
+
     private void InitInitiativeList()
     {
         // On trie les personnages par initiative
-        characters = characters.OrderBy(character => character.Data.currentInitiative).ToList();
+        characters = characters.OrderByDescending(character => character.CurrentData.currentInitiative).ToList();
         // On affiche la barre d'initiative
     }
 
-    private void InitCharacterPosition()
+    private void InitAllCharactersAndPlayers()
     {
-        // List des startTiles
         List<FightMapTile> _tiles = currentMap.GetStartTiles();
 
         if (_tiles.Count == 0)
@@ -88,9 +156,9 @@ public class FightManager : Singleton<FightManager>
 
     private void SetAllPlayers(List<FightMapTile> _tiles)
     {
-        List<PlayerController> _players = FindObjectsOfType<PlayerController>().ToList();
+        players = FindObjectsOfType<PlayerController>().ToList();
         List<FightMapTile> _teamPlayerTiles = _tiles.Where(tile => tile.TeamId == 0).ToList();
-        SetAllCharactersOfPlayerTeam(_players, _teamPlayerTiles);
+        SetAllCharactersOfPlayerTeam(players, _teamPlayerTiles);
     }
     private void SetAllFightCharactersOfTeam(List<FightCharacter> _fCharacters, List<FightMapTile> _tiles)
     {
@@ -109,8 +177,6 @@ public class FightManager : Singleton<FightManager>
         {
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             int _randomCharacterIndex = UnityEngine.Random.Range(0, _characters.Count);
-
-            Debug.Log(_characters[_randomCharacterIndex].CharacterName);
 
             Character _character = Instantiate(_characters[_randomCharacterIndex]);
             _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
@@ -139,8 +205,6 @@ public class FightManager : Singleton<FightManager>
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             Character _character = InstantiateCharacter(_teamPlayers[0].CharacterToInstantiate, _teamTiles, _randomTileIndex);
             characters.Add(_character);
-
-            Debug.Log("Player : " + _teamPlayers[0], _teamPlayers[0]);
             _teamPlayers[0].SetCharacter(_character);
 
             _teamPlayers.RemoveAt(0);
@@ -171,7 +235,7 @@ public class FightManager : Singleton<FightManager>
 
     public void EndTurn(Character _character)
     {
-        Debug.Log("EndTurn " + _character.CharacterName);
+        Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.CurrentData.currentInitiative + " | IsHuman: " + _character.isHumanController);
         _character.isMyTurn = false;
 
         int _currentCharacterIndex = characters.IndexOf(_character);
@@ -180,14 +244,24 @@ public class FightManager : Singleton<FightManager>
         {
             _nextCharacterIndex = 0;
         }
-        Debug.Log("StartTurn " + characters[_nextCharacterIndex].CharacterName);
-        characters[_nextCharacterIndex].isMyTurn = true;
 
         currentCharacter = characters[_nextCharacterIndex];
 
-        // if (!characters[_nextCharacterIndex].isHumanController)
-        // {
-        //     EndTurn(currentCharacter);
-        // }
+        _character.CurrentData.currentActionPoints = _character.CurrentData.maxActionPoints;
+        _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
+
+        Debug.Log("StartTurn " + currentCharacter.CharacterName);
+        currentCharacter.isMyTurn = true;
+    }
+
+    internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
+    {
+        Debug.Log("Cast spell " + _currentSpellSelected.name + " on tile " + _tile.Position);
+        // On check si il y a un character sur la tile
+        if (_tile.character != null)
+        {
+            Debug.Log("Target: " + _tile.character.CharacterName);
+            _tile.character.TakeDamage(_currentSpellSelected.damage);
+        }
     }
 }
