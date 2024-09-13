@@ -40,7 +40,7 @@ public class Character : MonoBehaviour
 
     internal void UpdateUI()
     {
-        UIManager.Instance.SetHudValues(currentData.currentHealth, currentData.currentActionPoints, currentData.currentMovementPoints);
+        //UIManager.Instance.SetHudValues(currentData.currentHealth, currentData.currentActionPoints, currentData.currentMovementPoints);
 
         // Health Bar
         characterUI.SetHealthBar(currentData.currentHealth,currentData.maxHealth);
