@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 public class FightMapTile : MonoBehaviour
 {
@@ -24,10 +21,21 @@ public class FightMapTile : MonoBehaviour
 
     public Character character;
 
-    private void Start() {
+    private void Start()
+    {
         position = gameObject.transform.position;
     }
 
+    public void ChangeColorHighlight(Color _color)
+    {
+        if (highlight != null)
+            highlight.color = _color;
+    }
 
-
+    public void DisplayHighlight(bool _display = true)
+    {
+        if (highlight != null)
+            highlight.gameObject.SetActive(_display);
+        return;
+    }
 }
