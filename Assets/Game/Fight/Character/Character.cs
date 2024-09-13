@@ -9,9 +9,11 @@ public class Character : MonoBehaviour
     [SerializeField] protected List<SpellData> spells;
     public List<SpellData> Spells => spells;
     [SerializeField] protected CharacterData data;
-
+    private CharacterUI characterUI;
     private CharacterData currentData;
     public CharacterData CurrentData => currentData;
+
+    
 
     public FightMapTile CurrentTile { get; set; }
 
@@ -20,11 +22,30 @@ public class Character : MonoBehaviour
     public bool isMyTurn = false;
     public bool isHumanController = false;
 
-    [SerializeField] private GameObject isMyTurnArrow;
+    private void Awake() {
+        characterUI = GetComponent<CharacterUI>();
+    }
 
-    private void Update()
+    internal void StartTurn()
     {
-        isMyTurnArrow.SetActive(isMyTurn);
+        isMyTurn = true;
+        UpdateUI();
+    }
+
+    internal void EndTurn()
+    {
+        isMyTurn = false;
+        UpdateUI();
+    }
+
+    internal void UpdateUI()
+    {
+        UIManager.Instance.SetHudValues(currentData.currentHealth, currentData.currentActionPoints, currentData.currentMovementPoints);
+
+        // Health Bar
+        characterUI.SetHealthBar(currentData.currentHealth,currentData.maxHealth);
+        // Turn Arrow
+        characterUI.SetTurnArrow(isMyTurn);
     }
 
     internal void InitData()
@@ -32,6 +53,7 @@ public class Character : MonoBehaviour
         currentData = new();
         currentData.Copy(data);
         currentData.Init();
+        UpdateUI();
     }
 
     internal void TakeDamage(int damage)
@@ -42,6 +64,8 @@ public class Character : MonoBehaviour
         if (currentData.currentHealth <= 0)
         {
             Debug.Log("Character " + characterName + " is dead");
+            gameObject.SetActive(false);
         }
+        UpdateUI();
     }
 }

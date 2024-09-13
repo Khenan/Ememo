@@ -101,7 +101,7 @@ public class FightManager : Singleton<FightManager>
     {
         LockAllPlayersOnFight();
         currentCharacter = characters.First();
-        currentCharacter.isMyTurn = true;
+        currentCharacter.StartTurn();
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
     }
 
@@ -236,7 +236,8 @@ public class FightManager : Singleton<FightManager>
     public void EndTurn(Character _character)
     {
         Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.CurrentData.currentInitiative + " | IsHuman: " + _character.isHumanController);
-        _character.isMyTurn = false;
+        
+        _character.EndTurn();
 
         int _currentCharacterIndex = characters.IndexOf(_character);
         int _nextCharacterIndex = _currentCharacterIndex + 1;
@@ -251,7 +252,7 @@ public class FightManager : Singleton<FightManager>
         _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
 
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
-        currentCharacter.isMyTurn = true;
+        currentCharacter.StartTurn();
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
