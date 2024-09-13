@@ -13,4 +13,14 @@ public class Character : MonoBehaviour
     public FightMapTile CurrentTile { get; set; }
 
     public int CurrentActionPoints => data.currentActionPoints;
+
+    public bool isMyTurn = false;
+    public bool isHumanController = false;
+
+    [SerializeField] private GameObject isMyTurnArrow;
+
+    private void Update()
+    {
+        isMyTurnArrow.SetActive(isMyTurn);
+    }
 }

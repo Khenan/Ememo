@@ -5,7 +5,10 @@ using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Character character;
+    [SerializeField] private Character characterToInstantiate;
+    public Character CharacterToInstantiate => characterToInstantiate;
+
+    private Character character;
     public Character Character => character;
 
     private PlayerActionController actionAsset;
@@ -60,6 +63,7 @@ public class PlayerController : MonoBehaviour
     public void SetCharacter(Character _character)
     {
         character = _character;
+        character.isHumanController = true;
     }
 
     private void InputActivation(Action<InputAction.CallbackContext> _action, InputAction.CallbackContext _context)
@@ -73,9 +77,11 @@ public class PlayerController : MonoBehaviour
         RaycastHit _hit;
         if (Physics.Raycast(_ray, out _hit))
         {
-            FightMapTile _tile = _hit.collider.GetComponent<FightMapTile>();
-            Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
-            return _tile;
+            if(_hit.collider.TryGetComponent(out FightMapTile _tile))
+            {
+                Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
+                return _tile;
+            }
         }
         return null;
     }
