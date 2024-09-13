@@ -101,7 +101,7 @@ public class FightManager : Singleton<FightManager>
     {
         LockAllPlayersOnFight();
         currentCharacter = characters.First();
-        currentCharacter.isMyTurn = true;
+        currentCharacter.StartTurn();
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
         UpdateInitiativeUI();
         if(FightMapManager.Instance != null) FightMapManager.Instance.StartFight();
@@ -239,7 +239,8 @@ public class FightManager : Singleton<FightManager>
     public void EndTurn(Character _character)
     {
         Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.CurrentData.currentInitiative + " | IsHuman: " + _character.isHumanController);
-        _character.isMyTurn = false;
+        
+        _character.EndTurn();
 
         int _currentCharacterIndex = characters.IndexOf(_character);
         int _nextCharacterIndex = _currentCharacterIndex + 1;
