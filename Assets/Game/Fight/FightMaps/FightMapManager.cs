@@ -139,4 +139,9 @@ public class FightMapManager : Singleton<FightMapManager>
     {
         return currentMap.GetTiles()[(int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x];
     }
+
+    internal int DistanceBetweenTiles(FightMapTile currentTile, FightMapTile tile)
+    {
+        return (int)(Mathf.Abs(currentTile.MatrixPosition.x - tile.MatrixPosition.x) + Mathf.Abs(currentTile.MatrixPosition.y - tile.MatrixPosition.y));
+    }
 }

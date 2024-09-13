@@ -6,10 +6,12 @@ public class Character : MonoBehaviour
 {
     [SerializeField] protected string characterName;
     public string CharacterName => characterName;
-    [SerializeField] protected List<Spell> spells;
-    public List<Spell> Spells => spells;
+    [SerializeField] protected List<SpellData> spells;
+    public List<SpellData> Spells => spells;
     [SerializeField] protected CharacterData data;
-    public CharacterData Data => data;
+
+    private CharacterData currentData;
+    public CharacterData CurrentData => currentData;
 
     public FightMapTile CurrentTile { get; set; }
 
@@ -27,6 +29,19 @@ public class Character : MonoBehaviour
 
     internal void InitData()
     {
-        data.Init();
+        currentData = new();
+        currentData.Copy(data);
+        currentData.Init();
+    }
+
+    internal void TakeDamage(int damage)
+    {
+        Debug.Log("Character " + characterName + " takes " + damage + " damage");
+        currentData.currentHealth -= damage;
+        currentData.currentHealth = Mathf.Clamp(currentData.currentHealth, 0, currentData.maxHealth);
+        if (currentData.currentHealth <= 0)
+        {
+            Debug.Log("Character " + characterName + " is dead");
+        }
     }
 }

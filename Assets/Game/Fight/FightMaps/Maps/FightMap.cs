@@ -8,7 +8,6 @@ public class FightMap : MonoBehaviour
     [SerializeField] internal Vector2 size;
     public Vector2 Size => size;
     [SerializeField] private List<FightMapTile> tiles;
-    private int teamCount = 2;
 
     internal void Init()
     {

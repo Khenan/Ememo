@@ -124,7 +124,7 @@ public class FightManager : Singleton<FightManager>
     private void InitInitiativeList()
     {
         // On trie les personnages par initiative
-        characters = characters.OrderByDescending(character => character.Data.currentInitiative).ToList();
+        characters = characters.OrderByDescending(character => character.CurrentData.currentInitiative).ToList();
         // On affiche la barre d'initiative
     }
 
@@ -235,7 +235,7 @@ public class FightManager : Singleton<FightManager>
 
     public void EndTurn(Character _character)
     {
-        Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.Data.currentInitiative + " | IsHuman: " + _character.isHumanController);
+        Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.CurrentData.currentInitiative + " | IsHuman: " + _character.isHumanController);
         _character.isMyTurn = false;
 
         int _currentCharacterIndex = characters.IndexOf(_character);
@@ -247,7 +247,21 @@ public class FightManager : Singleton<FightManager>
 
         currentCharacter = characters[_nextCharacterIndex];
 
+        _character.CurrentData.currentActionPoints = _character.CurrentData.maxActionPoints;
+        _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
+
         Debug.Log("StartTurn " + currentCharacter.CharacterName);
         currentCharacter.isMyTurn = true;
+    }
+
+    internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
+    {
+        Debug.Log("Cast spell " + _currentSpellSelected.name + " on tile " + _tile.Position);
+        // On check si il y a un character sur la tile
+        if (_tile.character != null)
+        {
+            Debug.Log("Target: " + _tile.character.CharacterName);
+            _tile.character.TakeDamage(_currentSpellSelected.damage);
+        }
     }
 }

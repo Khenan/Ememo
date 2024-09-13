@@ -19,6 +19,9 @@ public class PlayerController : MonoBehaviour
     public bool IsReadyToFight => isReadyToFight;
     public Action OnPlayerReady;
 
+    // Spell 
+    private SpellData currentSpellSelected;
+
     #region Inputs
     private PlayerActionController actionAsset;
 
@@ -80,6 +83,8 @@ public class PlayerController : MonoBehaviour
     private void AssignInputActivations()
     {
         OnLeftClick += context => GetTileUnderMouseWithRaycast(context);
+        OnShortcut_01 += context => SelectionSpell(context, 0);
+        OnShortcut_02 += context => SelectionSpell(context, 1);
     }
 
     public void SetCharacter(Character _character)
@@ -91,6 +96,11 @@ public class PlayerController : MonoBehaviour
     private void InputActivation(Action<InputAction.CallbackContext> _action, InputAction.CallbackContext _context)
     {
         _action?.Invoke(_context);
+    }
+
+    private void SelectionSpell(InputAction.CallbackContext _context, int _spellIndex)
+    {
+        currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
     }
 
     private FightMapTile GetTileUnderMouseWithRaycast(InputAction.CallbackContext _context)
@@ -107,13 +117,58 @@ public class PlayerController : MonoBehaviour
                 // Debug.Log(_tile.character ? _tile.character.CharacterName : "No character");
                 // Debug.Log("ID: " + _tile.tileID + " | matrixPosition: " + _tile.MatrixPosition);
 
-                if (!lockOnFight) SwitchCharacterPositionOnTile(_tile);
+                if (lockOnFight)
+                {
+                    if (currentSpellSelected != null)
+                    {
+                        CastSpellOnTile(_tile);
+                    }
+                    else
+                    {
+                        MoveOnTile(_tile);
+                    }
+                }
+                else
+                {
+                    SwitchCharacterPositionOnTile(_tile);
+                }
 
                 FightMapManager.Instance.lastTileSelected = _tile;
                 return _tile;
             }
         }
         return null;
+    }
+
+    private void MoveOnTile(FightMapTile _tile)
+    {
+        if (character.isMyTurn && _tile.IsWalkable)
+        {
+            if (character.CurrentData.currentMovementPoints > 0)
+            {
+                int _tileDistance = FightMapManager.Instance.DistanceBetweenTiles(character.CurrentTile, _tile);
+                if (_tileDistance <= character.CurrentData.currentMovementPoints)
+                {
+                    character.CurrentData.currentMovementPoints -= _tileDistance;
+                    FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+                }
+            }
+        }
+    }
+    private void CastSpellOnTile(FightMapTile _tile)
+    {
+        if (character.isMyTurn && _tile.IsWalkable)
+        {
+            if (currentSpellSelected != null)
+            {
+                if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
+                {
+                    character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
+                    FightManager.Instance.CastSpell(currentSpellSelected, _tile);
+                }
+                currentSpellSelected = null;
+            }
+        }
     }
 
     private void SwitchCharacterPositionOnTile(FightMapTile _tile)
@@ -129,7 +184,6 @@ public class PlayerController : MonoBehaviour
         isReadyToFight = true;
         OnPlayerReady?.Invoke();
     }
-
     internal void EndFight()
     {
         isReadyToFight = false;
