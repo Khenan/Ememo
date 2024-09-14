@@ -85,7 +85,7 @@ public class Character : MonoBehaviour
     {
         isDead = true;
         characterUI.Dead();
-        FightManager.I.OnCharacterDead();
+        FightManager.I.OnCharacterDead(this);
     }
 
     // SpellBar

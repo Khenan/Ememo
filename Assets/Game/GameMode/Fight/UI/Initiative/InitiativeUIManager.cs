@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,6 +25,12 @@ public class InitiativeUIManager : Singleton<InitiativeUIManager>
             _visual.Init(_i - 1, _characters[_i].CharacterName);
             currentVisuals.Add(_visual);
         }
+        UpdateVisuals();
+    }
+
+    internal void CharacterDead(int _index)
+    {
+        currentVisuals[_index].Dead();
         UpdateVisuals();
     }
 

@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6a599df5bdfc0478f104dd8247cb00, type: 3}
   m_Name: SpellData_FireBall
   m_EditorClassIdentifier: 
-  name: FireBall
+  name: Fire Ball
   description: Une boule de feu
   cost: 3
   level: 1
+  withSight: 1
   rangeMin: 1
   rangeMax: 10
-  damage: 1
+  damage: 10

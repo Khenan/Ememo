@@ -84,7 +84,7 @@ public class FightManager : Singleton<FightManager>
 
     public void EndTurn(Character _character)
     {
-        if(fightIsOver) return;
+        if (fightIsOver) return;
         _character.EndTurn();
 
         int _currentCharacterIndex = characters.IndexOf(_character);
@@ -106,11 +106,16 @@ public class FightManager : Singleton<FightManager>
         }
     }
 
-    internal void OnCharacterDead()
+    internal void OnCharacterDead(Character _character)
+    {
+        if (InitiativeUIManager.I != null) InitiativeUIManager.I.CharacterDead(characters.IndexOf(_character));
+        CheckEndFight();
+    }
+
+    private void CheckEndFight()
     {
         // Check le nombre de team en vie
         int _teamsAlive = characters.Where(character => !character.IsDead).Select(character => character.teamId).Distinct().Count();
-        Debug.Log("Teams alive: " + _teamsAlive);
         if (_teamsAlive == 1)
         {
             fightIsOver = true;

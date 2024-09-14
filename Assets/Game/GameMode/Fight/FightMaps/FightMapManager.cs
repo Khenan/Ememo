@@ -12,11 +12,9 @@ public class FightMapManager : Singleton<FightMapManager>
 
     public FightMapTile lastTileSelected;
     public FightMapTile lastTileHovered;
-    [SerializeField] private Transform tileSelectorVisual;
     private List<FightMapTile> lastTilesHighlighted = new();
 
     private FightMap currentMap;
-    public FightMap CurrentMap => currentMap;
 
     private class OldHighlight
     {
@@ -25,15 +23,6 @@ public class FightMapManager : Singleton<FightMapManager>
     }
 
     private OldHighlight oldHardHighlights = new();
-
-    // private void Update()
-    // {
-    //     tileSelectorVisual.gameObject.SetActive(lastTileSelected != null);
-    //     if (lastTileSelected != null && tileSelectorVisual != null)
-    //     {
-    //         tileSelectorVisual.position = lastTileSelected.transform.position;
-    //     }
-    // }
 
     private void SetCameraPosition()
     {
@@ -121,21 +110,21 @@ public class FightMapManager : Singleton<FightMapManager>
         lastTilesHighlighted = _tiles;
     }
 
-    private void DisplayHighlightTile(FightMapTile _tile, bool _show = true, Color _color = default)
+    private void DisplayHighlightTile(FightMapTile _tile, bool _show = true, Color _color = default, bool _withTips = false, TipsType _tipsType = TipsType.Default)
     {
-        if (_tile != null) _tile.DisplayHighlight(_show, _color);
+        if (_tile != null) _tile.DisplayHighlight(_show, _color, _withTips, _tipsType);
     }
     public void ShowHighlightTiles(List<FightMapTile> _tiles, Color _color = default) => ToggleHighlightList(_tiles, true, _color);
     public void HideHighlightTiles(List<FightMapTile> _tiles) => ToggleHighlightList(_tiles, false);
     public void HideHighlightTiles() => ToggleHighlightList(null, false);
-    public void ColorHighlightTiles(List<FightMapTile> _tiles, Color _color)
+    public void ColorHighlightTiles(List<FightMapTile> _tiles, Color _color, bool _withTips = false, TipsType _tipsType = TipsType.Default)
     {
         // On redonne l'ancienne couleur aux anciens highlights
         if (oldHardHighlights.tiles.Count > 0)
         {
             for (int _i = 0; _i < oldHardHighlights.tiles.Count; _i++)
             {
-                DisplayHighlightTile(oldHardHighlights.tiles[_i], true, oldHardHighlights.colors[_i]);
+                DisplayHighlightTile(oldHardHighlights.tiles[_i], true, oldHardHighlights.colors[_i], _withTips, _tipsType);
             }
             oldHardHighlights.tiles.Clear();
             oldHardHighlights.colors.Clear();
@@ -255,7 +244,7 @@ public class FightMapManager : Singleton<FightMapManager>
         bool _isInRangeMin = DistanceBetweenTiles(_centerTile, _targetTile) >= _rangeMin;
         bool _isInRangeMax = DistanceBetweenTiles(_centerTile, _targetTile) <= _rangeMax;
         bool _isInRange = _isInRangeMin && _isInRangeMax;
-        if (_isInRange && LineOfSight(_centerTile, _targetTile))
+        if (_isInRange && (_sight ? LineOfSight(_centerTile, _targetTile) : true))
         {
             _valueToReturn = true;
         }

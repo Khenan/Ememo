@@ -106,10 +106,10 @@ public class PlayerController : MonoBehaviour
                     }
                     else if (currentSpellSelected != null)
                     {
-                        if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax))
+                        if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.SpellHighlightHover);
                         else
-                            FightMapManager.I.ColorHighlightTiles(new List<FightMapTile>(), Colors.I.SpellHighlightHover);
+                            FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { }, Colors.I.SpellHighlightSightless);
                     }
                 }
                 // Show PM Path of Hover Character
@@ -194,6 +194,7 @@ public class PlayerController : MonoBehaviour
         OnRightClick += context => RightClickAction(context);
         OnShortcut_01 += context => ActionSelectionSpell(context, 0);
         OnShortcut_02 += context => ActionSelectionSpell(context, 1);
+        OnShortcut_03 += context => ActionSelectionSpell(context, 2);
     }
 
     private void LeftClickAction(InputAction.CallbackContext _context)
@@ -249,10 +250,13 @@ public class PlayerController : MonoBehaviour
             currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
             List<FightMapTile> _rangeTiles = GetTilesFromSpellSelectedRange();
             FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.SpellHighlight);
-            foreach (var _tile in _rangeTiles)
+            if (currentSpellSelected.withSight)
             {
-                if(_tile != null && !FightMapManager.I.LineOfSight(character.CurrentTile, _tile))
-                    _tile.DisplayHighlight(true, Colors.I.SpellHighlightHover);
+                foreach (var _tile in _rangeTiles)
+                {
+                    if (_tile != null && !FightMapManager.I.LineOfSight(character.CurrentTile, _tile))
+                        _tile.DisplayHighlight(true, Colors.I.SpellHighlightSightless);
+                }
             }
         }
         else
@@ -307,7 +311,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
                 {
-                    if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax))
+                    if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
                     {
                         character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
                         FightManager.I.CastSpell(currentSpellSelected, _tile);
