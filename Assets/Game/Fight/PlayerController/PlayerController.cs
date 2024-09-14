@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Tilemaps;
 
 public class PlayerController : MonoBehaviour
 {
@@ -22,10 +22,26 @@ public class PlayerController : MonoBehaviour
     // Spell 
     private SpellData currentSpellSelected;
 
+    private Dictionary<Direction, Vector2> lineDirection = new()
+    {
+        {Direction.Up, new(0, -1)},
+        {Direction.Down, new(0, 1)},
+        {Direction.Left, new(-1, 0)},
+        {Direction.Right, new(1, 0)}
+    };
+    private Dictionary<Direction, Vector2> diagonaleDirection = new()
+    {
+        {Direction.Up, new(-1, -1)},
+        {Direction.Down, new(1, 1)},
+        {Direction.Left, new(-1, 1)},
+        {Direction.Right, new(1, -1)}
+    };
+
     #region Inputs
     private PlayerActionController actionAsset;
 
     private InputAction leftClick;
+    private InputAction rightClick;
     private InputAction shortCut_1;
     private InputAction shortCut_2;
     private InputAction shortCut_3;
@@ -35,6 +51,7 @@ public class PlayerController : MonoBehaviour
     private InputAction shiftBar;
 
     public Action<InputAction.CallbackContext> OnLeftClick;
+    public Action<InputAction.CallbackContext> OnRightClick;
     public Action<InputAction.CallbackContext> OnShortcut_01;
     public Action<InputAction.CallbackContext> OnShortcut_02;
     public Action<InputAction.CallbackContext> OnShortcut_03;
@@ -59,6 +76,7 @@ public class PlayerController : MonoBehaviour
     {
         actionAsset = new();
         leftClick = actionAsset.asset.FindAction("LeftClick");
+        rightClick = actionAsset.asset.FindAction("RightClick");
         shortCut_1 = actionAsset.asset.FindAction("ShortCut_1");
         shortCut_2 = actionAsset.asset.FindAction("ShortCut_2");
         shortCut_3 = actionAsset.asset.FindAction("ShortCut_3");
@@ -67,11 +85,13 @@ public class PlayerController : MonoBehaviour
         ctrlBar = actionAsset.asset.FindAction("CtrlBar");
         shiftBar = actionAsset.asset.FindAction("ShiftBar");
     }
+
     private void AssignInputActions()
     {
         actionAsset.Enable();
 
         leftClick.performed += _context => InputActivation(OnLeftClick, _context);
+        rightClick.performed += _context => InputActivation(OnRightClick, _context);
         shortCut_1.performed += _context => InputActivation(OnShortcut_01, _context);
         shortCut_2.performed += _context => InputActivation(OnShortcut_02, _context);
         shortCut_3.performed += _context => InputActivation(OnShortcut_03, _context);
@@ -83,8 +103,16 @@ public class PlayerController : MonoBehaviour
     private void AssignInputActivations()
     {
         OnLeftClick += context => GetTileUnderMouseWithRaycast(context);
+        OnRightClick += context => RightClickAction(context);
         OnShortcut_01 += context => SelectionSpell(context, 0);
         OnShortcut_02 += context => SelectionSpell(context, 1);
+    }
+
+
+
+    private void RightClickAction(InputAction.CallbackContext _context)
+    {
+        SelectionSpell(_context, -1);
     }
 
     public void SetCharacter(Character _character)
@@ -98,9 +126,18 @@ public class PlayerController : MonoBehaviour
         _action?.Invoke(_context);
     }
 
-    private void SelectionSpell(InputAction.CallbackContext _context, int _spellIndex)
+    private void SelectionSpell(InputAction.CallbackContext _context = default, int _spellIndex = -1)
     {
-        currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
+        if (_spellIndex != -1)
+        {
+            currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
+        }
+        else
+        {
+            currentSpellSelected = null;
+            Debug.Log("Spell is NULL");
+        }
+        FightMapManager.Instance.ShowTileList(GetTilesFromSpellSelectedRange());
     }
 
     private FightMapTile GetTileUnderMouseWithRaycast(InputAction.CallbackContext _context)
@@ -142,7 +179,7 @@ public class PlayerController : MonoBehaviour
 
     private void MoveOnTile(FightMapTile _tile)
     {
-        if (character.isMyTurn && _tile.IsWalkable)
+        if (character.isMyTurn && _tile.IsWalkable && !_tile.IsOccupied)
         {
             if (character.CurrentData.currentMovementPoints > 0)
             {
@@ -155,6 +192,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
     private void CastSpellOnTile(FightMapTile _tile)
     {
         if (character.isMyTurn && _tile.IsWalkable)
@@ -171,6 +209,35 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private List<FightMapTile> GetTilesFromSpellSelectedRange()
+    {
+        if (currentSpellSelected != null)
+        {
+            List<FightMapTile> _rangeTiles = new();
+            FightMapTile _centerTile = character.CurrentTile;
+            int rangeMin = currentSpellSelected.rangeMin;
+            int rangeMax = currentSpellSelected.rangeMax;
+            if (rangeMax <= 0)
+            {
+                _rangeTiles.Add(_centerTile);
+                Debug.Log("Center Tile is Added");
+                return _rangeTiles;
+            }
+            for (int rangeCurrent = rangeMin; rangeCurrent <= rangeMax; rangeCurrent++)
+            {
+                foreach (KeyValuePair<Direction, Vector2> dir in lineDirection)
+                {
+                    _rangeTiles.Add(FightMapManager.Instance.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * rangeCurrent)));
+                }
+                foreach (KeyValuePair<Direction, Vector2> dir in diagonaleDirection)
+                {
+                    _rangeTiles.Add(FightMapManager.Instance.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * (rangeCurrent - 1))));
+                }
+            }
+            return _rangeTiles;
+        }
+        return null;
+    }
     private void SwitchCharacterPositionOnTile(FightMapTile _tile)
     {
         if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
@@ -187,5 +254,13 @@ public class PlayerController : MonoBehaviour
     internal void EndFight()
     {
         isReadyToFight = false;
+    }
+
+    enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
     }
 }
