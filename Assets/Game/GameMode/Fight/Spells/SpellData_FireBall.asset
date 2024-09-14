@@ -17,5 +17,5 @@ MonoBehaviour:
   cost: 3
   level: 1
   rangeMin: 1
-  rangeMax: 6
+  rangeMax: 10
   damage: 1

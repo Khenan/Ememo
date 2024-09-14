@@ -247,7 +247,13 @@ public class PlayerController : MonoBehaviour
         if (_spellIndex != -1 && character.Spells[_spellIndex].cost <= character.CurrentData.currentActionPoints)
         {
             currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
-            FightMapManager.I.ShowHighlightTiles(GetTilesFromSpellSelectedRange(), Colors.I.SpellHighlight);
+            List<FightMapTile> _rangeTiles = GetTilesFromSpellSelectedRange();
+            FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.SpellHighlight);
+            foreach (var _tile in _rangeTiles)
+            {
+                if(_tile != null && !FightMapManager.I.LineOfSight(character.CurrentTile, _tile))
+                    _tile.DisplayHighlight(true, Colors.I.SpellHighlightHover);
+            }
         }
         else
         {

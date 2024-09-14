@@ -9,9 +9,9 @@ public class CharacterUI : MonoBehaviour
 
     internal void SetHealthBar(int _current, int _max)
     {
-        healthBar.Value = _current;
-        healthBar.MaxValue = _max;
-        healthBar.updateBar();
+        healthBar.value = _current;
+        healthBar.maxValue = _max;
+        healthBar.UpdateBar();
     }
     internal void SetTurnArrow(bool isActive)
     {

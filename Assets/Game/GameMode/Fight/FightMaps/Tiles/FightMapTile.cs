@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class FightMapTile : MonoBehaviour
@@ -11,6 +10,8 @@ public class FightMapTile : MonoBehaviour
     public bool IsWalkable => isWalkable;
     [SerializeField] private bool isOccupied;
     public bool IsOccupied => isOccupied || character != null;
+    [SerializeField] private bool blockLineOfSight;
+    public bool BlockLineOfSight => blockLineOfSight || character != null;
     [SerializeField] private bool isStartTile;
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
