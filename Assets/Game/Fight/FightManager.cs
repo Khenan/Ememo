@@ -64,7 +64,7 @@ public class FightManager : Singleton<FightManager>
     public void InitFight(FightData _fightData)
     {
         characters.Clear();
-        currentMap = FightMapManager.Instance.InitMap(_fightData.AreaId);
+        currentMap = FightMapManager.I.InitMap(_fightData.AreaId);
         InitAllCharactersAndPlayers();
         InitPlayerActions();
         InitAllCharacterDatas();
@@ -102,9 +102,8 @@ public class FightManager : Singleton<FightManager>
         LockAllPlayersOnFight();
         currentCharacter = characters.First();
         currentCharacter.StartTurn();
-        Debug.Log("StartTurn " + currentCharacter.CharacterName);
         UpdateInitiativeUI();
-        if(FightMapManager.Instance != null) FightMapManager.Instance.StartFight();
+        if(FightMapManager.I != null) FightMapManager.I.StartFight();
     }
 
     private void LockAllPlayersOnFight()
@@ -128,7 +127,7 @@ public class FightManager : Singleton<FightManager>
         // On trie les personnages par initiative
         characters = characters.OrderByDescending(character => character.CurrentData.currentInitiative).ToList();
         // On affiche la barre d'initiative
-        if(InitiativeUIManager.Instance != null) InitiativeUIManager.Instance.Init(characters);
+        if(InitiativeUIManager.I != null) InitiativeUIManager.I.Init(characters);
     }
 
     private void InitAllCharactersAndPlayers()
@@ -233,13 +232,11 @@ public class FightManager : Singleton<FightManager>
 
     private void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
     {
-        FightMapManager.Instance.SetCharacterOnTile(_character, _fightMapTile, _map);
+        FightMapManager.I.SetCharacterOnTile(_character, _fightMapTile, _map);
     }
 
     public void EndTurn(Character _character)
     {
-        Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.CurrentData.currentInitiative + " | IsHuman: " + _character.isHumanController);
-        
         _character.EndTurn();
 
         int _currentCharacterIndex = characters.IndexOf(_character);
@@ -251,17 +248,13 @@ public class FightManager : Singleton<FightManager>
 
         currentCharacter = characters[_nextCharacterIndex];
 
-        _character.CurrentData.currentActionPoints = _character.CurrentData.maxActionPoints;
-        _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
-
-        Debug.Log("StartTurn " + currentCharacter.CharacterName);
         currentCharacter.StartTurn();
         UpdateInitiativeUI();
     }
 
     private void UpdateInitiativeUI()
     {
-        if(InitiativeUIManager.Instance != null) InitiativeUIManager.Instance.UpdateTurn(characters.IndexOf(currentCharacter));
+        if(InitiativeUIManager.I != null) InitiativeUIManager.I.UpdateTurn(characters.IndexOf(currentCharacter));
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)

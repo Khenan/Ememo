@@ -69,26 +69,21 @@ public class FightMapManager : Singleton<FightMapManager>
         }
     }
 
-
-    private void ShowHighlight(FightMapTile _tile, bool _show = true)
-    {
-        if (_tile != null)
-            _tile.DisplayHighlight(_show);
-    }
-
     private void ShowStartTiles(FightMap _map)
     {
         List<FightMapTile> _startTiles = _map.GetStartTiles();
+        Color _color = Colors.I.DefaultHightlight;
         foreach (FightMapTile _startTile in _startTiles)
         {
-            ShowHighlight(_startTile);
             switch (_startTile.TeamId)
             {
                 case 0:
-                    _startTile.ChangeColorHighlight(teamColor0);
+                    _color = Colors.I.TeamColors.Count > 0 ? Colors.I.TeamColors[0] : Colors.I.DefaultHightlight;
+                    DisplayHighlightTile(_startTile, true, _color);
                     break;
                 case 1:
-                    _startTile.ChangeColorHighlight(teamColor1);
+                    _color = Colors.I.TeamColors.Count > 1 ? Colors.I.TeamColors[1] : Colors.I.DefaultHightlight;
+                    DisplayHighlightTile(_startTile, true, _color);
                     break;
                 default:
                     Debug.LogError("Undefined team");
@@ -97,28 +92,37 @@ public class FightMapManager : Singleton<FightMapManager>
         }
     }
 
-    public void ShowTileList(List<FightMapTile> _tiles = null, bool _show = true)
+    #region Highlight
+    private void ToggleHighlightList(List<FightMapTile> _tiles = null, bool _show = true, Color _color = default)
     {
         if (lastTilesHighlighted != null)
         {
             foreach (FightMapTile _tile in lastTilesHighlighted)
             {
-                ShowHighlight(_tile, false);
+                DisplayHighlightTile(_tile, false);
             }
         }
         if (_tiles != null)
         {
             foreach (FightMapTile _tile in _tiles)
             {
-                ShowHighlight(_tile, _show);
+                DisplayHighlightTile(_tile, _show, _color);
             }
         }
         lastTilesHighlighted = _tiles;
     }
 
+    private void DisplayHighlightTile(FightMapTile _tile, bool _show = true, Color _color = default)
+    {
+        if (_tile != null) _tile.DisplayHighlight(_show, _color);
+    }
+    public void ShowHighlightTiles(List<FightMapTile> _tiles, Color _color = default) => ToggleHighlightList(_tiles, true, _color);
+    public void HideHighlightTiles(List<FightMapTile> _tiles) => ToggleHighlightList(_tiles, false);
+    #endregion
+
     public void StartFight()
     {
-        ShowTileList(currentMap.GetStartTiles());
+        HideHighlightTiles(currentMap.GetStartTiles());
     }
 
     internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
@@ -165,16 +169,20 @@ public class FightMapManager : Singleton<FightMapManager>
 
     internal FightMapTile GetTileByMatrixPosition(Vector2 _matrixPosition)
     {
+        FightMapTile _tile = null;
         int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x;
         if (indexPos >= 0 && indexPos < currentMap.GetMapTileCount())
-            return currentMap.GetTiles()[indexPos];
-        else
-            Debug.Log("This tile don't exist. Out of bounds of currentMap.GetTiles()");
-        return null;
+            _tile = currentMap.GetTiles()[indexPos];
+        return _tile;
     }
 
     internal int DistanceBetweenTiles(FightMapTile currentTile, FightMapTile tile)
     {
         return (int)(Mathf.Abs(currentTile.MatrixPosition.x - tile.MatrixPosition.x) + Mathf.Abs(currentTile.MatrixPosition.y - tile.MatrixPosition.y));
+    }
+
+    internal void ShowHighlightTiles(List<FightMapTile> fightMapTiles, object spellHighlight)
+    {
+        throw new System.NotImplementedException();
     }
 }

@@ -32,10 +32,12 @@ public class FightMapTile : MonoBehaviour
             highlight.color = _color;
     }
 
-    public void DisplayHighlight(bool _display = true)
+    public void DisplayHighlight(bool _display = true, Color _color = default)
     {
         if (highlight != null)
+        {
+            highlight.color = _color == default ? Colors.I.DefaultHightlight : _color;
             highlight.gameObject.SetActive(_display);
-        return;
+        }
     }
 }

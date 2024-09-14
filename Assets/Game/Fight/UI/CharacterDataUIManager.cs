@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class UIManager : Singleton<UIManager>
+public class CharacterDataUIManager : Singleton<CharacterDataUIManager>
 {
-    [SerializeField] private TMP_Text apValue;
-    [SerializeField] private TMP_Text mpValue;
-    [SerializeField] private TMP_Text hpValue;
+    [SerializeField] private TextMeshProUGUI apValue;
+    [SerializeField] private TextMeshProUGUI mpValue;
+    [SerializeField] private TextMeshProUGUI hpValue;
 
+    private void Awake() {
+        
+    }
+    
     internal void SetHudValues(int _hp, int _ap, int _mp)
     {
         apValue.text = _ap.ToString();

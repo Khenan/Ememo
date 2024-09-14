@@ -46,7 +46,7 @@ public class ButtonBehaviour : MonoBehaviour
         }
         else if (playerController.onFight && playerController.lockOnFight)
         {
-            FightManager.Instance.EndTurn(playerController.Character);
+            FightManager.I.EndTurn(playerController.Character);
         }
     }
 }
