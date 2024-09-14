@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class FightMapTile : MonoBehaviour
@@ -9,7 +10,7 @@ public class FightMapTile : MonoBehaviour
     [SerializeField] private bool isWalkable;
     public bool IsWalkable => isWalkable;
     [SerializeField] private bool isOccupied;
-    public bool IsOccupied => isOccupied;
+    public bool IsOccupied => isOccupied || character != null;
     [SerializeField] private bool isStartTile;
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
@@ -26,18 +27,34 @@ public class FightMapTile : MonoBehaviour
         position = gameObject.transform.position;
     }
 
-    public void ChangeColorHighlight(Color _color)
-    {
-        if (highlight != null)
-            highlight.color = _color;
-    }
-
     public void DisplayHighlight(bool _display = true, Color _color = default)
     {
         if (highlight != null)
         {
             highlight.color = _color == default ? Colors.I.DefaultHightlight : _color;
             highlight.gameObject.SetActive(_display);
+        }
+    }
+
+    internal void ColorTop(Color _color)
+    {
+        if (visualTop != null)
+        {
+            visualTop.color = _color;
+        }
+    }
+    internal void HideStartTile()
+    {
+        ColorBaseTopByIndex();
+    }
+
+    internal void ColorBaseTopByIndex()
+    {
+        if (visualTop != null)
+        {
+            bool _odd = (MatrixPosition.x + MatrixPosition.y) % 2 == 0;
+            VisualTop.color = _odd ? Colors.I.FloorOdd : Colors.I.FloorEven;
+            visualTop.color = Color.white;
         }
     }
 }
