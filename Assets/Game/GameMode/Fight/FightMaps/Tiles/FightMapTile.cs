@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FightMapTile : MonoBehaviour
+public partial class FightMapTile : MonoBehaviour
 {
     private Vector3 position;
     public Vector3 Position => position;
@@ -20,20 +20,28 @@ public class FightMapTile : MonoBehaviour
     public SpriteRenderer VisualTop => visualTop;
     [SerializeField] private SpriteRenderer highlight;
     public SpriteRenderer Highlight => highlight;
+    
+    [SerializeField] private SpriteRenderer highlightTips;
+    [SerializeField] private Sprite defaultSprite;
+    [SerializeField] private Sprite blindSprite;
 
     public Character character;
 
     private void Start()
     {
         position = gameObject.transform.position;
+        if(highlight != null) highlight.gameObject.SetActive(false);
+        if(highlightTips != null) highlightTips.gameObject.SetActive(false);
     }
 
-    public void DisplayHighlight(bool _display = true, Color _color = default)
+    public void DisplayHighlight(bool _display = true, Color _color = default, bool _withTips = false, TipsType _tipsType = TipsType.Default)
     {
         if (highlight != null)
         {
             highlight.color = _color == default ? Colors.I.DefaultHightlight : _color;
             highlight.gameObject.SetActive(_display);
+
+            SetHighlightTips(_withTips, _tipsType);
         }
     }
 
@@ -55,6 +63,21 @@ public class FightMapTile : MonoBehaviour
         {
             bool _odd = (MatrixPosition.x + MatrixPosition.y) % 2 == 0;
             VisualTop.color = _odd ? Colors.I.FloorOdd : Colors.I.FloorEven;
+        }
+    }
+
+    private void SetHighlightTips(bool _active, TipsType _tipsType)
+    {
+        if(highlightTips == null) return;
+        highlightTips.gameObject.SetActive(_active);
+        switch (_tipsType)
+        {
+            case TipsType.Default:
+                highlightTips.sprite = defaultSprite;
+                break;
+            case TipsType.Blind:
+                highlightTips.sprite = blindSprite;
+                break;
         }
     }
 }

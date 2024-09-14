@@ -54,6 +54,8 @@ MonoBehaviour:
   teamId: 0
   visualTop: {fileID: 636254518066657192}
   highlight: {fileID: 0}
+  defaultSprite: {fileID: 7482667652216324306, guid: 45ee9b251cc83cb458624e740b33d64d, type: 3}
+  blindSprite: {fileID: 21300000, guid: 1b6fd1438c3aab94ea7a890a2d371cc0, type: 3}
   character: {fileID: 0}
 --- !u!65 &8726026042808145337
 BoxCollider:

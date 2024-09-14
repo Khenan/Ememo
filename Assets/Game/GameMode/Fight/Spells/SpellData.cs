@@ -11,6 +11,7 @@ public class SpellData : ScriptableObject
     public string description;
     public int cost;
     public int level;
+    public bool withSight;
     public int rangeMin;
     public int rangeMax;
     public int damage;

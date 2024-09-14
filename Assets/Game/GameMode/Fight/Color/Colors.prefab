@@ -50,7 +50,8 @@ MonoBehaviour:
   - {r: 0.05882354, g: 0.5079297, b: 0.79607844, a: 1}
   Red: {r: 0.7960785, g: 0.058823533, b: 0.058823533, a: 1}
   SpellHighlight: {r: 0, g: 0.6015773, b: 1, a: 0.78431374}
-  SpellHighlightHover: {r: 0, g: 0.37035027, b: 0.61725056, a: 0.78431374}
+  SpellHighlightHover: {r: 0, g: 0.7767279, b: 1, a: 0.78431374}
+  SpellHighlightSightless: {r: 0, g: 0.36960053, b: 0.61185974, a: 0.78431374}
   HoverHighlight: {r: 0, g: 0, b: 0, a: 0.19607843}
   FloorOdd: {r: 1, g: 1, b: 1, a: 1}
   FloorEven: {r: 0.94070077, g: 0.94070077, b: 0.94070077, a: 1}

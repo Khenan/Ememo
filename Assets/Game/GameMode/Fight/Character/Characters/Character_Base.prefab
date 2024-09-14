@@ -334,12 +334,14 @@ MonoBehaviour:
   spells:
   - {fileID: 11400000, guid: 3fdbe2ab52a2ed742bfe92e1c170043a, type: 2}
   - {fileID: 11400000, guid: 9d83f14ab7baf944c85ab18ba1d313ff, type: 2}
+  - {fileID: 11400000, guid: c37b46cd132ed024fa2347c4bd80c101, type: 2}
   data:
     level: 1
     defaultHealth: 10
     defaultInitiative: 0
     defaultActionPoints: 6
     defaultMovementPoints: 3
+  teamId: 0
   isMyTurn: 0
   isHumanController: 0
 --- !u!114 &-1695630545324159952
@@ -565,8 +567,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca66cd5ffb564f64b8895fb323f5d416, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxValue: 0
-  value: 0
   barCursor: {fileID: 4736870149426467477}
 --- !u!1 &7648335560670020421
 GameObject:
