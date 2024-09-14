@@ -132,11 +132,6 @@ public class PlayerController : MonoBehaviour
         {
             currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
         }
-        else
-        {
-            currentSpellSelected = null;
-            Debug.Log("Spell is NULL");
-        }
         FightMapManager.I.ShowHighlightTiles(GetTilesFromSpellSelectedRange(), Colors.I.SpellHighlight);
     }
 
@@ -207,38 +202,23 @@ public class PlayerController : MonoBehaviour
                     character.UpdateAllUI();
                 }
                 currentSpellSelected = null;
+                FightMapManager.I.HideHighlightTiles();
             }
         }
     }
 
     private List<FightMapTile> GetTilesFromSpellSelectedRange()
     {
+        List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
-            List<FightMapTile> _rangeTiles = new();
             FightMapTile _centerTile = character.CurrentTile;
             int rangeMin = currentSpellSelected.rangeMin;
             int rangeMax = currentSpellSelected.rangeMax;
-            if (rangeMax <= 0)
-            {
-                _rangeTiles.Add(_centerTile);
-                Debug.Log("Center Tile is Added");
-                return _rangeTiles;
-            }
-            for (int rangeCurrent = rangeMin; rangeCurrent <= rangeMax; rangeCurrent++)
-            {
-                foreach (KeyValuePair<Direction, Vector2> dir in lineDirection)
-                {
-                    _rangeTiles.Add(FightMapManager.I.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * rangeCurrent)));
-                }
-                foreach (KeyValuePair<Direction, Vector2> dir in diagonaleDirection)
-                {
-                    _rangeTiles.Add(FightMapManager.I.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * (rangeCurrent - 1))));
-                }
-            }
+            _rangeTiles = FightMapManager.I.GetTilesByRange(_centerTile, rangeMin, rangeMax);
             return _rangeTiles;
         }
-        return null;
+        return _rangeTiles;
     }
     private void SwitchCharacterPositionOnTile(FightMapTile _tile)
     {
