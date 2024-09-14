@@ -10,7 +10,10 @@ public class Singleton<T> : MonoBehaviour where T: Singleton<T>
             if (instance == null)
             {
                 instance = FindObjectOfType<T>();
-                if(instance == null) instance = Instantiate(new GameObject()).AddComponent<T>();
+                if(instance == null) {
+                    GameObject _gameObject = new GameObject(typeof(T).Name);
+                    instance = _gameObject.AddComponent<T>();
+                }
             }
             return instance;
         }
