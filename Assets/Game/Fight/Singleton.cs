@@ -10,8 +10,13 @@ public class Singleton<T> : MonoBehaviour where T: Singleton<T>
             if (instance == null)
             {
                 instance = FindObjectOfType<T>();
+                if(instance == null) instance = Instantiate(new GameObject()).AddComponent<T>();
             }
             return instance;
         }
+    }
+
+    private void Start() {
+        if(instance != null) Destroy(gameObject);
     }
 }

@@ -102,7 +102,6 @@ public class FightManager : Singleton<FightManager>
         LockAllPlayersOnFight();
         currentCharacter = characters.First();
         currentCharacter.StartTurn();
-        Debug.Log("StartTurn " + currentCharacter.CharacterName);
         UpdateInitiativeUI();
         if(FightMapManager.Instance != null) FightMapManager.Instance.StartFight();
     }
@@ -238,8 +237,6 @@ public class FightManager : Singleton<FightManager>
 
     public void EndTurn(Character _character)
     {
-        Debug.Log("EndTurn " + _character.CharacterName + " | Initiative: " + _character.CurrentData.currentInitiative + " | IsHuman: " + _character.isHumanController);
-        
         _character.EndTurn();
 
         int _currentCharacterIndex = characters.IndexOf(_character);
@@ -251,10 +248,6 @@ public class FightManager : Singleton<FightManager>
 
         currentCharacter = characters[_nextCharacterIndex];
 
-        _character.CurrentData.currentActionPoints = _character.CurrentData.maxActionPoints;
-        _character.CurrentData.currentMovementPoints = _character.CurrentData.maxMovementPoints;
-
-        Debug.Log("StartTurn " + currentCharacter.CharacterName);
         currentCharacter.StartTurn();
         UpdateInitiativeUI();
     }

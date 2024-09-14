@@ -28,7 +28,6 @@ public class CharacterData
     internal int currentMovementPoints;
 
     public void Init() {
-        Debug.Log("CharacterData Init");
         maxHealth = defaultHealth;
         maxInitiative = defaultInitiative;
         maxActionPoints = defaultActionPoints;

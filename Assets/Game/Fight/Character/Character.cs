@@ -28,22 +28,26 @@ public class Character : MonoBehaviour
     internal void StartTurn()
     {
         isMyTurn = true;
-        UpdateUI();
+        UpdateAllUI();
     }
 
     internal void EndTurn()
     {
         isMyTurn = false;
-        UpdateUI();
+        ReloadComsumableData();
     }
 
-    internal void UpdateUI()
+    private void ReloadComsumableData()
     {
-        //UIManager.Instance.SetHudValues(currentData.currentHealth, currentData.currentActionPoints, currentData.currentMovementPoints);
+        CurrentData.currentActionPoints = CurrentData.maxActionPoints;
+        CurrentData.currentMovementPoints = CurrentData.maxMovementPoints;
+        UpdateAllUI();
+    }
 
-        // Health Bar
+    internal void UpdateAllUI()
+    {
+        CharacterDataUIManager.Instance.SetHudValues(currentData.currentHealth, currentData.currentActionPoints, currentData.currentMovementPoints);
         characterUI.SetHealthBar(currentData.currentHealth,currentData.maxHealth);
-        // Turn Arrow
         characterUI.SetTurnArrow(isMyTurn);
     }
 
@@ -52,7 +56,7 @@ public class Character : MonoBehaviour
         currentData = new();
         currentData.Copy(data);
         currentData.Init();
-        UpdateUI();
+        UpdateAllUI();
     }
 
     internal void TakeDamage(int damage)
@@ -65,6 +69,6 @@ public class Character : MonoBehaviour
             Debug.Log("Character " + characterName + " is dead");
             gameObject.SetActive(false);
         }
-        UpdateUI();
+        UpdateAllUI();
     }
 }

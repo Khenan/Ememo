@@ -188,6 +188,7 @@ public class PlayerController : MonoBehaviour
                 {
                     character.CurrentData.currentMovementPoints -= _tileDistance;
                     FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+                    character.UpdateAllUI();
                 }
             }
         }
@@ -203,6 +204,7 @@ public class PlayerController : MonoBehaviour
                 {
                     character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
                     FightManager.Instance.CastSpell(currentSpellSelected, _tile);
+                    character.UpdateAllUI();
                 }
                 currentSpellSelected = null;
             }
