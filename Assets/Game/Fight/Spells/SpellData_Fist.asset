@@ -18,4 +18,4 @@ MonoBehaviour:
   level: 1
   rangeMin: 1
   rangeMax: 1
-  damage: 5
+  damage: 3

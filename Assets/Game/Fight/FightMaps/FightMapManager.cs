@@ -16,6 +16,14 @@ public class FightMapManager : Singleton<FightMapManager>
     private FightMap currentMap;
     public FightMap CurrentMap => currentMap;
 
+    private class OldHighlight
+    {
+        public List<FightMapTile> tiles = new();
+        public List<Color> colors = new();
+    }
+
+    private OldHighlight oldHardHighlights = new();
+
     // private void Update()
     // {
     //     tileSelectorVisual.gameObject.SetActive(lastTileSelected != null);
@@ -118,6 +126,37 @@ public class FightMapManager : Singleton<FightMapManager>
     public void ShowHighlightTiles(List<FightMapTile> _tiles, Color _color = default) => ToggleHighlightList(_tiles, true, _color);
     public void HideHighlightTiles(List<FightMapTile> _tiles) => ToggleHighlightList(_tiles, false);
     public void HideHighlightTiles() => ToggleHighlightList(null, false);
+    public void ColorHighlightTiles(List<FightMapTile> _tiles, Color _color)
+    {
+        // On redonne l'ancienne couleur aux anciens highlights
+        if (oldHardHighlights.tiles.Count > 0)
+        {
+            for (int _i = 0; _i < oldHardHighlights.tiles.Count; _i++)
+            {
+                DisplayHighlightTile(oldHardHighlights.tiles[_i], true, oldHardHighlights.colors[_i]);
+            }
+            oldHardHighlights.tiles.Clear();
+            oldHardHighlights.colors.Clear();
+        }
+        foreach (FightMapTile _tile in _tiles)
+        {
+            if (_tile.Highlight != null)
+            {
+                oldHardHighlights.tiles.Add(_tile);
+                oldHardHighlights.colors.Add(_tile.Highlight.color);
+                DisplayHighlightTile(_tile, true, _color);
+            }
+        }
+    }
+    public void HideColorHighlightTiles()
+    {
+        for (int _i = 0; _i < oldHardHighlights.tiles.Count; _i++)
+        {
+            DisplayHighlightTile(oldHardHighlights.tiles[_i], false, oldHardHighlights.colors[_i]);
+        }
+        oldHardHighlights.tiles.Clear();
+        oldHardHighlights.colors.Clear();
+    }
     #endregion
 
     public void StartFight()
@@ -207,5 +246,10 @@ public class FightMapManager : Singleton<FightMapManager>
     internal int DistanceBetweenTiles(FightMapTile currentTile, FightMapTile tile)
     {
         return (int)(Mathf.Abs(currentTile.MatrixPosition.x - tile.MatrixPosition.x) + Mathf.Abs(currentTile.MatrixPosition.y - tile.MatrixPosition.y));
+    }
+
+    internal bool IsTileInRange(FightMapTile _centerTile, FightMapTile _tile, int _rangeMin, int _rangeMax)
+    {
+        return DistanceBetweenTiles(_centerTile, _tile) >= _rangeMin && DistanceBetweenTiles(_centerTile, _tile) <= _rangeMax;
     }
 }

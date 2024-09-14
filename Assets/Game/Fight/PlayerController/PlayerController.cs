@@ -97,20 +97,27 @@ public class PlayerController : MonoBehaviour
                             _highlight = true;
                         }
                     }
-                    // Show Spell Range
+                    // Show Hover Highlight Tile
                     else if (currentSpellSelected == null && _tile.IsWalkable)
                     {
                         HoverHighlightTile(_tile);
-                            _highlight = true;
+                        _highlight = true;
+                    }
+                    else if (currentSpellSelected != null)
+                    {
+                        if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax))
+                            FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.SpellHighlightHover);
+                        else
+                            FightMapManager.I.ColorHighlightTiles(new List<FightMapTile>(), Colors.I.SpellHighlightHover);
                     }
                 }
                 // Show PM Path of Hover Character
                 if (currentSpellSelected == null && _tile.character != null)
                 {
                     HoverHighlightPMOfCharacter(_tile);
-                            _highlight = true;
+                    _highlight = true;
                 }
-                if(!_highlight)
+                if (!_highlight && currentSpellSelected == null)
                 {
                     FightMapManager.I.HideHighlightTiles();
                 }
@@ -230,11 +237,11 @@ public class PlayerController : MonoBehaviour
 
     private void SelectionSpell(InputAction.CallbackContext _context = default, int _spellIndex = -1)
     {
-        if (_spellIndex != -1)
+        if (_spellIndex != -1 && character.Spells[_spellIndex].cost <= character.CurrentData.currentActionPoints)
         {
             currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
+            FightMapManager.I.ShowHighlightTiles(GetTilesFromSpellSelectedRange(), Colors.I.SpellHighlight);
         }
-        FightMapManager.I.ShowHighlightTiles(GetTilesFromSpellSelectedRange(), Colors.I.SpellHighlight);
     }
 
     private FightMapTile GetTileUnderMouseWithRaycast()
@@ -267,6 +274,7 @@ public class PlayerController : MonoBehaviour
                     character.CurrentData.currentMovementPoints -= _tileDistance;
                     FightMapManager.I.SwitchTileCharacter(Character, _tile);
                     character.UpdateAllUI();
+                    FightMapManager.I.HideHighlightTiles();
                 }
             }
         }
@@ -280,12 +288,16 @@ public class PlayerController : MonoBehaviour
             {
                 if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
                 {
-                    character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
-                    FightManager.I.CastSpell(currentSpellSelected, _tile);
-                    character.UpdateAllUI();
+                    if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax))
+                    {
+                        character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
+                        FightManager.I.CastSpell(currentSpellSelected, _tile);
+                        character.UpdateAllUI();
+                    }
                 }
                 currentSpellSelected = null;
                 FightMapManager.I.HideHighlightTiles();
+                FightMapManager.I.HideColorHighlightTiles();
             }
         }
     }

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: FireBall
   description: Une boule de feu
-  cost: 2
+  cost: 3
   level: 1
   rangeMin: 1
   rangeMax: 6
-  damage: 11
+  damage: 1
