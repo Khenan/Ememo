@@ -137,12 +137,12 @@ public class PlayerController : MonoBehaviour
             currentSpellSelected = null;
             Debug.Log("Spell is NULL");
         }
-        FightMapManager.Instance.ShowTileList(GetTilesFromSpellSelectedRange());
+        FightMapManager.I.ShowHighlightTiles(GetTilesFromSpellSelectedRange(), Colors.I.SpellHighlight);
     }
 
     private FightMapTile GetTileUnderMouseWithRaycast(InputAction.CallbackContext _context)
     {
-        FightMapManager.Instance.lastTileSelected = null;
+        FightMapManager.I.lastTileSelected = null;
 
         Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit _hit;
@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour
                     SwitchCharacterPositionOnTile(_tile);
                 }
 
-                FightMapManager.Instance.lastTileSelected = _tile;
+                FightMapManager.I.lastTileSelected = _tile;
                 return _tile;
             }
         }
@@ -183,11 +183,11 @@ public class PlayerController : MonoBehaviour
         {
             if (character.CurrentData.currentMovementPoints > 0)
             {
-                int _tileDistance = FightMapManager.Instance.DistanceBetweenTiles(character.CurrentTile, _tile);
+                int _tileDistance = FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile);
                 if (_tileDistance <= character.CurrentData.currentMovementPoints)
                 {
                     character.CurrentData.currentMovementPoints -= _tileDistance;
-                    FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+                    FightMapManager.I.SwitchTileCharacter(Character, _tile);
                     character.UpdateAllUI();
                 }
             }
@@ -203,7 +203,7 @@ public class PlayerController : MonoBehaviour
                 if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
                 {
                     character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
-                    FightManager.Instance.CastSpell(currentSpellSelected, _tile);
+                    FightManager.I.CastSpell(currentSpellSelected, _tile);
                     character.UpdateAllUI();
                 }
                 currentSpellSelected = null;
@@ -229,11 +229,11 @@ public class PlayerController : MonoBehaviour
             {
                 foreach (KeyValuePair<Direction, Vector2> dir in lineDirection)
                 {
-                    _rangeTiles.Add(FightMapManager.Instance.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * rangeCurrent)));
+                    _rangeTiles.Add(FightMapManager.I.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * rangeCurrent)));
                 }
                 foreach (KeyValuePair<Direction, Vector2> dir in diagonaleDirection)
                 {
-                    _rangeTiles.Add(FightMapManager.Instance.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * (rangeCurrent - 1))));
+                    _rangeTiles.Add(FightMapManager.I.GetTileByMatrixPosition(_centerTile.MatrixPosition + (dir.Value * (rangeCurrent - 1))));
                 }
             }
             return _rangeTiles;
@@ -244,7 +244,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
         {
-            FightMapManager.Instance.SwitchTileCharacter(Character, _tile);
+            FightMapManager.I.SwitchTileCharacter(Character, _tile);
         }
     }
 
