@@ -3,12 +3,10 @@ using UnityEngine.UI;
 
 public class Bar : MonoBehaviour
 {
-    [SerializeField] public int maxValue;
-    [SerializeField] public int value;
     [SerializeField] private Image barCursor;
 
-    public void UpdateBar()
+    public void UpdateBar(float _current, float _max)
     {
-        barCursor.fillAmount = (float) value/ (float) maxValue;
+        barCursor.fillAmount = _current / _max;
     }
 }

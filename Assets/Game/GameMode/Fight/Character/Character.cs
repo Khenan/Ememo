@@ -13,11 +13,14 @@ public class Character : MonoBehaviour
     private CharacterData currentData;
     public CharacterData CurrentData => currentData;
 
-    
+    private bool isDead = false;
+    public bool IsDead => isDead;
 
     public FightMapTile CurrentTile { get; set; }
 
     public int CurrentActionPoints => data.currentActionPoints;
+
+    public int teamId = 0;
 
     public bool isMyTurn = false;
     public bool isHumanController = false;
@@ -73,14 +76,19 @@ public class Character : MonoBehaviour
         if (currentData.currentHealth <= 0)
         {
             Debug.Log("Character " + characterName + " is dead");
-            gameObject.SetActive(false);
+            Dead();
         }
         UpdateAllUI();
     }
 
-    // SpellBar
-    
+    private void Dead()
+    {
+        isDead = true;
+        characterUI.Dead();
+        FightManager.I.OnCharacterDead();
+    }
 
+    // SpellBar
     public void InitSpellBar(PlayerController _playerController)
     {
         int _currentPA = CurrentData.currentActionPoints;

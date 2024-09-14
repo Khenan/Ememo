@@ -5,18 +5,12 @@ using UnityEngine;
 
 public class FightManager : Singleton<FightManager>
 {
-    // Met la barre d'initiative des personnages pour le visuel
-
-    // Si tout le monde est prêt (bouton), on lance le combat
-    // Le combat commence par le personnage ayant l'initiative la plus haute
-
-    // On sait qui est le personnage qui joue actuellement
-
-    // On fini le combat si il ne reste plus que une équipe en vie
-
     // Timer
-    private float timerMax = 0.5f;
+    private float timerMax = 0.25f;
     private float currentTimer = 0f;
+
+    // Teams
+    private int teamCount = 0;
 
     // Characters
     private List<Character> characters = new();
@@ -26,6 +20,7 @@ public class FightManager : Singleton<FightManager>
     private List<PlayerController> players = new();
 
     private bool onFight = false;
+    private bool fightIsOver = false;
 
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
@@ -61,31 +56,11 @@ public class FightManager : Singleton<FightManager>
         }
     }
 
-    public void InitFight(FightData _fightData)
-    {
-        characters.Clear();
-        currentMap = FightMapManager.I.InitMap(_fightData.AreaId);
-        InitAllCharactersAndPlayers();
-        InitPlayerActions();
-        InitAllCharacterDatas();
-        InitInitiativeList();
-        SetPlayersOnFight();
-        UpdateUILocalPlayer();
-    }
-
     private void SetPlayersOnFight()
     {
         foreach (PlayerController _player in players)
         {
             _player.onFight = true;
-        }
-    }
-
-    private void InitPlayerActions()
-    {
-        foreach (PlayerController _player in players)
-        {
-            _player.OnPlayerReady += CheckAllPlayersReady;
         }
     }
 
@@ -107,6 +82,43 @@ public class FightManager : Singleton<FightManager>
         if (FightMapManager.I != null) FightMapManager.I.StartFight();
     }
 
+    public void EndTurn(Character _character)
+    {
+        if(fightIsOver) return;
+        _character.EndTurn();
+
+        int _currentCharacterIndex = characters.IndexOf(_character);
+        int _nextCharacterIndex = _currentCharacterIndex + 1;
+        if (_nextCharacterIndex >= characters.Count)
+        {
+            _nextCharacterIndex = 0;
+        }
+
+        currentCharacter = characters[_nextCharacterIndex];
+        if (!currentCharacter.IsDead)
+        {
+            currentCharacter.StartTurn();
+            UpdateInitiativeUI();
+        }
+        else
+        {
+            EndTurn(currentCharacter);
+        }
+    }
+
+    internal void OnCharacterDead()
+    {
+        // Check le nombre de team en vie
+        int _teamsAlive = characters.Where(character => !character.IsDead).Select(character => character.teamId).Distinct().Count();
+        Debug.Log("Teams alive: " + _teamsAlive);
+        if (_teamsAlive == 1)
+        {
+            fightIsOver = true;
+            Debug.Log("Fight is over");
+            Debug.Log("Team " + characters.First(character => !character.IsDead).teamId + " wins");
+        }
+    }
+
     private void LockAllPlayersOnFight()
     {
         foreach (PlayerController _player in players)
@@ -115,11 +127,33 @@ public class FightManager : Singleton<FightManager>
         }
     }
 
+    #region Initialisation Methods
+
+    public void InitFight(FightData _fightData)
+    {
+        characters.Clear();
+        currentMap = FightMapManager.I.InitMap(_fightData.AreaId);
+        InitAllCharactersAndPlayers();
+        InitPlayerActions();
+        InitAllCharacterDatas();
+        InitInitiativeList();
+        SetPlayersOnFight();
+        UpdateUILocalPlayer();
+    }
+
     private void InitAllCharacterDatas()
     {
         foreach (Character _character in characters)
         {
             _character.InitData();
+        }
+    }
+
+    private void InitPlayerActions()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.OnPlayerReady += CheckAllPlayersReady;
         }
     }
 
@@ -143,6 +177,7 @@ public class FightManager : Singleton<FightManager>
 
         SetAllCharacters(_tiles);
         SetAllPlayers(_tiles);
+        teamCount = characters.Max(_character => _character.teamId);
     }
 
     private void SetAllCharacters(List<FightMapTile> _tiles)
@@ -168,6 +203,7 @@ public class FightManager : Singleton<FightManager>
         List<Character> _teamCharacters = new();
         foreach (FightCharacter _fCharacter in _fCharacters)
         {
+            _fCharacter.character.teamId = _fCharacter.teamId;
             _teamCharacters.Add(_fCharacter.character);
         }
         SetAllCharactersOfTeam(_teamCharacters, _tiles);
@@ -230,32 +266,11 @@ public class FightManager : Singleton<FightManager>
         SetCharacterOnTile(_character, _tiles[_tileIndex], currentMap);
         return _character;
     }
+    #endregion
 
     private void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
     {
         FightMapManager.I.SetCharacterOnTile(_character, _fightMapTile, _map);
-    }
-
-    public void EndTurn(Character _character)
-    {
-        _character.EndTurn();
-
-        int _currentCharacterIndex = characters.IndexOf(_character);
-        int _nextCharacterIndex = _currentCharacterIndex + 1;
-        if (_nextCharacterIndex >= characters.Count)
-        {
-            _nextCharacterIndex = 0;
-        }
-
-        currentCharacter = characters[_nextCharacterIndex];
-
-        currentCharacter.StartTurn();
-        UpdateInitiativeUI();
-    }
-
-    private void UpdateInitiativeUI()
-    {
-        if (InitiativeUIManager.I != null) InitiativeUIManager.I.UpdateTurn(characters.IndexOf(currentCharacter));
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
@@ -270,8 +285,17 @@ public class FightManager : Singleton<FightManager>
         }
     }
 
+
+    #region UI
+
     public void UpdateUILocalPlayer()
     {
         players.Find(player => player.IsLocalPlayer).UpdateHUDUI();
     }
+    private void UpdateInitiativeUI()
+    {
+        if (InitiativeUIManager.I != null) InitiativeUIManager.I.UpdateTurn(characters.IndexOf(currentCharacter));
+    }
+
+    #endregion
 }
