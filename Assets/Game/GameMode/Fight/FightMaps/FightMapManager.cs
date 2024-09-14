@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class FightMapManager : Singleton<FightMapManager>
 {
@@ -247,8 +249,78 @@ public class FightMapManager : Singleton<FightMapManager>
         return (int)(Mathf.Abs(currentTile.MatrixPosition.x - tile.MatrixPosition.x) + Mathf.Abs(currentTile.MatrixPosition.y - tile.MatrixPosition.y));
     }
 
-    internal bool IsTileInRange(FightMapTile _centerTile, FightMapTile _tile, int _rangeMin, int _rangeMax)
+    internal bool IsTileInRange(FightMapTile _centerTile, FightMapTile _targetTile, int _rangeMin, int _rangeMax, bool _sight = false)
     {
-        return DistanceBetweenTiles(_centerTile, _tile) >= _rangeMin && DistanceBetweenTiles(_centerTile, _tile) <= _rangeMax;
+        bool _valueToReturn = false;
+        bool _isInRangeMin = DistanceBetweenTiles(_centerTile, _targetTile) >= _rangeMin;
+        bool _isInRangeMax = DistanceBetweenTiles(_centerTile, _targetTile) <= _rangeMax;
+        bool _isInRange = _isInRangeMin && _isInRangeMax;
+        if (_isInRange && LineOfSight(_centerTile, _targetTile))
+        {
+            _valueToReturn = true;
+        }
+        return _valueToReturn;
+    }
+    public bool LineOfSight(FightMapTile _centerTile, FightMapTile _targetTile)
+    {
+        if (_centerTile == null || _targetTile == null)
+        {
+            throw new ArgumentNullException("Les tuiles ne doivent pas être nulles è_é.");
+        }
+
+        Vector2 centerPos = _centerTile.MatrixPosition;
+        Vector2 targetPos = _targetTile.MatrixPosition;
+
+        int dx = (int)Mathf.Abs(targetPos.x - centerPos.x);
+        int dy = (int)Mathf.Abs(targetPos.y - centerPos.y);
+
+        int sx = centerPos.x < targetPos.x ? 1 : -1;
+        int sy = centerPos.y < targetPos.y ? 1 : -1;
+
+        int currentX = (int)centerPos.x;
+        int currentY = (int)centerPos.y;
+
+        int n = 1 + dx + dy;
+        int error = dx - dy;
+        dx *= 2;
+        dy *= 2;
+
+        for (; n > 0; --n)
+        {
+            if (!(currentX == (int)centerPos.x && currentY == (int)centerPos.y))
+            {
+                FightMapTile currentTile = GetTileByMatrixPosition(new Vector2(currentX, currentY));
+                if (currentTile != null && currentTile.BlockLineOfSight)
+                {
+                    if (currentTile == _targetTile && currentTile.character != null)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+            if (Mathf.Abs(dx) == Mathf.Abs(dy))
+            {
+                currentX += sx;
+                currentY += sy;
+                --n;
+            }
+            else
+            {
+                if (error > 0)
+                {
+                    currentX += sx;
+                    error -= dy;
+                }
+                else
+                {
+                    currentY += sy;
+                    error += dx;
+                }
+            }
+        }
+
+        return true;
     }
 }

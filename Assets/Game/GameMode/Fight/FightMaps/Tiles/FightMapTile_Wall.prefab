@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FightMapTile_Wall
       objectReference: {fileID: 0}
+    - target: {fileID: 2934233592071123807, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: blockLineOfSight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7010855072813120688, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: m_LocalScale.y
       value: 1
