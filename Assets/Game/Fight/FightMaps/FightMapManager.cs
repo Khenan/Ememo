@@ -5,25 +5,25 @@ public class FightMapManager : Singleton<FightMapManager>
 {
     // Liste des maps possibles
     [SerializeField] private List<FightMap> maps;
-    [SerializeField] private Color floorColor1, floorColor2, teamColor0, teamColor1;
     [SerializeField] private Camera cam;
     [SerializeField] private FightMapTile floor, wall, hole;
 
     public FightMapTile lastTileSelected;
+    public FightMapTile lastTileHovered;
     [SerializeField] private Transform tileSelectorVisual;
     private List<FightMapTile> lastTilesHighlighted = new();
 
     private FightMap currentMap;
     public FightMap CurrentMap => currentMap;
 
-    private void Update()
-    {
-        tileSelectorVisual.gameObject.SetActive(lastTileSelected != null);
-        if (lastTileSelected != null && tileSelectorVisual != null)
-        {
-            tileSelectorVisual.position = lastTileSelected.transform.position;
-        }
-    }
+    // private void Update()
+    // {
+    //     tileSelectorVisual.gameObject.SetActive(lastTileSelected != null);
+    //     if (lastTileSelected != null && tileSelectorVisual != null)
+    //     {
+    //         tileSelectorVisual.position = lastTileSelected.transform.position;
+    //     }
+    // }
 
     private void SetCameraPosition()
     {
@@ -64,26 +64,25 @@ public class FightMapManager : Singleton<FightMapManager>
         List<FightMapTile> _floorTiles = _map.GetWalkableTiles();
         foreach (FightMapTile _floorTile in _floorTiles)
         {
-            bool _odd = (_floorTile.MatrixPosition.x + _floorTile.MatrixPosition.y) % 2 == 0;
-            _floorTile.VisualTop.color = _odd ? floorColor1 : floorColor2;
+            _floorTile.ColorBaseTopByIndex();
         }
     }
 
     private void ShowStartTiles(FightMap _map)
     {
         List<FightMapTile> _startTiles = _map.GetStartTiles();
-        Color _color = Colors.I.DefaultHightlight;
+        Color _color;
         foreach (FightMapTile _startTile in _startTiles)
         {
             switch (_startTile.TeamId)
             {
                 case 0:
                     _color = Colors.I.TeamColors.Count > 0 ? Colors.I.TeamColors[0] : Colors.I.DefaultHightlight;
-                    DisplayHighlightTile(_startTile, true, _color);
+                    _startTile.ColorTop(_color);
                     break;
                 case 1:
                     _color = Colors.I.TeamColors.Count > 1 ? Colors.I.TeamColors[1] : Colors.I.DefaultHightlight;
-                    DisplayHighlightTile(_startTile, true, _color);
+                    _startTile.ColorTop(_color);
                     break;
                 default:
                     Debug.LogError("Undefined team");
@@ -123,7 +122,7 @@ public class FightMapManager : Singleton<FightMapManager>
 
     public void StartFight()
     {
-        HideHighlightTiles(currentMap.GetStartTiles());
+        currentMap.GetStartTiles().ForEach(tile => tile.HideStartTile());
     }
 
     internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
@@ -171,7 +170,7 @@ public class FightMapManager : Singleton<FightMapManager>
     internal FightMapTile GetTileByMatrixPosition(Vector2 _matrixPosition)
     {
         FightMapTile _tile = null;
-        if(_matrixPosition.x >= 0 && _matrixPosition.x < currentMap.Size.x && _matrixPosition.y >= 0 && _matrixPosition.y < currentMap.Size.y)
+        if (_matrixPosition.x >= 0 && _matrixPosition.x < currentMap.Size.x && _matrixPosition.y >= 0 && _matrixPosition.y < currentMap.Size.y)
         {
             int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x;
             if (indexPos >= 0 && indexPos < currentMap.GetMapTileCount())
@@ -180,7 +179,7 @@ public class FightMapManager : Singleton<FightMapManager>
         return _tile;
     }
 
-    internal List<FightMapTile> GetTilesByRange(FightMapTile _centerTile, int _rangeMin, int _rangeMax)
+    internal List<FightMapTile> GetTilesByRange(FightMapTile _centerTile, int _rangeMin, int _rangeMax, bool _canWalk = false)
     {
         List<FightMapTile> _rangeTiles = new();
         int _startX = (int)_centerTile.MatrixPosition.x;
@@ -195,7 +194,7 @@ public class FightMapManager : Singleton<FightMapManager>
                 if (_sum >= _rangeMin && _sum <= _rangeMax)
                 {
                     FightMapTile _tile = GetTileByMatrixPosition(new Vector2(_x, _y));
-                    if (_tile != null)
+                    if (_tile != null && _canWalk ? !_tile.IsOccupied : true)
                     {
                         _rangeTiles.Add(_tile);
                     }
