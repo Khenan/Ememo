@@ -118,6 +118,7 @@ public class FightMapManager : Singleton<FightMapManager>
     }
     public void ShowHighlightTiles(List<FightMapTile> _tiles, Color _color = default) => ToggleHighlightList(_tiles, true, _color);
     public void HideHighlightTiles(List<FightMapTile> _tiles) => ToggleHighlightList(_tiles, false);
+    public void HideHighlightTiles() => ToggleHighlightList(null, false);
     #endregion
 
     public void StartFight()
@@ -170,19 +171,42 @@ public class FightMapManager : Singleton<FightMapManager>
     internal FightMapTile GetTileByMatrixPosition(Vector2 _matrixPosition)
     {
         FightMapTile _tile = null;
-        int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x;
-        if (indexPos >= 0 && indexPos < currentMap.GetMapTileCount())
-            _tile = currentMap.GetTiles()[indexPos];
+        if(_matrixPosition.x >= 0 && _matrixPosition.x < currentMap.Size.x && _matrixPosition.y >= 0 && _matrixPosition.y < currentMap.Size.y)
+        {
+            int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x;
+            if (indexPos >= 0 && indexPos < currentMap.GetMapTileCount())
+                _tile = currentMap.GetTiles()[indexPos];
+        }
         return _tile;
+    }
+
+    internal List<FightMapTile> GetTilesByRange(FightMapTile _centerTile, int _rangeMin, int _rangeMax)
+    {
+        List<FightMapTile> _rangeTiles = new();
+        int _startX = (int)_centerTile.MatrixPosition.x;
+        int _startY = (int)_centerTile.MatrixPosition.y;
+        _rangeTiles.Add(_centerTile);
+        for (int _x = _startX - _rangeMax; _x <= _startX + _rangeMax; _x++)
+        {
+            for (int _y = _startY - _rangeMax; _y <= _startY + _rangeMax; _y++)
+            {
+                int _sum = Mathf.Abs(_x - _startX) + Mathf.Abs(_y - _startY);
+
+                if (_sum >= _rangeMin && _sum <= _rangeMax)
+                {
+                    FightMapTile _tile = GetTileByMatrixPosition(new Vector2(_x, _y));
+                    if (_tile != null)
+                    {
+                        _rangeTiles.Add(_tile);
+                    }
+                }
+            }
+        }
+        return _rangeTiles;
     }
 
     internal int DistanceBetweenTiles(FightMapTile currentTile, FightMapTile tile)
     {
         return (int)(Mathf.Abs(currentTile.MatrixPosition.x - tile.MatrixPosition.x) + Mathf.Abs(currentTile.MatrixPosition.y - tile.MatrixPosition.y));
-    }
-
-    internal void ShowHighlightTiles(List<FightMapTile> fightMapTiles, object spellHighlight)
-    {
-        throw new System.NotImplementedException();
     }
 }
