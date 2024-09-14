@@ -16,7 +16,7 @@ public class Singleton<T> : MonoBehaviour where T: Singleton<T>
         }
     }
 
-    private void Start() {
+    private void Awake() {
         if(instance != null) Destroy(gameObject);
     }
 }
