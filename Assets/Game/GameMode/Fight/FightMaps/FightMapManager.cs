@@ -236,11 +236,30 @@ public class FightMapManager : Singleton<FightMapManager>
         return _rangeTiles;
     }
 
+    internal List<Vector2> GetMatrixPositionsByRange(Vector2 _centerTile, int _rangeMin, int _rangeMax)
+    {
+        List<Vector2> _rangeTiles = new();
+        int _startX = (int)_centerTile.x;
+        int _startY = (int)_centerTile.y;
+        for (int _x = _startX - _rangeMax; _x <= _startX + _rangeMax; _x++)
+        {
+            for (int _y = _startY - _rangeMax; _y <= _startY + _rangeMax; _y++)
+            {
+                int _sum = Mathf.Abs(_x - _startX) + Mathf.Abs(_y - _startY);
+
+                if (_sum >= _rangeMin && _sum <= _rangeMax)
+                {
+                    _rangeTiles.Add(new Vector2(_x, _y));
+                }
+            }
+        }
+        return _rangeTiles;
+    }
+
     internal int DistanceBetweenTiles(FightMapTile currentTile, FightMapTile tile)
     {
         return (int)(Mathf.Abs(currentTile.MatrixPosition.x - tile.MatrixPosition.x) + Mathf.Abs(currentTile.MatrixPosition.y - tile.MatrixPosition.y));
     }
-
     internal bool IsTileInRange(FightMapTile _centerTile, FightMapTile _targetTile, int _rangeMin, int _rangeMax, bool _sight = false)
     {
         bool _valueToReturn = false;

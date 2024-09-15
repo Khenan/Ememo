@@ -1,16 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+public class MapTile : MonoBehaviour
+{
+    public Map map;
+    public Vector2 MatrixPosition { get; set; }
+    public virtual bool IsWalkable { get; set; }
+    public virtual bool IsOccupied { get; set; }
+
+    public virtual void Start()
+    {
+        SetMap(GetComponentInParent<Map>());
+    }
+    public void SetMap(Map _map)
+    {
+        map = _map;
+    }
+}
 
 public class Node
 {
-    public FightMapTile tile;
+    public MapTile tile;
     public int fCost;
     public int gCost;
     public int hCost;
     public Node parentNode;
 
-    public Node(FightMapTile _tile, int _gCost, int _hCost, Node _parentNode = null)
+    public Node(MapTile _tile, int _gCost, int _hCost, Node _parentNode = null)
     {
         tile = _tile;
         gCost = _gCost;
@@ -20,12 +38,103 @@ public class Node
     }
 }
 
+public class Map : MonoBehaviour
+{
+    public Vector2 matrixPosition = Vector2.zero;
+    public List<MapTile> mapTiles = new();
+    public List<MapTile> GetTileOfYPosition(int _y)
+    {
+        return mapTiles.FindAll(_t => _t.MatrixPosition.y == _y).OrderBy(_t => _t.MatrixPosition.x).ToList();
+    }
+    public void SetTileMatrixPositions()
+    {
+        for(int _i = 0; _i < mapTiles.Count; _i++)
+        {
+            mapTiles[_i].MatrixPosition = new Vector2(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
+        }
+    }
+}
+
+public static class MapSizeData
+{
+    public static int SIZE = 14;
+}
+
+public static class ConcatenatorMapList
+{
+    public static List<MapTile> ConcatenateMaps(List<Map> _mapList, MapTile _currentTile, MapTile _targetTile)
+    {
+        List<MapTile> _concatenatedMap = new();
+        List<Map> _orderedMapList = OrderByMatrixPosition(_mapList);
+        ResetMatrixPositionOfAllTiles(_orderedMapList);
+        int _maxMapY = GetMaxMapY(_orderedMapList);
+        int _minMapY = GetMinMapY(_orderedMapList);
+        int _diffY = (int)GetMapDiff(_currentTile, _targetTile).y;
+        int _diffX = (int)GetMapDiff(_currentTile, _targetTile).x;
+
+        // We take the range of tile lists from each map and add them to the concatenated list
+        for (int _mapY = _minMapY; _mapY <= _maxMapY; _mapY++)
+        {
+            for (int _y = 0; _y < MapSizeData.SIZE * (_diffY + 1); _y++)
+            {
+                for (int _index = 0; _index < _orderedMapList.Count; _index++)
+                {
+                    if ((int)_orderedMapList[_index].matrixPosition.y == _mapY)
+                    {
+                        List<MapTile> _tiles = _orderedMapList[_index].GetTileOfYPosition(_y);
+                        _concatenatedMap.AddRange(_tiles);
+                    }
+                }
+            }
+        }
+
+        // Set the matrix position of each tile in the concatenated map
+        for (int _i = 0; _i < _concatenatedMap.Count; _i++)
+        {
+            _concatenatedMap[_i].MatrixPosition = new Vector2(_i % (MapSizeData.SIZE * (_diffX + 1)), _i / (MapSizeData.SIZE * (_diffX + 1)));
+        }
+
+        return _concatenatedMap;
+    }
+
+    private static void ResetMatrixPositionOfAllTiles(List<Map> orderedMapList)
+    {
+        foreach (Map _map in orderedMapList)
+        {
+            _map.SetTileMatrixPositions();
+        }
+    }
+
+    private static int GetMinMapY(List<Map> orderedMapList)
+    {
+        return (int)orderedMapList.Min(_m => _m.matrixPosition.y);
+    }
+
+    private static int GetMaxMapY(List<Map> orderedMapList)
+    {
+        return (int)orderedMapList.Max(_m => _m.matrixPosition.y);
+    }
+
+    private static List<Map> OrderByMatrixPosition(List<Map> _mapList)
+    {
+        return _mapList.OrderBy(_m => _m.matrixPosition.y).ThenBy(_m => _m.matrixPosition.x).ToList();
+    }
+
+    private static Vector2 GetMapDiff(MapTile _currentTile, MapTile _targetTile)
+    {
+        Vector2 _mapDiff = new Vector2();
+        _mapDiff.x = Mathf.Abs((int)_targetTile.map.matrixPosition.x - (int)_currentTile.map.matrixPosition.x);
+        _mapDiff.y = Mathf.Abs((int)_targetTile.map.matrixPosition.y - (int)_currentTile.map.matrixPosition.y);
+        return _mapDiff;
+    }
+}
+
 public static class AStar
 {
     private static List<Node> openList = new();
-    private static HashSet<FightMapTile> closedList = new();
+    private static HashSet<MapTile> closedList = new();
 
-    public static List<FightMapTile> FindPath(FightMapTile _startTile, FightMapTile _goalTile)
+    public static List<MapTile> FindPath(List<MapTile> _tiles, MapTile _startTile, MapTile _goalTile)
     {
         openList.Clear();
         closedList.Clear();
@@ -47,7 +156,7 @@ public static class AStar
             closedList.Add(_currentNode.tile);
 
             // Explorer les voisins de la tuile actuelle
-            foreach (FightMapTile _neighborTile in GetNeighborTiles(_currentNode.tile))
+            foreach (MapTile _neighborTile in GetNeighborTiles(_currentNode.tile, _tiles))
             {
                 if (closedList.Contains(_neighborTile)) continue;
 
@@ -72,15 +181,15 @@ public static class AStar
 
         return null; // Aucun chemin trouvé
     }
-    
-    private static int CalculateHeuristic(FightMapTile _tileA, FightMapTile _tileB)
+
+    private static int CalculateHeuristic(MapTile _tileA, MapTile _tileB)
     {
         int _dx = Math.Abs((int)_tileA.MatrixPosition.x - (int)_tileB.MatrixPosition.x);
         int _dy = Math.Abs((int)_tileA.MatrixPosition.y - (int)_tileB.MatrixPosition.y);
         return _dx + _dy;
     }
 
-    private static int CalculateDistanceCost(FightMapTile _fromTile, FightMapTile _toTile)
+    private static int CalculateDistanceCost(MapTile _fromTile, MapTile _toTile)
     {
         return 1; // C'est 1 car les tuiles sont adjacentes et qu'on ne fait pas de déplacement en diagonale
     }
@@ -100,36 +209,41 @@ public static class AStar
     }
 
     // Récupère les voisins adjacents (haut, bas, gauche, droite)
-    private static List<FightMapTile> GetNeighborTiles(FightMapTile _currentTile)
+    private static List<MapTile> GetNeighborTiles(MapTile _currentTile, List<MapTile> _tiles)
     {
-        List<FightMapTile> _neighbors = new();
+        List<MapTile> _neighbors = new();
 
-        AddNeighborIfValid(_currentTile, 1, 0, _neighbors);   // Droite
-        AddNeighborIfValid(_currentTile, -1, 0, _neighbors);  // Gauche
-        AddNeighborIfValid(_currentTile, 0, 1, _neighbors);   // Haut
-        AddNeighborIfValid(_currentTile, 0, -1, _neighbors);  // Bas
+        AddNeighborIfValid(_currentTile, 1, 0, _neighbors, _tiles);   // Droite
+        AddNeighborIfValid(_currentTile, -1, 0, _neighbors, _tiles);  // Gauche
+        AddNeighborIfValid(_currentTile, 0, 1, _neighbors, _tiles);   // Haut
+        AddNeighborIfValid(_currentTile, 0, -1, _neighbors, _tiles);  // Bas
 
         return _neighbors;
     }
 
     // Ajoute une tuile voisine si elle est valide
-    private static void AddNeighborIfValid(FightMapTile _currentTile, int _offsetX, int _offsetY, List<FightMapTile> _neighbors)
+    private static void AddNeighborIfValid(MapTile _currentTile, int _offsetX, int _offsetY, List<MapTile> _neighbors, List<MapTile> _tiles)
     {
         Vector2 _neighborPos = new Vector2(
             _currentTile.MatrixPosition.x + _offsetX,
             _currentTile.MatrixPosition.y + _offsetY
         );
-        FightMapTile _neighborTile = FightMapManager.I.GetTileByMatrixPosition(_neighborPos);
+        MapTile _neighborTile = GetTileByMatrixPosition(_tiles, _neighborPos);
         if (_neighborTile != null && _neighborTile.IsWalkable && !_neighborTile.IsOccupied)
         {
             _neighbors.Add(_neighborTile);
         }
     }
 
-    // Retrace le chemin en partant du Node final jusqu'au Node de départ
-    private static List<FightMapTile> RetracePath(Node _endNode)
+    private static MapTile GetTileByMatrixPosition(List<MapTile> _tiles, Vector2 _mPos)
     {
-        List<FightMapTile> _path = new();
+        return _tiles.Find(_t => _t.MatrixPosition == _mPos);
+    }
+
+    // Retrace le chemin en partant du Node final jusqu'au Node de départ
+    private static List<MapTile> RetracePath(Node _endNode)
+    {
+        List<MapTile> _path = new();
         Node _currentNode = _endNode;
 
         // Remonter jusqu'au Node de départ en utilisant les parents

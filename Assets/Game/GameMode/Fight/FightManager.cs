@@ -27,6 +27,7 @@ public class FightManager : Singleton<FightManager>
 
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
+    public List<FightMap> currentMaps = new();
 
     public void EnterFight(FightData _fightData)
     {
