@@ -109,6 +109,7 @@ public class FightManager : Singleton<FightManager>
     internal void OnCharacterDead(Character _character)
     {
         if (InitiativeUIManager.I != null) InitiativeUIManager.I.CharacterDead(characters.IndexOf(_character));
+        _character.CurrentTile.character = null;
         CheckEndFight();
     }
 
@@ -129,6 +130,23 @@ public class FightManager : Singleton<FightManager>
         foreach (PlayerController _player in players)
         {
             _player.StartFight();
+        }
+    }
+
+    private void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
+    {
+        FightMapManager.I.SetCharacterOnTile(_character, _fightMapTile, _map);
+    }
+
+    internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
+    {
+        Debug.Log("Cast spell " + _currentSpellSelected.name + " on tile " + _tile.Position);
+        // On check si il y a un character sur la tile
+        if (_tile.character != null)
+        {
+            Debug.Log("Target: " + _tile.character.CharacterName);
+            _tile.character.TakeDamage(_currentSpellSelected.damage);
+            UpdateUILocalPlayer();
         }
     }
 
@@ -272,24 +290,6 @@ public class FightManager : Singleton<FightManager>
         return _character;
     }
     #endregion
-
-    private void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
-    {
-        FightMapManager.I.SetCharacterOnTile(_character, _fightMapTile, _map);
-    }
-
-    internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
-    {
-        Debug.Log("Cast spell " + _currentSpellSelected.name + " on tile " + _tile.Position);
-        // On check si il y a un character sur la tile
-        if (_tile.character != null)
-        {
-            Debug.Log("Target: " + _tile.character.CharacterName);
-            _tile.character.TakeDamage(_currentSpellSelected.damage);
-            UpdateUILocalPlayer();
-        }
-    }
-
 
     #region UI
 

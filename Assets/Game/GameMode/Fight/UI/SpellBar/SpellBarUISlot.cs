@@ -7,6 +7,7 @@ internal class SpellBarUISlot : MonoBehaviour, IPointerClickHandler
 {
     private int cost;
     private int index;
+    private bool isAble = false;
     private TextMeshProUGUI textMeshProUGUI;
     [SerializeField] private Vector2 size;
     [SerializeField] private Image disableImage;
@@ -26,12 +27,13 @@ internal class SpellBarUISlot : MonoBehaviour, IPointerClickHandler
     }
     internal void UpdateAble(int _currentPAOfCharacter)
     {
-        disableImage.gameObject.SetActive(_currentPAOfCharacter < cost);
+        isAble = _currentPAOfCharacter >= cost;
+        disableImage.gameObject.SetActive(!isAble);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (disableImage.gameObject.activeSelf) return;
+        if (!isAble) return;
         playerController.SelectionSpell(index);
     }
 }

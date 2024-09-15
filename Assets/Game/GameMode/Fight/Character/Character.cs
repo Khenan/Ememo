@@ -25,14 +25,13 @@ public class Character : MonoBehaviour
     public bool isMyTurn = false;
     public bool isHumanController = false;
 
+    // Actions
+    public Action OnStartTurn;
+    public Action OnEndTurn;
+    public Action OnTakeDamage;
+
     private void Awake() {
         characterUI = GetComponent<CharacterUI>();
-    }
-
-    internal void StartTurn()
-    {
-        isMyTurn = true;
-        UpdateAllUI();
     }
 
     internal void StartFight()
@@ -40,10 +39,18 @@ public class Character : MonoBehaviour
         UpdateAllUI();
     }
 
+    internal void StartTurn()
+    {
+        isMyTurn = true;
+        UpdateAllUI();
+        OnStartTurn?.Invoke();
+    }
+
     internal void EndTurn()
     {
         isMyTurn = false;
         ReloadComsumableData();
+        OnEndTurn?.Invoke();
     }
 
     private void ReloadComsumableData()
@@ -78,6 +85,7 @@ public class Character : MonoBehaviour
             Debug.Log("Character " + characterName + " is dead");
             Dead();
         }
+        OnTakeDamage?.Invoke();
         UpdateAllUI();
     }
 

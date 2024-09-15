@@ -25,21 +25,6 @@ public class PlayerController : MonoBehaviour
     // Spell 
     private SpellData currentSpellSelected;
 
-    private Dictionary<Direction, Vector2> lineDirection = new()
-    {
-        {Direction.Up, new(0, -1)},
-        {Direction.Down, new(0, 1)},
-        {Direction.Left, new(-1, 0)},
-        {Direction.Right, new(1, 0)}
-    };
-    private Dictionary<Direction, Vector2> diagonaleDirection = new()
-    {
-        {Direction.Up, new(-1, -1)},
-        {Direction.Down, new(1, 1)},
-        {Direction.Left, new(-1, 1)},
-        {Direction.Right, new(1, -1)}
-    };
-
     #region Inputs
     private PlayerActionController actionAsset;
 
@@ -52,6 +37,7 @@ public class PlayerController : MonoBehaviour
     private InputAction shortCut_5;
     private InputAction ctrlBar;
     private InputAction shiftBar;
+    private InputAction spaceBar;
 
     public Action<InputAction.CallbackContext> OnLeftClick;
     public Action<InputAction.CallbackContext> OnRightClick;
@@ -62,6 +48,7 @@ public class PlayerController : MonoBehaviour
     public Action<InputAction.CallbackContext> OnShortcut_05;
     public Action<InputAction.CallbackContext> OnCtrlBar;
     public Action<InputAction.CallbackContext> OnShiftBar;
+    public Action<InputAction.CallbackContext> OnSpaceBar;
     #endregion
 
     private void Awake()
@@ -171,6 +158,7 @@ public class PlayerController : MonoBehaviour
         shortCut_5 = actionAsset.asset.FindAction("ShortCut_5");
         ctrlBar = actionAsset.asset.FindAction("CtrlBar");
         shiftBar = actionAsset.asset.FindAction("ShiftBar");
+        spaceBar = actionAsset.asset.FindAction("SpaceBar");
     }
 
     private void AssignInputActions()
@@ -186,6 +174,7 @@ public class PlayerController : MonoBehaviour
         shortCut_5.performed += _context => InputActivation(OnShortcut_05, _context);
         ctrlBar.performed += _context => InputActivation(OnCtrlBar, _context);
         shiftBar.performed += _context => InputActivation(OnShiftBar, _context);
+        spaceBar.performed += _context => InputActivation(OnSpaceBar, _context);
     }
 
     private void AssignInputActivations()
@@ -351,27 +340,35 @@ public class PlayerController : MonoBehaviour
         isReadyToFight = true;
         OnPlayerReady?.Invoke();
     }
-    internal void EndFight()
-    {
-        isReadyToFight = false;
-    }
 
     internal void StartFight()
     {
         lockOnFight = true;
         character.InitSpellBar(this);
+        InitCharacterActions();
+    }
+    internal void EndFight()
+    {
+        isReadyToFight = false;
+    }
+    internal void StartTurn()
+    {
+        
+    }
+    internal void EndTurn()
+    {
+        UpdateHUDUI();
+    }
+
+    private void InitCharacterActions()
+    {
+        character.OnTakeDamage += UpdateHUDUI;
+        character.OnStartTurn += StartTurn;
+        character.OnEndTurn += EndTurn;
     }
 
     internal void UpdateHUDUI()
     {
         CharacterDataUIManager.I.SetHudValues(character.CurrentData.currentHealth, character.CurrentData.currentActionPoints, character.CurrentData.currentMovementPoints);
-    }
-
-    enum Direction
-    {
-        Up,
-        Down,
-        Left,
-        Right
     }
 }
