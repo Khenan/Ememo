@@ -184,6 +184,19 @@ public class PlayerController : MonoBehaviour
         OnShortcut_01 += context => ActionSelectionSpell(context, 0);
         OnShortcut_02 += context => ActionSelectionSpell(context, 1);
         OnShortcut_03 += context => ActionSelectionSpell(context, 2);
+        OnSpaceBar += context => SpaceBarAction();
+    }
+
+    private void SpaceBarAction()
+    {
+        if (!isReadyToFight)
+        {
+            ReadyToFight();
+        }
+        else if (character.isMyTurn)
+        {
+            FightManager.I.EndTurn(character);
+        }
     }
 
     private void LeftClickAction(InputAction.CallbackContext _context)
@@ -353,7 +366,7 @@ public class PlayerController : MonoBehaviour
     }
     internal void StartTurn()
     {
-        
+
     }
     internal void EndTurn()
     {

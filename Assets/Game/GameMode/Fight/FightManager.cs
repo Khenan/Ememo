@@ -32,19 +32,6 @@ public class FightManager : Singleton<FightManager>
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (!onFight)
-            {
-                players.ForEach(player => player.ReadyToFight());
-                CheckAllPlayersReady();
-            }
-            else
-            {
-                if (currentCharacter != null && currentCharacter.isHumanController) EndTurn(currentCharacter);
-            }
-        }
-
         if (currentCharacter != null && !currentCharacter.isHumanController)
         {
             currentTimer += Time.deltaTime;
