@@ -54,6 +54,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         if (!isLocalPlayer) return;
+        GameManager.I.SetPlayerController(this);
         DontDestroyOnLoad(gameObject);
         InitActionAssets();
     }
@@ -86,7 +87,7 @@ public class PlayerController : MonoBehaviour
         // {
         //     if (_hit.collider.TryGetComponent(out FightData _fightData))
         //     {
-                
+
         //     }
         // }
     }
@@ -111,12 +112,6 @@ public class PlayerController : MonoBehaviour
                             ShowPMPath(_tile);
                             _highlight = true;
                         }
-                    }
-                    // Show Hover Highlight Tile
-                    else if (currentSpellSelected == null && _tile.IsWalkable)
-                    {
-                        HoverHighlightTile(_tile);
-                        _highlight = true;
                     }
                     else if (currentSpellSelected != null)
                     {
@@ -148,14 +143,52 @@ public class PlayerController : MonoBehaviour
         FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.PMPathHoverCharacter);
     }
 
-    private void HoverHighlightTile(FightMapTile _tile)
-    {
-        FightMapManager.I.ShowHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.HoverHighlight);
-    }
-
     private void ShowPMPath(FightMapTile _tile)
     {
-        List<FightMapTile> _tiles = AStar.FindPath(character.CurrentTile, _tile);
+        // TEST 
+
+        List<Map> _maps = new();
+        Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
+        Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
+
+        // Get all maps between the current map and the target map
+        int _minX = (int)Mathf.Min(_mapTargetMatrix.x, _mapCurrentMatrix.x);
+        int _maxX = (int)Mathf.Max(_mapTargetMatrix.x, _mapCurrentMatrix.x);
+
+        int _minY = (int)Mathf.Min(_mapTargetMatrix.y, _mapCurrentMatrix.y);
+        int _maxY = (int)Mathf.Max(_mapTargetMatrix.y, _mapCurrentMatrix.y);
+
+        List<FightMap> _mapsBetween = new();
+        foreach (FightMap _map in FightManager.I.currentMaps)
+        {
+            if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX)
+            {
+                if (_map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
+                {
+                    _mapsBetween.Add(_map);
+                }
+            }
+        }
+        _mapsBetween.ForEach(_m => _maps.Add(_m));
+
+        // if (_tile.map == character.CurrentTile.map)
+        // {
+        //     _maps.Add(_tile.map);
+        // }
+        // else
+        // {
+        //     _maps.Add(character.CurrentTile.map);
+        //     Debug.Log(_tile.map.name);
+        //     _maps.Add(_tile.map);
+        // }
+        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
+        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+
+        // END TEST
+
+        //List<MapTile> _mapTiles = AStar.FindPath(character.CurrentTile.map.mapTiles, character.CurrentTile, _tile);
+        Debug.Log(_mapTiles.Count);
+        List<FightMapTile> _tiles = _mapTiles.ConvertAll(_t => (FightMapTile)_t);
         if (_tiles != null && _tiles.Count > 0 && _tiles.Count <= character.CurrentData.currentMovementPoints)
         {
             canMoveOnThisTile = true;
@@ -295,7 +328,12 @@ public class PlayerController : MonoBehaviour
         if (character == null) return;
         if (_spellIndex != -1 && character.Spells[_spellIndex].cost <= character.CurrentData.currentActionPoints)
         {
-            currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
+            currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? currentSpellSelected : character.Spells[_spellIndex];
+            if (currentSpellSelected == null)
+            {
+                FightMapManager.I?.HideColorHighlightTiles();
+                FightMapManager.I?.HideHighlightTiles();
+            }
             List<FightMapTile> _rangeTiles = GetTilesFromSpellSelectedRange();
             FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.SpellHighlight);
             if (currentSpellSelected.withSight)

@@ -1,15 +1,13 @@
 using UnityEngine;
 
-public partial class FightMapTile : MonoBehaviour
+public partial class FightMapTile : MapTile
 {
     private Vector3 position;
     public Vector3 Position => position;
-    public Vector2 MatrixPosition { get; set; }
     [SerializeField] public int tileID;
-    [SerializeField] private bool isWalkable;
-    public bool IsWalkable => isWalkable;
-    [SerializeField] private bool isOccupied;
-    public bool IsOccupied => isOccupied || character != null;
+    [SerializeField] public bool isWalkable;
+    public override bool IsWalkable => isWalkable;
+    public override bool IsOccupied => character != null;
     [SerializeField] private bool blockLineOfSight;
     public bool BlockLineOfSight => blockLineOfSight || character != null;
     [SerializeField] private bool isStartTile;
@@ -27,8 +25,9 @@ public partial class FightMapTile : MonoBehaviour
 
     public Character character;
 
-    private void Start()
+    public override void Start()
     {
+        base.Start();
         position = gameObject.transform.position;
         if(highlight != null) highlight.gameObject.SetActive(false);
         if(highlightTips != null) highlightTips.gameObject.SetActive(false);
