@@ -10,6 +10,8 @@ public class InitiativeUIManager : Singleton<InitiativeUIManager>
     private RectTransform rootRectTransform;
     private Vector2 rootSize = new Vector2(50, 50);
 
+    private int currentTurnIndex = 0;
+
     public override void Awake()
     {
         base.Awake();
@@ -24,19 +26,22 @@ public class InitiativeUIManager : Singleton<InitiativeUIManager>
             InitiativeCharacterVisual _visual = Instantiate(initiativeUICharacterPrefab, root.transform);
             _visual.Init(_i - 1, _characters[_i].CharacterName);
             currentVisuals.Add(_visual);
+            FightManager.I.AddGarbage(_visual.gameObject);
         }
+        currentTurnIndex = 0;
         UpdateVisuals();
     }
 
     internal void CharacterDead(int _index)
     {
         currentVisuals[_index].Dead();
-        UpdateVisuals();
+        UpdateTurn(currentTurnIndex);
     }
 
     internal void UpdateTurn(int _index)
     {
         UpdateVisuals();
+        currentTurnIndex = _index;
         InitiativeCharacterVisual _visual = currentVisuals[_index];
         _visual.transform.localPosition += Vector3.left * 10;
     }
@@ -45,7 +50,8 @@ public class InitiativeUIManager : Singleton<InitiativeUIManager>
     {
         foreach (InitiativeCharacterVisual _visual in currentVisuals)
         {
-            Destroy(_visual.gameObject);
+            if(_visual != null)
+                Destroy(_visual.gameObject);
         }
         currentVisuals.Clear();
     }
