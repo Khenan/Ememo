@@ -22,12 +22,17 @@ public class FightManager : Singleton<FightManager>
     private bool onFight = false;
     private bool fightIsOver = false;
 
+    // Garbage
+    private List<GameObject> garbage = new();
+
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
 
-    private void Start()
+    public void EnterFight(FightData _fightData)
     {
+        fightData = _fightData;
         InitFight(fightData);
+        fightIsOver = false;
     }
 
     private void Update()
@@ -109,6 +114,35 @@ public class FightManager : Singleton<FightManager>
             fightIsOver = true;
             Debug.Log("Fight is over");
             Debug.Log("Team " + characters.First(character => !character.IsDead).teamId + " wins");
+            EndFight();
+        }
+    }
+
+    private void EndFight()
+    {
+        ClearGarbage();
+        UnlockAllPlayersOnFight();
+        GameManager.I.ExitFightMode();
+    }
+
+    private void UnlockAllPlayersOnFight()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.EndFight();
+        }
+    }
+
+    public void AddGarbage(GameObject _go)
+    {
+        garbage.Add(_go);
+    }
+
+    private void ClearGarbage()
+    {
+        foreach (GameObject _go in garbage)
+        {
+            Destroy(_go);
         }
     }
 
@@ -226,13 +260,9 @@ public class FightManager : Singleton<FightManager>
         {
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             int _randomCharacterIndex = UnityEngine.Random.Range(0, _characters.Count);
-
-            Character _character = Instantiate(_characters[_randomCharacterIndex]);
-            _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
-            _teamTiles[_randomTileIndex].character = _character;
-            _character.CurrentTile = _teamTiles[_randomTileIndex];
-            SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
+            Character _character = InstantiateCharacter(_characters[_randomCharacterIndex], _teamTiles, _randomTileIndex);
             characters.Add(_character);
+            AddGarbage(_character.gameObject);
 
             _characters.RemoveAt(_randomCharacterIndex);
             _teamTiles.RemoveAt(_randomTileIndex);
@@ -274,6 +304,7 @@ public class FightManager : Singleton<FightManager>
         _tiles[_tileIndex].character = _character;
         _character.CurrentTile = _tiles[_tileIndex];
         SetCharacterOnTile(_character, _tiles[_tileIndex], currentMap);
+        AddGarbage(_character.gameObject);
         return _character;
     }
     #endregion
