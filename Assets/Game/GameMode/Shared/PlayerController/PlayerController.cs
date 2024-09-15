@@ -54,6 +54,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         if (!isLocalPlayer) return;
+        GameManager.I.SetPlayerController(this);
         DontDestroyOnLoad(gameObject);
         InitActionAssets();
     }
@@ -86,7 +87,7 @@ public class PlayerController : MonoBehaviour
         // {
         //     if (_hit.collider.TryGetComponent(out FightData _fightData))
         //     {
-                
+
         //     }
         // }
     }
@@ -103,20 +104,20 @@ public class PlayerController : MonoBehaviour
                 bool _highlight = false;
                 if (character.isMyTurn)
                 {
+                    Debug.Log("character.isMyTurn");
+                    Debug.Log("currentSpellSelected == null : " + currentSpellSelected == null);
+                    Debug.Log("_tile.IsWalkable" + _tile.IsWalkable);
+                    Debug.Log("!_tile.IsOccupied" + !_tile.IsOccupied);
                     // Show PM Path
                     if (currentSpellSelected == null && _tile.IsWalkable && !_tile.IsOccupied)
                     {
+                        Debug.Log("Want Show PM Path");
                         if (FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile) <= character.CurrentData.currentMovementPoints)
                         {
+                            Debug.Log("Show PM Path");
                             ShowPMPath(_tile);
                             _highlight = true;
                         }
-                    }
-                    // Show Hover Highlight Tile
-                    else if (currentSpellSelected == null && _tile.IsWalkable)
-                    {
-                        HoverHighlightTile(_tile);
-                        _highlight = true;
                     }
                     else if (currentSpellSelected != null)
                     {
@@ -155,7 +156,9 @@ public class PlayerController : MonoBehaviour
 
     private void ShowPMPath(FightMapTile _tile)
     {
-        List<FightMapTile> _tiles = AStar.FindPath(character.CurrentTile, _tile);
+        List<MapTile> _mapTiles = AStar.FindPath(character.CurrentTile.map.mapTiles, character.CurrentTile, _tile);
+        Debug.Log(_mapTiles.Count);
+        List<FightMapTile> _tiles = _mapTiles.ConvertAll(_t => (FightMapTile)_t);
         if (_tiles != null && _tiles.Count > 0 && _tiles.Count <= character.CurrentData.currentMovementPoints)
         {
             canMoveOnThisTile = true;
@@ -295,7 +298,12 @@ public class PlayerController : MonoBehaviour
         if (character == null) return;
         if (_spellIndex != -1 && character.Spells[_spellIndex].cost <= character.CurrentData.currentActionPoints)
         {
-            currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
+            currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? currentSpellSelected : character.Spells[_spellIndex];
+            if (currentSpellSelected == null)
+            {
+                FightMapManager.I?.HideColorHighlightTiles();
+                FightMapManager.I?.HideHighlightTiles();
+            }
             List<FightMapTile> _rangeTiles = GetTilesFromSpellSelectedRange();
             FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.SpellHighlight);
             if (currentSpellSelected.withSight)

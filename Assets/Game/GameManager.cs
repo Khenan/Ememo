@@ -8,6 +8,9 @@ public class GameManager : Singleton<GameManager>
     private Dictionary<string, GameSceneManager> _gameSceneManagers = new();
     [SerializeField] private List<string> _gameSceneToStart = new();
 
+    private PlayerController _playerController;
+    public PlayerController PlayerController => _playerController;
+
     private Vector3 lastCameraPosition;
 
     private void Start()
@@ -52,6 +55,7 @@ public class GameManager : Singleton<GameManager>
     }
     #endregion
 
+    #region Camera
     private void StockCameraPosition()
     {
         lastCameraPosition = Camera.main.transform.position;
@@ -59,5 +63,11 @@ public class GameManager : Singleton<GameManager>
     private void RestoreCameraPosition()
     {
         Camera.main.transform.position = lastCameraPosition;
+    }
+    #endregion
+
+    public void SetPlayerController(PlayerController _playerController)
+    {
+        this._playerController = _playerController;
     }
 }

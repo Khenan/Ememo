@@ -1,41 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FightMap : MonoBehaviour
+public class FightMap : Map
 {
     [SerializeField] internal int areaId;
     [SerializeField] internal Vector2 size;
     public Vector2 Size => size;
-    [SerializeField] private List<FightMapTile> tiles;
 
     internal void Init()
     {
-        SetTileIDs();
+        InitTiles();
         SetTileMatrixPositions();
     }
     internal int GetMapTileCount()
     {
-        return tiles.Count;
+        return mapTiles.Count;
     }
     internal List<FightMapTile> GetTiles()
     {
-        return tiles;
+        return mapTiles.ConvertAll(_tile => (FightMapTile)_tile);
     }
-    internal void SetTileIDs()
+    internal void InitTiles()
     {
         int _id = 0;
-        foreach (FightMapTile _tile in tiles)
+        foreach (FightMapTile _tile in mapTiles)
         {
             _tile.tileID = _id;
+            _tile.SetMap(this);
             _id++;
         }
     }
     internal void SetTileMatrixPositions()
     {
-        int _tileCount = tiles.Count;
+        int _tileCount = mapTiles.Count;
         while (_tileCount > 0)
         {
-            foreach (FightMapTile _tile in tiles)
+            foreach (FightMapTile _tile in mapTiles)
             {
                 _tile.MatrixPosition = new Vector3(_tile.tileID % (int)size.x, _tile.tileID / (int)size.x, 0);
                 _tileCount--;
@@ -44,10 +44,10 @@ public class FightMap : MonoBehaviour
     }
     internal List<FightMapTile> GetWalkableTiles()
     {
-        return tiles.FindAll(tile => tile.IsWalkable);
+        return mapTiles.FindAll(tile => tile.IsWalkable).ConvertAll(_tile => (FightMapTile)_tile);
     }
     internal List<FightMapTile> GetStartTiles()
     {
-        return tiles.FindAll(tile => tile.IsStartTile);
+        return mapTiles.ConvertAll(_tile => (FightMapTile)_tile).FindAll(tile => tile.IsStartTile);
     }
 }
