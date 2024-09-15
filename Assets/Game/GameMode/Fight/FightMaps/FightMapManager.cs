@@ -7,10 +7,8 @@ public class FightMapManager : Singleton<FightMapManager>
 {
     // Liste des maps possibles
     [SerializeField] private List<FightMap> maps;
-    [SerializeField] private Camera cam;
+    private Camera cam;
     [SerializeField] private FightMapTile floor, wall, hole;
-
-    public FightMapTile lastTileSelected;
     public FightMapTile lastTileHovered;
     private List<FightMapTile> lastTilesHighlighted = new();
 
@@ -26,6 +24,10 @@ public class FightMapManager : Singleton<FightMapManager>
 
     private void SetCameraPosition()
     {
+        if(cam == null)
+        {
+            cam = Camera.main;
+        }
         cam.transform.position = new Vector3(23, 13, -10);
         cam.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
@@ -51,6 +53,7 @@ public class FightMapManager : Singleton<FightMapManager>
     {
         List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
         currentMap = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
+        FightManager.I.AddGarbage(currentMap.gameObject);
         currentMap.Init();
         SetMapColor(currentMap);
         ShowStartTiles(currentMap);

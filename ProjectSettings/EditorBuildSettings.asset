@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Game/StarterScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Game/GameMode/Exploration/Exploration.unity
+    guid: bd4f9b3be4eb52b49b84ce5d693f8824
+  - enabled: 1
+    path: Assets/Game/GameMode/Fight/Fight.unity
+    guid: 457f1b83937927340946ab64129afe6f
   m_configObjects: {}

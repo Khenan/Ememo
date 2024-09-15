@@ -87,6 +87,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "SpaceBar",
+                    "type": "Button",
+                    "id": "fa342c5b-8027-48fb-acc1-0e0967849022",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "MousePosition",
                     "type": "Value",
                     "id": "70f71db8-d372-4f3b-b706-8aaf8817f32d",
@@ -204,6 +213,17 @@
                     "processors": "",
                     "groups": "Keyboard/Mouse",
                     "action": "RightClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7dcda3ef-b1a5-42b7-b38a-9099f14335d1",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard/Mouse",
+                    "action": "SpaceBar",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

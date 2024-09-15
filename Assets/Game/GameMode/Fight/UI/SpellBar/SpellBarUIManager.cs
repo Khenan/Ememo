@@ -15,6 +15,7 @@ public class SpellBarUIManager : Singleton<SpellBarUIManager>
             SpellBarUISlot spellBarUISlot = Instantiate(spellBarUISlotPrefab, root);
             spellBarUISlot.Init(_playerController, _spellDatas[_i].cost, _spellDatas[_i].name, _i);
             spellBarUISlots.Add(spellBarUISlot);
+            FightManager.I.AddGarbage(spellBarUISlot.gameObject);
         }
         UpdateSpellBar(_currentPAOfCharacter);
     }
@@ -29,9 +30,10 @@ public class SpellBarUIManager : Singleton<SpellBarUIManager>
 
     private void ClearSpellBar()
     {
-        foreach (var _spellBarUISlot in spellBarUISlots)
+        foreach (SpellBarUISlot _spellBarUISlot in spellBarUISlots)
         {
-            Destroy(_spellBarUISlot.gameObject);
+            if(_spellBarUISlot != null)
+                Destroy(_spellBarUISlot.gameObject);
         }
         spellBarUISlots.Clear();
     }

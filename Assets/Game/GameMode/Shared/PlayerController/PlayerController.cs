@@ -25,21 +25,6 @@ public class PlayerController : MonoBehaviour
     // Spell 
     private SpellData currentSpellSelected;
 
-    private Dictionary<Direction, Vector2> lineDirection = new()
-    {
-        {Direction.Up, new(0, -1)},
-        {Direction.Down, new(0, 1)},
-        {Direction.Left, new(-1, 0)},
-        {Direction.Right, new(1, 0)}
-    };
-    private Dictionary<Direction, Vector2> diagonaleDirection = new()
-    {
-        {Direction.Up, new(-1, -1)},
-        {Direction.Down, new(1, 1)},
-        {Direction.Left, new(-1, 1)},
-        {Direction.Right, new(1, -1)}
-    };
-
     #region Inputs
     private PlayerActionController actionAsset;
 
@@ -52,6 +37,7 @@ public class PlayerController : MonoBehaviour
     private InputAction shortCut_5;
     private InputAction ctrlBar;
     private InputAction shiftBar;
+    private InputAction spaceBar;
 
     public Action<InputAction.CallbackContext> OnLeftClick;
     public Action<InputAction.CallbackContext> OnRightClick;
@@ -62,10 +48,13 @@ public class PlayerController : MonoBehaviour
     public Action<InputAction.CallbackContext> OnShortcut_05;
     public Action<InputAction.CallbackContext> OnCtrlBar;
     public Action<InputAction.CallbackContext> OnShiftBar;
+    public Action<InputAction.CallbackContext> OnSpaceBar;
     #endregion
 
     private void Awake()
     {
+        if (!isLocalPlayer) return;
+        DontDestroyOnLoad(gameObject);
         InitActionAssets();
     }
     private void Start()
@@ -73,12 +62,37 @@ public class PlayerController : MonoBehaviour
         if (!isLocalPlayer) return;
         AssignInputActions();
         AssignInputActivations();
+        UpdateHUDUI();
     }
 
     private void Update()
     {
-        if (!isLocalPlayer || !lockOnFight) return;
+        if (!isLocalPlayer) return;
+        if (onFight)
+        {
+            UpdateFight();
+        }
+        else
+        {
+            UpdateHoverworld();
+        }
+    }
 
+    private void UpdateHoverworld()
+    {
+        Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        RaycastHit _hit;
+        if(Physics.Raycast(_ray, out _hit))
+        {
+            if(_hit.collider.TryGetComponent(out FightData _fightData))
+            {
+                GameManager.I.LaunchFightGameMode(_fightData);
+            }
+        }
+    }
+
+    private void UpdateFight()
+    {
         FightMapTile _tile = HoverTileUnderMouse();
         if (FightMapManager.I.lastTileHovered != _tile)
         {
@@ -171,6 +185,7 @@ public class PlayerController : MonoBehaviour
         shortCut_5 = actionAsset.asset.FindAction("ShortCut_5");
         ctrlBar = actionAsset.asset.FindAction("CtrlBar");
         shiftBar = actionAsset.asset.FindAction("ShiftBar");
+        spaceBar = actionAsset.asset.FindAction("SpaceBar");
     }
 
     private void AssignInputActions()
@@ -186,6 +201,7 @@ public class PlayerController : MonoBehaviour
         shortCut_5.performed += _context => InputActivation(OnShortcut_05, _context);
         ctrlBar.performed += _context => InputActivation(OnCtrlBar, _context);
         shiftBar.performed += _context => InputActivation(OnShiftBar, _context);
+        spaceBar.performed += _context => InputActivation(OnSpaceBar, _context);
     }
 
     private void AssignInputActivations()
@@ -195,35 +211,51 @@ public class PlayerController : MonoBehaviour
         OnShortcut_01 += context => ActionSelectionSpell(context, 0);
         OnShortcut_02 += context => ActionSelectionSpell(context, 1);
         OnShortcut_03 += context => ActionSelectionSpell(context, 2);
+        OnSpaceBar += context => SpaceBarAction();
+    }
+
+    private void SpaceBarAction()
+    {
+        if (onFight)
+        {
+            if (!isReadyToFight)
+            {
+                ReadyToFight();
+            }
+            else if (character != null && character.isMyTurn)
+            {
+                FightManager.I.EndTurn(character);
+            }
+        }
     }
 
     private void LeftClickAction(InputAction.CallbackContext _context)
     {
-        FightMapManager.I.lastTileSelected = null;
-        FightMapTile _tile = GetTileUnderMouseWithRaycast();
-        if (_tile == null) return;
-        if (lockOnFight)
+        if (onFight)
         {
-            if (currentSpellSelected != null)
+            FightMapTile _tile = GetTileUnderMouseWithRaycast();
+            if (_tile == null) return;
+            if (lockOnFight)
             {
-                CastSpellOnTile(_tile);
+                if (currentSpellSelected != null)
+                {
+                    CastSpellOnTile(_tile);
+                }
+                else
+                {
+                    MoveOnTile(_tile);
+                }
             }
             else
             {
-                MoveOnTile(_tile);
+                SwitchCharacterPositionOnTile(_tile);
             }
         }
-        else
-        {
-            SwitchCharacterPositionOnTile(_tile);
-        }
-
-        FightMapManager.I.lastTileSelected = _tile;
     }
 
     private void RightClickAction(InputAction.CallbackContext _context)
     {
-        ActionSelectionSpell(_context, -1);
+        if (lockOnFight && currentSpellSelected != null) ActionSelectionSpell(_context, -1);
     }
 
     public void SetCharacter(Character _character)
@@ -240,11 +272,12 @@ public class PlayerController : MonoBehaviour
 
     private void ActionSelectionSpell(InputAction.CallbackContext _context = default, int _spellIndex = -1)
     {
-        SelectionSpell(_spellIndex);
+        if (lockOnFight) SelectionSpell(_spellIndex);
     }
 
     public void SelectionSpell(int _spellIndex = -1)
     {
+        if (character == null) return;
         if (_spellIndex != -1 && character.Spells[_spellIndex].cost <= character.CurrentData.currentActionPoints)
         {
             currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? null : character.Spells[_spellIndex];
@@ -262,8 +295,8 @@ public class PlayerController : MonoBehaviour
         else
         {
             currentSpellSelected = null;
-            FightMapManager.I.HideColorHighlightTiles();
-            FightMapManager.I.HideHighlightTiles();
+            FightMapManager.I?.HideColorHighlightTiles();
+            FightMapManager.I?.HideHighlightTiles();
         }
     }
 
@@ -291,13 +324,13 @@ public class PlayerController : MonoBehaviour
         {
             if (character.CurrentData.currentMovementPoints > 0)
             {
-                int _tileDistance = FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile);
-                if (_tileDistance <= character.CurrentData.currentMovementPoints)
+                int _tileDistance = FightMapManager.I != null ? FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile) : -1;
+                if (_tileDistance != -1 && _tileDistance <= character.CurrentData.currentMovementPoints)
                 {
                     character.CurrentData.currentMovementPoints -= _tileDistance;
-                    FightMapManager.I.SwitchTileCharacter(Character, _tile);
+                    FightMapManager.I?.SwitchTileCharacter(Character, _tile);
                     character.UpdateAllUI();
-                    FightMapManager.I.HideHighlightTiles();
+                    FightMapManager.I?.HideHighlightTiles();
                 }
             }
         }
@@ -314,13 +347,13 @@ public class PlayerController : MonoBehaviour
                     if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
                     {
                         character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
-                        FightManager.I.CastSpell(currentSpellSelected, _tile);
+                        FightManager.I?.CastSpell(currentSpellSelected, _tile);
                         character.UpdateAllUI();
                     }
                 }
                 currentSpellSelected = null;
-                FightMapManager.I.HideHighlightTiles();
-                FightMapManager.I.HideColorHighlightTiles();
+                FightMapManager.I?.HideHighlightTiles();
+                FightMapManager.I?.HideColorHighlightTiles();
             }
         }
     }
@@ -333,7 +366,7 @@ public class PlayerController : MonoBehaviour
             FightMapTile _centerTile = character.CurrentTile;
             int rangeMin = currentSpellSelected.rangeMin;
             int rangeMax = currentSpellSelected.rangeMax;
-            _rangeTiles = FightMapManager.I.GetTilesByRange(_centerTile, rangeMin, rangeMax);
+            _rangeTiles = FightMapManager.I?.GetTilesByRange(_centerTile, rangeMin, rangeMax);
             return _rangeTiles;
         }
         return _rangeTiles;
@@ -342,7 +375,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
         {
-            FightMapManager.I.SwitchTileCharacter(Character, _tile);
+            FightMapManager.I?.SwitchTileCharacter(Character, _tile);
         }
     }
 
@@ -351,27 +384,38 @@ public class PlayerController : MonoBehaviour
         isReadyToFight = true;
         OnPlayerReady?.Invoke();
     }
-    internal void EndFight()
-    {
-        isReadyToFight = false;
-    }
 
     internal void StartFight()
     {
         lockOnFight = true;
         character.InitSpellBar(this);
+        InitCharacterActions();
+    }
+    internal void EndFight()
+    {
+        isReadyToFight = false;
+        lockOnFight = false;
+        onFight = false;
+    }
+    internal void StartTurn()
+    {
+
+    }
+    internal void EndTurn()
+    {
+        UpdateHUDUI();
+    }
+
+    private void InitCharacterActions()
+    {
+        character.OnTakeDamage += UpdateHUDUI;
+        character.OnStartTurn += StartTurn;
+        character.OnEndTurn += EndTurn;
     }
 
     internal void UpdateHUDUI()
     {
-        CharacterDataUIManager.I.SetHudValues(character.CurrentData.currentHealth, character.CurrentData.currentActionPoints, character.CurrentData.currentMovementPoints);
-    }
-
-    enum Direction
-    {
-        Up,
-        Down,
-        Left,
-        Right
+        if (character != null)
+            CharacterDataUIManager.I?.SetHudValues(onFight, character.CurrentData.currentHealth, character.CurrentData.currentActionPoints, character.CurrentData.currentMovementPoints);
     }
 }
