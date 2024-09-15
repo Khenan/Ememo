@@ -12,16 +12,11 @@ public class Character : MonoBehaviour
     private CharacterUI characterUI;
     private CharacterData currentData;
     public CharacterData CurrentData => currentData;
-
     private bool isDead = false;
     public bool IsDead => isDead;
-
     public FightMapTile CurrentTile { get; set; }
-
     public int CurrentActionPoints => data.currentActionPoints;
-
     public int teamId = 0;
-
     public bool isMyTurn = false;
     public bool isHumanController = false;
 

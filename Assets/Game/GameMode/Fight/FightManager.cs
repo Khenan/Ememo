@@ -161,7 +161,7 @@ public class FightManager : Singleton<FightManager>
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
     {
-        Debug.Log("Cast spell " + _currentSpellSelected.name + " on tile " + _tile.Position);
+        Debug.Log("Cast spell " + _currentSpellSelected.spellName + " on tile " + _tile.Position);
         // On check si il y a un character sur la tile
         if (_tile.character != null)
         {

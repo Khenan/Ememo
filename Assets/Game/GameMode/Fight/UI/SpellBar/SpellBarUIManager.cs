@@ -13,7 +13,7 @@ public class SpellBarUIManager : Singleton<SpellBarUIManager>
         for (int _i = 0; _i < _spellDatas.Count; _i++)
         {
             SpellBarUISlot spellBarUISlot = Instantiate(spellBarUISlotPrefab, root);
-            spellBarUISlot.Init(_playerController, _spellDatas[_i].cost, _spellDatas[_i].name, _i);
+            spellBarUISlot.Init(_playerController, _spellDatas[_i].apCost, _spellDatas[_i].spellName, _i);
             spellBarUISlots.Add(spellBarUISlot);
             FightManager.I.AddGarbage(spellBarUISlot.gameObject);
         }
