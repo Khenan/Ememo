@@ -80,15 +80,15 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateHoverworld()
     {
-        Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit _hit;
-        if(Physics.Raycast(_ray, out _hit))
-        {
-            if(_hit.collider.TryGetComponent(out FightData _fightData))
-            {
-                GameManager.I.LaunchFightGameMode(_fightData);
-            }
-        }
+        // Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        // RaycastHit _hit;
+        // if (Physics.Raycast(_ray, out _hit))
+        // {
+        //     if (_hit.collider.TryGetComponent(out FightData _fightData))
+        //     {
+                
+        //     }
+        // }
     }
 
     private void UpdateFight()
@@ -231,24 +231,39 @@ public class PlayerController : MonoBehaviour
 
     private void LeftClickAction(InputAction.CallbackContext _context)
     {
-        if (onFight)
+        if (onFight) FightLeftClickAction(_context);
+        else ExplorationLeftClickAction(_context);
+    }
+
+    private void FightLeftClickAction(InputAction.CallbackContext _context)
+    {
+        FightMapTile _tile = GetTileUnderMouseWithRaycast();
+        if (_tile == null) return;
+        if (lockOnFight)
         {
-            FightMapTile _tile = GetTileUnderMouseWithRaycast();
-            if (_tile == null) return;
-            if (lockOnFight)
+            if (currentSpellSelected != null)
             {
-                if (currentSpellSelected != null)
-                {
-                    CastSpellOnTile(_tile);
-                }
-                else
-                {
-                    MoveOnTile(_tile);
-                }
+                CastSpellOnTile(_tile);
             }
             else
             {
-                SwitchCharacterPositionOnTile(_tile);
+                MoveOnTile(_tile);
+            }
+        }
+        else
+        {
+            SwitchCharacterPositionOnTile(_tile);
+        }
+    }
+    private void ExplorationLeftClickAction(InputAction.CallbackContext _context)
+    {
+        Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        RaycastHit _hit;
+        if (Physics.Raycast(_ray, out _hit))
+        {
+            if (_hit.collider.TryGetComponent(out FightData _fightData))
+            {
+                GameManager.I.LaunchFightGameMode(_fightData);
             }
         }
     }
