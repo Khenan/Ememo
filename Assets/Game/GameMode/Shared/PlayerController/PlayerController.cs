@@ -104,17 +104,11 @@ public class PlayerController : MonoBehaviour
                 bool _highlight = false;
                 if (character.isMyTurn)
                 {
-                    Debug.Log("character.isMyTurn");
-                    Debug.Log("currentSpellSelected == null : " + currentSpellSelected == null);
-                    Debug.Log("_tile.IsWalkable" + _tile.IsWalkable);
-                    Debug.Log("!_tile.IsOccupied" + !_tile.IsOccupied);
                     // Show PM Path
                     if (currentSpellSelected == null && _tile.IsWalkable && !_tile.IsOccupied)
                     {
-                        Debug.Log("Want Show PM Path");
                         if (FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile) <= character.CurrentData.currentMovementPoints)
                         {
-                            Debug.Log("Show PM Path");
                             ShowPMPath(_tile);
                             _highlight = true;
                         }
@@ -149,14 +143,50 @@ public class PlayerController : MonoBehaviour
         FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.PMPathHoverCharacter);
     }
 
-    private void HoverHighlightTile(FightMapTile _tile)
-    {
-        FightMapManager.I.ShowHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.HoverHighlight);
-    }
-
     private void ShowPMPath(FightMapTile _tile)
     {
-        List<MapTile> _mapTiles = AStar.FindPath(character.CurrentTile.map.mapTiles, character.CurrentTile, _tile);
+        // TEST 
+
+        List<Map> _maps = new();
+        Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
+        Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
+
+        // Get all maps between the current map and the target map
+        int _minX = (int)Mathf.Min(_mapTargetMatrix.x, _mapCurrentMatrix.x);
+        int _maxX = (int)Mathf.Max(_mapTargetMatrix.x, _mapCurrentMatrix.x);
+
+        int _minY = (int)Mathf.Min(_mapTargetMatrix.y, _mapCurrentMatrix.y);
+        int _maxY = (int)Mathf.Max(_mapTargetMatrix.y, _mapCurrentMatrix.y);
+
+        List<FightMap> _mapsBetween = new();
+        foreach (FightMap _map in FightManager.I.currentMaps)
+        {
+            if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX)
+            {
+                if (_map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
+                {
+                    _mapsBetween.Add(_map);
+                }
+            }
+        }
+        _mapsBetween.ForEach(_m => _maps.Add(_m));
+
+        // if (_tile.map == character.CurrentTile.map)
+        // {
+        //     _maps.Add(_tile.map);
+        // }
+        // else
+        // {
+        //     _maps.Add(character.CurrentTile.map);
+        //     Debug.Log(_tile.map.name);
+        //     _maps.Add(_tile.map);
+        // }
+        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
+        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+
+        // END TEST
+
+        //List<MapTile> _mapTiles = AStar.FindPath(character.CurrentTile.map.mapTiles, character.CurrentTile, _tile);
         Debug.Log(_mapTiles.Count);
         List<FightMapTile> _tiles = _mapTiles.ConvertAll(_t => (FightMapTile)_t);
         if (_tiles != null && _tiles.Count > 0 && _tiles.Count <= character.CurrentData.currentMovementPoints)

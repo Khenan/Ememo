@@ -25,8 +25,9 @@ public partial class FightMapTile : MapTile
 
     public Character character;
 
-    private void Start()
+    public override void Start()
     {
+        base.Start();
         position = gameObject.transform.position;
         if(highlight != null) highlight.gameObject.SetActive(false);
         if(highlightTips != null) highlightTips.gameObject.SetActive(false);

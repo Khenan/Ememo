@@ -7,6 +7,13 @@ public class FightMap : Map
     [SerializeField] internal Vector2 size;
     public Vector2 Size => size;
 
+    private void Start()
+    {
+        FightManager.I.currentMaps.Add(this);
+    }
+    private void OnDestroy() {
+        FightManager.I.currentMaps.Remove(this);
+    }
     internal void Init()
     {
         InitTiles();
@@ -28,18 +35,6 @@ public class FightMap : Map
             _tile.tileID = _id;
             _tile.SetMap(this);
             _id++;
-        }
-    }
-    internal void SetTileMatrixPositions()
-    {
-        int _tileCount = mapTiles.Count;
-        while (_tileCount > 0)
-        {
-            foreach (FightMapTile _tile in mapTiles)
-            {
-                _tile.MatrixPosition = new Vector3(_tile.tileID % (int)size.x, _tile.tileID / (int)size.x, 0);
-                _tileCount--;
-            }
         }
     }
     internal List<FightMapTile> GetWalkableTiles()
