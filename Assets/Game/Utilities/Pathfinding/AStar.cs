@@ -136,7 +136,6 @@ public static class AStar
 
     public static List<MapTile> FindPath(List<MapTile> _tiles, MapTile _startTile, MapTile _goalTile)
     {
-        Debug.Log(_tiles.Count);
         openList.Clear();
         closedList.Clear();
 

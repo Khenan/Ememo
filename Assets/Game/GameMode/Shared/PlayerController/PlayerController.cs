@@ -187,7 +187,6 @@ public class PlayerController : MonoBehaviour
         // END TEST
 
         //List<MapTile> _mapTiles = AStar.FindPath(character.CurrentTile.map.mapTiles, character.CurrentTile, _tile);
-        Debug.Log(_mapTiles.Count);
         List<FightMapTile> _tiles = _mapTiles.ConvertAll(_t => (FightMapTile)_t);
         if (_tiles != null && _tiles.Count > 0 && _tiles.Count <= character.CurrentData.currentMovementPoints)
         {

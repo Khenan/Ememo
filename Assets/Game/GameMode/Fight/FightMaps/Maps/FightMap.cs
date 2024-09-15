@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,11 +8,22 @@ public class FightMap : Map
     [SerializeField] internal Vector2 size;
     public Vector2 Size => size;
 
+    private void Awake()
+    {
+        GetAllChildrenTiles();
+    }
     private void Start()
     {
         FightManager.I.currentMaps.Add(this);
     }
-    private void OnDestroy() {
+
+    private void GetAllChildrenTiles()
+    {
+        mapTiles = new List<MapTile>(GetComponentsInChildren<MapTile>());
+    }
+
+    private void OnDestroy()
+    {
         FightManager.I.currentMaps.Remove(this);
     }
     internal void Init()

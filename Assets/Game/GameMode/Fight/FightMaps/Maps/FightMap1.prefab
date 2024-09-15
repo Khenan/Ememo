@@ -1164,7 +1164,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8168988379650836688, guid: 4ace7ca04a527d146ae73dcfae5ff854, type: 3}
       propertyPath: mapTiles.Array.size
-      value: 196
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8168988379650836688, guid: 4ace7ca04a527d146ae73dcfae5ff854, type: 3}
       propertyPath: tiles.Array.data[3]
