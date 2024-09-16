@@ -75,8 +75,8 @@ public static class AStar
 
     private static int CalculateHeuristic(MapTile _tileA, MapTile _tileB)
     {
-        int _dx = Math.Abs((int)_tileA.MatrixPosition.x - (int)_tileB.MatrixPosition.x);
-        int _dy = Math.Abs((int)_tileA.MatrixPosition.y - (int)_tileB.MatrixPosition.y);
+        int _dx = Math.Abs((int)_tileA.MatrixPositionLocalTemporary.x - (int)_tileB.MatrixPositionLocalTemporary.x);
+        int _dy = Math.Abs((int)_tileA.MatrixPositionLocalTemporary.y - (int)_tileB.MatrixPositionLocalTemporary.y);
         return _dx + _dy;
     }
 
@@ -116,8 +116,8 @@ public static class AStar
     private static void AddNeighborIfValid(MapTile _currentTile, int _offsetX, int _offsetY, List<MapTile> _neighbors, List<MapTile> _tiles)
     {
         Vector2 _neighborPos = new Vector2(
-            _currentTile.MatrixPosition.x + _offsetX,
-            _currentTile.MatrixPosition.y + _offsetY
+            _currentTile.MatrixPositionLocalTemporary.x + _offsetX,
+            _currentTile.MatrixPositionLocalTemporary.y + _offsetY
         );
         MapTile _neighborTile = GetTileByMatrixPosition(_tiles, _neighborPos);
         if (_neighborTile != null && _neighborTile.IsWalkable && !_neighborTile.IsOccupied)
@@ -128,7 +128,7 @@ public static class AStar
 
     private static MapTile GetTileByMatrixPosition(List<MapTile> _tiles, Vector2 _mPos)
     {
-        return _tiles.Find(_t => _t.MatrixPosition == _mPos);
+        return _tiles.Find(_t => _t.MatrixPositionLocalTemporary == _mPos);
     }
 
     // Retrace le chemin en partant du Node final jusqu'au Node de départ

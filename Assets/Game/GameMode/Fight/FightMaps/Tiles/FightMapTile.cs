@@ -8,7 +8,7 @@ public partial class FightMapTile : MapTile
     public override bool IsWalkable => isWalkable;
     public override bool IsOccupied => character != null;
     [SerializeField] private bool blockLineOfSight;
-    public bool BlockLineOfSight => blockLineOfSight || character != null;
+    public override bool BlockLineOfSight => blockLineOfSight || character != null;
     [SerializeField] private bool isStartTile;
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
@@ -59,7 +59,7 @@ public partial class FightMapTile : MapTile
     {
         if (visualTop != null)
         {
-            bool _odd = (MatrixPosition.x + MatrixPosition.y) % 2 == 0;
+            bool _odd = (MatrixPositionWorld.x + MatrixPositionWorld.y) % 2 == 0;
             VisualTop.color = _odd ? Colors.I.FloorOdd : Colors.I.FloorEven;
         }
     }
