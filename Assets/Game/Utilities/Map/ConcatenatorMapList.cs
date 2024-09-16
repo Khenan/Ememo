@@ -21,9 +21,9 @@ public static class ConcatenatorMapList
             {
                 for (int _index = 0; _index < _orderedMapList.Count; _index++)
                 {
-                    if ((int)_orderedMapList[_index].matrixPosition.y == _mapY)
+                    if (_orderedMapList[_index].matrixPosition.y == _mapY)
                     {
-                        List<MapTile> _tiles = _orderedMapList[_index].GetTileOfYPosition(_y);
+                        List<MapTile> _tiles = _orderedMapList[_index].GetTileOfYLocalPosition(_y);
                         _concatenatedMap.AddRange(_tiles);
                     }
                 }

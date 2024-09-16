@@ -12,7 +12,6 @@ public class InitAllTilesOfSelectedMaps : MonoBehaviour
 
         if (_selectedAssets.Length == 0)
         {
-            Debug.LogWarning("No assets selected!");
             return;
         }
 
@@ -33,19 +32,14 @@ public class InitAllTilesOfSelectedMaps : MonoBehaviour
     // Method to apply on each asset
     static void ApplyMethod(Object _asset)
     {
-        Debug.Log("Applying method to asset: " + _asset.name);
-
-        // Example: If the asset is a GameObject (like a prefab), do something specific
         if (_asset is GameObject)
         {
             GameObject _gameObject = _asset as GameObject;
             if (_gameObject != null)
             {
-                Debug.Log("_asset is GameObject");
                 Map _map = _gameObject.GetComponent<Map>();
                 if (_map != null)
                 {
-                    Debug.Log("_asset is Map");
                     _map.InitAll();
                     EditorUtility.SetDirty(_map);
                 }
