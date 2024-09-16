@@ -5,10 +5,12 @@ public partial class FightMapTile : MapTile
     private Vector3 position;
     public Vector3 Position => position;
     [SerializeField] public bool isWalkable;
+    [SerializeField] public bool isBlock;
     public override bool IsWalkable => isWalkable;
     public override bool IsOccupied => character != null;
     [SerializeField] private bool blockLineOfSight;
-    public override bool BlockLineOfSight => blockLineOfSight || character != null;
+    public override bool BlockLineOfSight => blockLineOfSight || character != null || isBlock;
+    public override bool IsBlock => isBlock;
     [SerializeField] private bool isStartTile;
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;

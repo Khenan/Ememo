@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 public class Map : MonoBehaviour
 {
     public Vector2Int matrixPosition = Vector2Int.zero;
     public List<MapTile> mapTiles = new();
-    public List<MapTile> GetTileOfYPosition(int _y)
+    public List<MapTile> GetTileOfYLocalPosition(int _y)
+    {
+        return mapTiles.FindAll(_t => _t.MatrixPositionLocal.y == _y).OrderBy(_t => _t.MatrixPositionLocal.x).ToList();
+    }
+    public List<MapTile> GetTileOfYWorldPosition(int _y)
     {
         return mapTiles.FindAll(_t => _t.MatrixPositionWorld.y == _y).OrderBy(_t => _t.MatrixPositionWorld.x).ToList();
     }
@@ -17,6 +22,9 @@ public class Map : MonoBehaviour
         GetAllChildrenTiles();
         InitOrderParentHierarchyByTransformPosition();
         InitTiles();
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(this);
+#endif
     }
 
     private void GetAllChildrenTiles()
@@ -44,15 +52,30 @@ public class Map : MonoBehaviour
             int _worldY = mapTiles[_i].MatrixPositionLocal.y + (MapSizeData.SIZE * matrixPosition.y);
             mapTiles[_i].MatrixPositionWorld = new Vector2Int(_worldX, _worldY);
             mapTiles[_i].ID = _i;
-            mapTiles[_i].name = $"Tile_{(mapTiles[_i].IsWalkable ? "Walkable" : "Hole")}_{mapTiles[_i].MatrixPositionWorld.x}_{mapTiles[_i].MatrixPositionWorld.y}";
+            string _name = "";
+            if (mapTiles[_i].IsWalkable)
+            {
+                _name += "Walkable";
+            }
+            else if (mapTiles[_i].IsBlock)
+            {
+                _name += "Block";
+            }
+            else
+            {
+                _name += "Hole";
+            }
+            _name += $"_{mapTiles[_i].MatrixPositionWorld.x}_{mapTiles[_i].MatrixPositionWorld.y}";
+            mapTiles[_i].name = _name;
             mapTiles[_i].SetMap(this);
-            Debug.Log("Tile Init");  
         }
     }
     public void ResetTileMatrixPositionsLocalTemporary()
     {
+        Debug.Log("mapTiles.Count: " + mapTiles.Count);
         for (int _i = 0; _i < mapTiles.Count; _i++)
         {
+            Debug.Log("mapTiles[_i]:" + mapTiles[_i]);
             mapTiles[_i].MatrixPositionLocalTemporary = new Vector2Int(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
         }
     }

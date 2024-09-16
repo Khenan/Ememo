@@ -123,20 +123,6 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateExploration()
     {
-        ExplorationMapTile _tile = HoverExplorationTileUnderMouse();
-        if (MapManager.I.lastTileHovered != _tile)
-        {
-            MapManager.I.lastTileHovered = _tile;
-
-            if (_tile != null)
-            {
-                // Show PM Path
-                if (_tile.IsWalkable && !_tile.IsOccupied)
-                {
-                    ShowPMPathInExploration(_tile);
-                }
-            }
-        }
     }
 
     private void HoverHighlightPMOfCharacter(FightMapTile _tile)
@@ -182,8 +168,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void ShowPMPathInExploration(MapTile _tile)
+    private bool MoveOnPathInExploration(MapTile _tile)
     {
+        bool _canMove = false;
         List<Map> _maps = new();
         Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
         Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
@@ -198,18 +185,21 @@ public class PlayerController : MonoBehaviour
             if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX && _map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
                 _mapsBetween.Add(_map);
         _mapsBetween.ForEach(_m => _maps.Add(_m));
+        Debug.Log("_mapsBetween.Count: " + _mapsBetween.Count);
 
         List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
+        Debug.Log("_allTiles.Count: " + _allTiles.Count);
         List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
         if (_mapTiles != null)
         {
-            canMoveOnThisTile = true;
+            _canMove = true;
             Debug.Log("Path Count: " + _mapTiles.Count);
         }
         else
         {
-            canMoveOnThisTile = false;
+            _canMove = false;
         }
+        return _canMove;
     }
 
     private FightMapTile HoverFightTileUnderMouse()
@@ -315,8 +305,14 @@ public class PlayerController : MonoBehaviour
             }
             else if (_hit.collider.TryGetComponent(out ExplorationMapTile _tile))
             {
-                if(canMoveOnThisTile)
-                    SwitchTileCharacterOnExploTile(_tile);
+                if (MapManager.I.lastTileHovered != _tile)
+                {
+                    MapManager.I.lastTileHovered = _tile;
+
+                    if (_tile != null && _tile.IsWalkable && !_tile.IsOccupied)
+                        if (MoveOnPathInExploration(_tile))
+                            SwitchTileCharacterOnExploTile(_tile);
+                }
             }
         }
     }

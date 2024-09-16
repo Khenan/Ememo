@@ -9,4 +9,5 @@ public partial class ExplorationMapTile : MapTile
     public override bool IsWalkable => isWalkable;
     public override bool IsOccupied => characters.Count > 0;
     public override bool BlockLineOfSight => isBlock;
+    public override bool IsBlock => isBlock;
 }

@@ -8,8 +8,8 @@ public class MapManager : Singleton<MapManager>
     internal List<Vector2Int> GetMatrixPositionsByRange(Vector2Int _centerTile, int _rangeMin, int _rangeMax)
     {
         List<Vector2Int> _rangeTiles = new();
-        int _startX = (int)_centerTile.x;
-        int _startY = (int)_centerTile.y;
+        int _startX = _centerTile.x;
+        int _startY = _centerTile.y;
         for (int _x = _startX - _rangeMax; _x <= _startX + _rangeMax; _x++)
         {
             for (int _y = _startY - _rangeMax; _y <= _startY + _rangeMax; _y++)

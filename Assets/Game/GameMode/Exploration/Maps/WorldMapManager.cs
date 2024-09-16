@@ -42,7 +42,7 @@ public class WorldMapManager : Singleton<WorldMapManager>
             _map = GetMapAssetByMatrixPosition(_matrixPosition);
             if (_map != null)
             {
-                Map _mapGameObject = Instantiate(_map.gameObject, new Vector3(_matrixPosition.x, 0, _matrixPosition.y) * MapSizeData.SIZE, Quaternion.identity).GetComponent<Map>();
+                Map _mapGameObject = Instantiate(_map.gameObject, new Vector3(_matrixPosition.x, 0, -_matrixPosition.y) * MapSizeData.SIZE, Quaternion.identity).GetComponent<Map>();
                 _mapGameObject.transform.SetParent(transform);
                 createdMaps.Add(_mapGameObject);
                 currentMaps.Add(_mapGameObject);
