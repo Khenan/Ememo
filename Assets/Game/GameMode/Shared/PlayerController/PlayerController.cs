@@ -17,6 +17,13 @@ public class PlayerController : MonoBehaviour
     private Character character;
     public Character Character => character;
 
+    // Path
+    private List<MapTile> currentPath;
+    private int currentPathIndex = 0;
+    private bool onMove = false;
+    private float currentMoveTimer = 0f;
+    private float maxMoveTimer = 0.1f;
+
     // Fight
     public bool onFight = false;
     internal bool lockOnFight = false;
@@ -123,6 +130,25 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateExploration()
     {
+        if (onMove && currentPath != null)
+        {
+            if (currentMoveTimer < maxMoveTimer)
+            {
+                currentMoveTimer += Time.deltaTime;
+            }
+            else
+            {
+                currentMoveTimer = 0;
+                SwitchTileCharacterOnExploTile(currentPath[currentPathIndex] as ExplorationMapTile);
+                currentPathIndex++;
+                if (currentPathIndex >= currentPath.Count - 1)
+                {
+                    onMove = false;
+                    currentPath = null;
+                    currentPathIndex = 0;
+                }
+            }
+        }
     }
 
     private void HoverHighlightPMOfCharacter(FightMapTile _tile)
@@ -168,9 +194,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private bool MoveOnPathInExploration(MapTile _tile)
+    private List<MapTile> GetPathInExploration(MapTile _tile)
     {
-        bool _canMove = false;
         List<Map> _maps = new();
         Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
         Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
@@ -185,21 +210,10 @@ public class PlayerController : MonoBehaviour
             if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX && _map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
                 _mapsBetween.Add(_map);
         _mapsBetween.ForEach(_m => _maps.Add(_m));
-        Debug.Log("_mapsBetween.Count: " + _mapsBetween.Count);
 
         List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
-        Debug.Log("_allTiles.Count: " + _allTiles.Count);
         List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
-        if (_mapTiles != null)
-        {
-            _canMove = true;
-            Debug.Log("Path Count: " + _mapTiles.Count);
-        }
-        else
-        {
-            _canMove = false;
-        }
-        return _canMove;
+        return _mapTiles;
     }
 
     private FightMapTile HoverFightTileUnderMouse()
@@ -310,8 +324,15 @@ public class PlayerController : MonoBehaviour
                     MapManager.I.lastTileHovered = _tile;
 
                     if (_tile != null && _tile.IsWalkable && !_tile.IsOccupied)
-                        if (MoveOnPathInExploration(_tile))
-                            SwitchTileCharacterOnExploTile(_tile);
+                    {
+                        List<MapTile> _path = GetPathInExploration(_tile);
+                        if (_path != null && _path.Count > 0)
+                        {
+                            currentPath = _path;
+                            currentPathIndex = 0;
+                            onMove = true;
+                        }
+                    }
                 }
             }
         }
