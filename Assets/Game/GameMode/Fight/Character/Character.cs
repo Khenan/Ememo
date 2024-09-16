@@ -21,9 +21,7 @@ public class Character : MonoBehaviour
     public MapTile CurrentTile { get; set; }
 
     public int CurrentActionPoints => data.currentActionPoints;
-
     public int teamId = 0;
-
     public bool isMyTurn = false;
     public bool isHumanController = false;
 

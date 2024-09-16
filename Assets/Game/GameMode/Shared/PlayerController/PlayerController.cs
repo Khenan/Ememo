@@ -101,7 +101,7 @@ public class PlayerController : MonoBehaviour
                     }
                     else if (currentSpellSelected != null)
                     {
-                        if (MapManager.I.IsTileInRange(character.CurrentTile.map, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
+                        if (FightMapManager.I.IsTileInRange((FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.SpellHighlightHover);
                         else
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { }, Colors.I.SpellHighlightSightless);
@@ -385,7 +385,7 @@ public class PlayerController : MonoBehaviour
     public void SelectionSpell(int _spellIndex = -1)
     {
         if (character == null) return;
-        if (_spellIndex != -1 && character.Spells[_spellIndex].cost <= character.CurrentData.currentActionPoints)
+        if (_spellIndex != -1 && character.Spells[_spellIndex].apCost <= character.CurrentData.currentActionPoints)
         {
             currentSpellSelected = currentSpellSelected == character.Spells[_spellIndex] ? currentSpellSelected : character.Spells[_spellIndex];
             if (currentSpellSelected == null)
@@ -395,7 +395,7 @@ public class PlayerController : MonoBehaviour
             }
             List<FightMapTile> _rangeTiles = GetTilesFromSpellSelectedRange();
             FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.SpellHighlight);
-            if (currentSpellSelected.withSight)
+            if (currentSpellSelected.isLignOfSight)
             {
                 foreach (var _tile in _rangeTiles)
                 {
@@ -453,11 +453,11 @@ public class PlayerController : MonoBehaviour
         {
             if (currentSpellSelected != null)
             {
-                if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
+                if (character.CurrentData.currentActionPoints >= currentSpellSelected.apCost)
                 {
-                    if (MapManager.I.IsTileInRange(character.CurrentTile.map, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
+                    if (FightMapManager.I.IsTileInRange((FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
                     {
-                        character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
+                        character.CurrentData.currentActionPoints -= currentSpellSelected.apCost;
                         FightManager.I?.CastSpell(currentSpellSelected, _tile);
                         character.UpdateAllUI();
                     }
