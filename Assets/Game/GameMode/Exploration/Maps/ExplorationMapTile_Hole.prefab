@@ -54,7 +54,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2297101515480698302, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4267011144730326953, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
       propertyPath: isWalkable
@@ -63,6 +63,18 @@ PrefabInstance:
     - target: {fileID: 4267011144730326953, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
       propertyPath: hideVisualsOnStart
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8727303501996368747, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8727303501996368747, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8727303501996368747, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

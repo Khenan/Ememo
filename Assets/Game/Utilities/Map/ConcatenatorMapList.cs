@@ -33,7 +33,7 @@ public static class ConcatenatorMapList
         // Set the matrix position of each tile in the concatenated map
         for (int _i = 0; _i < _concatenatedMap.Count; _i++)
         {
-            _concatenatedMap[_i].MatrixPosition = new Vector2(_i % (MapSizeData.SIZE * (_diffX + 1)), _i / (MapSizeData.SIZE * (_diffX + 1)));
+            _concatenatedMap[_i].MatrixPosition = new Vector2Int(_i % (MapSizeData.SIZE * (_diffX + 1)), _i / (MapSizeData.SIZE * (_diffX + 1)));
         }
 
         return _concatenatedMap;

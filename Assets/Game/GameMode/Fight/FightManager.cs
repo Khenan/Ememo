@@ -102,7 +102,8 @@ public class FightManager : Singleton<FightManager>
     internal void OnCharacterDead(Character _character)
     {
         if (InitiativeUIManager.I != null) InitiativeUIManager.I.CharacterDead(characters.IndexOf(_character));
-        _character.CurrentTile.character = null;
+        FightMapTile _tile = (FightMapTile)_character.CurrentTile;
+        _tile.character = null;
         CheckEndFight();
     }
 

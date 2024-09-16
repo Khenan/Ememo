@@ -18,7 +18,7 @@ public class Character : MonoBehaviour
     private bool isDead = false;
     public bool IsDead => isDead;
 
-    public FightMapTile CurrentTile { get; set; }
+    public MapTile CurrentTile { get; set; }
 
     public int CurrentActionPoints => data.currentActionPoints;
 
