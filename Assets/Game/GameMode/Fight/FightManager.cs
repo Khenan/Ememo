@@ -102,7 +102,8 @@ public class FightManager : Singleton<FightManager>
     internal void OnCharacterDead(Character _character)
     {
         if (InitiativeUIManager.I != null) InitiativeUIManager.I.CharacterDead(characters.IndexOf(_character));
-        _character.CurrentTile.character = null;
+        FightMapTile _tile = (FightMapTile)_character.CurrentTile;
+        _tile.character = null;
         CheckEndFight();
     }
 
@@ -306,6 +307,7 @@ public class FightManager : Singleton<FightManager>
         _character.CurrentTile = _tiles[_tileIndex];
         SetCharacterOnTile(_character, _tiles[_tileIndex], currentMap);
         AddGarbage(_character.gameObject);
+        _character.SetCharacterMode(CharacterMode.Fight);
         return _character;
     }
     #endregion

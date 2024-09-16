@@ -12,9 +12,14 @@ public class Character : MonoBehaviour
     private CharacterUI characterUI;
     private CharacterData currentData;
     public CharacterData CurrentData => currentData;
+
+    public CharacterMode mode = CharacterMode.Exploration;
+
     private bool isDead = false;
     public bool IsDead => isDead;
-    public FightMapTile CurrentTile { get; set; }
+
+    public MapTile CurrentTile { get; set; }
+
     public int CurrentActionPoints => data.currentActionPoints;
     public int teamId = 0;
     public bool isMyTurn = false;
@@ -25,7 +30,8 @@ public class Character : MonoBehaviour
     public Action OnEndTurn;
     public Action OnTakeDamage;
 
-    private void Awake() {
+    private void Awake()
+    {
         characterUI = GetComponent<CharacterUI>();
     }
 
@@ -55,11 +61,22 @@ public class Character : MonoBehaviour
         UpdateAllUI();
     }
 
+    public void SetCharacterMode(CharacterMode _mode)
+    {
+        mode = _mode;
+    }
+
     internal void UpdateAllUI()
     {
-        characterUI.SetHealthBar(currentData.currentHealth,currentData.maxHealth);
-        characterUI.SetTurnArrow(isMyTurn);
-        UpdateSpellBar();
+        if (characterUI != null && currentData != null)
+        {
+            characterUI.SetHealthBar(currentData.currentHealth, currentData.maxHealth);
+            if (mode == CharacterMode.Fight)
+            {
+                characterUI.SetTurnArrow(isMyTurn);
+                UpdateSpellBar();
+            }
+        }
     }
 
     internal void InitData()
@@ -72,7 +89,6 @@ public class Character : MonoBehaviour
 
     internal void TakeDamage(int damage)
     {
-        //Debug.Log("Character " + characterName + " takes " + damage + " damage");
         currentData.currentHealth -= damage;
         currentData.currentHealth = Mathf.Clamp(currentData.currentHealth, 0, currentData.maxHealth);
         if (currentData.currentHealth <= 0)
@@ -88,7 +104,10 @@ public class Character : MonoBehaviour
     {
         isDead = true;
         characterUI.Dead();
-        FightManager.I.OnCharacterDead(this);
+        if (mode == CharacterMode.Fight)
+        {
+            FightManager.I.OnCharacterDead(this);
+        }
     }
 
     // SpellBar

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &5531987393637232773
+--- !u!1001 &6428502954774376172
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -50,7 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1608557747338679971, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
       propertyPath: m_Name
-      value: ExplorationMap_Base
+      value: ExplorationMapTile_Floor
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267011144730326953, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
+      propertyPath: isWalkable
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
