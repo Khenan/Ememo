@@ -1,15 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class ExplorationMapTile : MonoBehaviour
+public partial class ExplorationMapTile : MapTile
 {
-    public Vector2 MatrixPosition { get; set; }
-    private int tileID;
     public List<Character> characters;
-    public bool IsWalkable { get; set; }
-
-    private void Start()
-    {
-        
-    }
+    [SerializeField] private bool isWalkable;
+    public override bool IsWalkable => isWalkable;
+    public override bool IsOccupied => characters.Count > 0;
 }

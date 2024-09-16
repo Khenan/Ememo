@@ -306,6 +306,7 @@ public class FightManager : Singleton<FightManager>
         _character.CurrentTile = _tiles[_tileIndex];
         SetCharacterOnTile(_character, _tiles[_tileIndex], currentMap);
         AddGarbage(_character.gameObject);
+        _character.SetCharacterMode(CharacterMode.Fight);
         return _character;
     }
     #endregion
