@@ -6,6 +6,8 @@ public class WorldMapManager : Singleton<WorldMapManager>
 {
     [SerializeField] private List<Map> createdMaps = new();
     [SerializeField] private List<Map> currentMaps = new();
+    public List<Map> CurrentMaps => currentMaps;
+    
     public void LoadMapAndAroundByMatrixPosition(Vector2Int _matrixPosition)
     {
         LoadMapAssetByMatrixPosition(_matrixPosition);
