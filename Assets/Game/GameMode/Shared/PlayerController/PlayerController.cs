@@ -21,8 +21,11 @@ public class PlayerController : MonoBehaviour
     private List<MapTile> currentPath;
     private int currentPathIndex = 0;
     private bool onMove = false;
+    private bool directionCharacterVisualInit = false;
+    private bool temporaryPositionEnable = false;
+    private Vector3 temporaryPosition;
     private float currentMoveTimer = 0f;
-    private float maxMoveTimer = 0.1f;
+    private float maxMoveTimer = 0.3f;
 
     // Fight
     public bool onFight = false;
@@ -132,20 +135,47 @@ public class PlayerController : MonoBehaviour
     {
         if (onMove && currentPath != null)
         {
+            if (!directionCharacterVisualInit)
+            {
+                character.ChangeVisualDirection(currentPath[currentPathIndex]);
+                directionCharacterVisualInit = true;
+            }
             if (currentMoveTimer < maxMoveTimer)
             {
-                currentMoveTimer += Time.deltaTime;
+                float _speedMultiplier = 1;
+                if (currentPathIndex < currentPath.Count - 1 && MapManager.I.IsDiagonal(currentPath[currentPathIndex], currentPath[currentPathIndex + 1]))
+                {
+                    _speedMultiplier = 1.4f;
+                }
+
+                currentMoveTimer += Time.deltaTime / _speedMultiplier;
+
+                if (temporaryPositionEnable)
+                {
+                    character.transform.position = Vector3.Lerp(temporaryPosition, currentPath[currentPathIndex].transform.position, currentMoveTimer / maxMoveTimer);
+                }
+                else character.transform.position = Vector3.Lerp(character.CurrentTile.transform.position, currentPath[currentPathIndex].transform.position, currentMoveTimer / maxMoveTimer);
             }
             else
             {
+                temporaryPositionEnable = false;
                 currentMoveTimer = 0;
                 SwitchTileCharacterOnExploTile(currentPath[currentPathIndex] as ExplorationMapTile);
                 currentPathIndex++;
+
                 if (currentPathIndex >= currentPath.Count - 1)
                 {
                     onMove = false;
                     currentPath = null;
+                    directionCharacterVisualInit = false;
                     currentPathIndex = 0;
+                    currentMoveTimer = 0;
+                }
+                else
+                {
+                    // direction of character
+                    if (character.CurrentTile.MatrixPositionWorld != currentPath[currentPathIndex].MatrixPositionWorld)
+                        character.ChangeVisualDirection(currentPath[currentPathIndex]);
                 }
             }
         }
@@ -212,18 +242,13 @@ public class PlayerController : MonoBehaviour
         _mapsBetween.ForEach(_m => _maps.Add(_m));
 
         List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
-        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile, true);
         return _mapTiles;
     }
 
     private FightMapTile HoverFightTileUnderMouse()
     {
         return GetFightTileUnderMouseWithRaycast();
-    }
-
-    private ExplorationMapTile HoverExplorationTileUnderMouse()
-    {
-        return GetExplorationTileUnderMouseWithRaycast();
     }
 
     private void InitActionAssets()
@@ -328,6 +353,12 @@ public class PlayerController : MonoBehaviour
                         List<MapTile> _path = GetPathInExploration(_tile);
                         if (_path != null && _path.Count > 0)
                         {
+                            if (onMove)
+                            {
+                                temporaryPosition = character.transform.position;
+                                temporaryPositionEnable = true;
+                                directionCharacterVisualInit = false;
+                            }
                             currentPath = _path;
                             currentPathIndex = 0;
                             onMove = true;
@@ -359,6 +390,9 @@ public class PlayerController : MonoBehaviour
         character = _character;
         character.isHumanController = true;
         InitCharacterActions();
+
+        // Camera
+        CameraManager.I.SetTarget(character.transform);
     }
 
     private void InputActivation(Action<InputAction.CallbackContext> _action, InputAction.CallbackContext _context)
@@ -372,23 +406,8 @@ public class PlayerController : MonoBehaviour
     {
         if (_tile.IsWalkable)
         {
-            ExplorationManager.I.SwitchTileCharacter(Character, _tile);
+            ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
         }
-    }
-    private ExplorationMapTile GetExplorationTileUnderMouseWithRaycast()
-    {
-        ExplorationMapTile _tileToReturn = null;
-        Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit _hit;
-
-        if (Physics.Raycast(_ray, out _hit))
-        {
-            if (_hit.collider.TryGetComponent(out ExplorationMapTile _tile))
-            {
-                _tileToReturn = _tile;
-            }
-        }
-        return _tileToReturn;
     }
     #endregion
 

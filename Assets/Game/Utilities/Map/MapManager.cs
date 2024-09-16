@@ -70,7 +70,7 @@ public class MapManager : Singleton<MapManager>
         {
             if (!(currentX == (int)centerPos.x && currentY == (int)centerPos.y))
             {
-                MapTile currentTile = GetTileByMatrixPosition(_map, new Vector2(currentX, currentY));
+                MapTile currentTile = GetFightTileByMatrixPosition(_map, new Vector2(currentX, currentY));
                 if (currentTile != null && currentTile.BlockLineOfSight)
                 {
                     FightMapTile _characterTile = (FightMapTile)currentTile;
@@ -109,16 +109,17 @@ public class MapManager : Singleton<MapManager>
         return true;
     }
 
-    internal FightMapTile GetTileByMatrixPosition(Map _map, Vector2 _matrixPosition)
+    internal FightMapTile GetFightTileByMatrixPosition(Map _map, Vector2 _matrixPosition)
     {
-        FightMapTile _tile = null;
-        if (_matrixPosition.x >= 0 && _matrixPosition.x < MapSizeData.SIZE && _matrixPosition.y >= 0 && _matrixPosition.y < MapSizeData.SIZE)
+        FightMapTile _fightTile = null;
+        foreach (MapTile _tile in _map.mapTiles)
         {
-            int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * MapSizeData.SIZE;
-            if (indexPos >= 0 && indexPos < _map.mapTiles.Count)
-                _tile = (FightMapTile)_map.mapTiles[indexPos];
+            if (_tile.MatrixPositionWorld == _matrixPosition)
+            {
+                _fightTile = (FightMapTile) _tile;
+            }
         }
-        return _tile;
+        return _fightTile;
     }
 
     internal List<MapTile> GetTilesByRange(Map _map, MapTile _centerTile, int _rangeMin, int _rangeMax, bool _canWalk = false)
@@ -134,7 +135,7 @@ public class MapManager : Singleton<MapManager>
 
                 if (_sum >= _rangeMin && _sum <= _rangeMax)
                 {
-                    MapTile _tile = GetTileByMatrixPosition(_map, new Vector2Int(_x, _y));
+                    MapTile _tile = GetFightTileByMatrixPosition(_map, new Vector2Int(_x, _y));
                     if (_tile != null && _canWalk ? !_tile.IsOccupied : true)
                     {
                         _rangeTiles.Add(_tile);
@@ -145,4 +146,8 @@ public class MapManager : Singleton<MapManager>
         return _rangeTiles;
     }
 
+    internal bool IsDiagonal(MapTile _startTile, MapTile _endTile)
+    {
+        return Mathf.Abs(_startTile.MatrixPositionWorld.x - _endTile.MatrixPositionWorld.x) == 1 && Mathf.Abs(_startTile.MatrixPositionWorld.y - _endTile.MatrixPositionWorld.y) == 1;
+    }
 }

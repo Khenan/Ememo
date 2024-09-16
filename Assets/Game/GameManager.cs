@@ -39,7 +39,6 @@ public class GameManager : Singleton<GameManager>
     #region Fight
     public void GoToFight(FightData _fightData)
     {
-        StockCameraPosition();
         ExplorationManager.I.ClearGarbage();
         _gameSceneManagers["Exploration"].StopScene();
         ActiveScene("Fight");
@@ -50,21 +49,9 @@ public class GameManager : Singleton<GameManager>
     internal void ExitFightMode()
     {
         _gameSceneManagers["Fight"].StopScene();
-        RestoreCameraPosition();
         ActiveScene("Exploration");
         ExplorationSceneManager _manager = _gameSceneManagers["Exploration"] as ExplorationSceneManager;
         _manager.StartScene();
-    }
-    #endregion
-
-    #region Camera
-    private void StockCameraPosition()
-    {
-        lastCameraPosition = Camera.main.transform.position;
-    }
-    private void RestoreCameraPosition()
-    {
-        Camera.main.transform.position = lastCameraPosition;
     }
     #endregion
 
