@@ -72,10 +72,8 @@ public class Map : MonoBehaviour
     }
     public void ResetTileMatrixPositionsLocalTemporary()
     {
-        Debug.Log("mapTiles.Count: " + mapTiles.Count);
         for (int _i = 0; _i < mapTiles.Count; _i++)
         {
-            Debug.Log("mapTiles[_i]:" + mapTiles[_i]);
             mapTiles[_i].MatrixPositionLocalTemporary = new Vector2Int(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
         }
     }
