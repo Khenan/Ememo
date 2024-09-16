@@ -25,16 +25,18 @@ public class SpellData : ScriptableObject
     public int damage;
 }
 
+[System.Serializable]
 public class Cost {
     // récupère une statistique qui pourrait être un coup (genre PM ou HP ou Etats) et le fait payer.
 }
 
+[System.Serializable]
 public class Zone {
     public List<Vector2> tilesImpacted;
     // fait la liste des tiles impactés par le sort:
         // Exemple pour une croix : (0,0), (-1,0), (0,-1), (0,1), (1,0)
 }
 
-public class Effect {
+public abstract class Effect {
     // Liste les effects des sorts, peut être une classe abstracte avec chaque sort ayant des effets différents
 }

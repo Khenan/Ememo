@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d6a599df5bdfc0478f104dd8247cb00, type: 3}
   m_Name: SpellData_Fist
   m_EditorClassIdentifier: 
-  spellName: 
+  spellName: Fist
   description: Une bonne patate y'a rien de mieux
-  apCost: 0
+  apCost: 2
+  extraCosts: []
   isLignOfSight: 0
   isChangableRange: 0
   rangeMin: 0
@@ -24,6 +25,7 @@ MonoBehaviour:
   castPerTurn: 0
   castPerTarget: 0
   cooldown: 0
+  zones: []
   caster: {fileID: 0}
   targetedTiles: []
-  damage: 3
+  damage: 4
