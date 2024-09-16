@@ -8,8 +8,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool isLocalPlayer;
     public bool IsLocalPlayer => isLocalPlayer;
 
-    public Vector2 WorlMapMatrixPosition;
-    public Vector2 WorldTileMatrixPositionBase;
+    public Vector2Int WorlMapMatrixPosition;
+    public Vector2Int WorldTileMatrixPositionBase;
 
     // Character
     [SerializeField] private Character characterToInstantiate;
@@ -110,7 +110,7 @@ public class PlayerController : MonoBehaviour
                     // Show PM Path
                     if (currentSpellSelected == null && _tile.IsWalkable && !_tile.IsOccupied)
                     {
-                        if (FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile) <= character.CurrentData.currentMovementPoints)
+                        if (FightMapManager.I.DistanceBetweenTiles((FightMapTile)character.CurrentTile, _tile) <= character.CurrentData.currentMovementPoints)
                         {
                             ShowPMPath(_tile);
                             _highlight = true;
@@ -118,7 +118,7 @@ public class PlayerController : MonoBehaviour
                     }
                     else if (currentSpellSelected != null)
                     {
-                        if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
+                        if (FightMapManager.I.IsTileInRange((FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.SpellHighlightHover);
                         else
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { }, Colors.I.SpellHighlightSightless);
@@ -181,7 +181,7 @@ public class PlayerController : MonoBehaviour
 
     private FightMapTile HoverTileUnderMouse()
     {
-        return GetTileUnderMouseWithRaycast();
+        return GetFightTileUnderMouseWithRaycast();
     }
 
     private void InitActionAssets()
@@ -248,7 +248,7 @@ public class PlayerController : MonoBehaviour
 
     private void FightLeftClickAction(InputAction.CallbackContext _context)
     {
-        FightMapTile _tile = GetTileUnderMouseWithRaycast();
+        FightMapTile _tile = GetFightTileUnderMouseWithRaycast();
         if (_tile == null) return;
         if (lockOnFight)
         {
@@ -258,12 +258,12 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                MoveOnTile(_tile);
+                MoveOnFightTile(_tile);
             }
         }
         else
         {
-            SwitchCharacterPositionOnTile(_tile);
+            SwitchCharacterPositionOnFightTile(_tile);
         }
     }
     private void ExplorationLeftClickAction(InputAction.CallbackContext _context)
@@ -275,6 +275,10 @@ public class PlayerController : MonoBehaviour
             if (_hit.collider.TryGetComponent(out FightData _fightData))
             {
                 ExplorationManager.I.GoToFight(_fightData);
+            }
+            else if (_hit.collider.TryGetComponent(out ExplorationMapTile _tile))
+            {
+                SwitchTileCharacterOnExploTile(_tile);
             }
         }
     }
@@ -308,6 +312,16 @@ public class PlayerController : MonoBehaviour
         UpdateHUDUI();
     }
 
+    private void SwitchTileCharacterOnExploTile(ExplorationMapTile _tile)
+    {
+        if (_tile.IsWalkable)
+        {
+            ExplorationManager.I.SwitchTileCharacter(Character, _tile);
+        }
+    }
+
+    #region Fight
+
     private void ActionSelectionSpell(InputAction.CallbackContext _context = default, int _spellIndex = -1)
     {
         if (lockOnFight) SelectionSpell(_spellIndex);
@@ -330,7 +344,7 @@ public class PlayerController : MonoBehaviour
             {
                 foreach (var _tile in _rangeTiles)
                 {
-                    if (_tile != null && !FightMapManager.I.LineOfSight(character.CurrentTile, _tile))
+                    if (_tile != null && !FightMapManager.I.LineOfSight((FightMapTile)character.CurrentTile, _tile))
                         _tile.DisplayHighlight(true, Colors.I.SpellHighlightSightless);
                 }
             }
@@ -343,7 +357,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private FightMapTile GetTileUnderMouseWithRaycast()
+    private FightMapTile GetFightTileUnderMouseWithRaycast()
     {
         FightMapTile _tileToReturn = null;
         Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -361,13 +375,13 @@ public class PlayerController : MonoBehaviour
         return _tileToReturn;
     }
 
-    private void MoveOnTile(FightMapTile _tile)
+    private void MoveOnFightTile(FightMapTile _tile)
     {
         if (character.isMyTurn && canMoveOnThisTile && _tile.IsWalkable && !_tile.IsOccupied)
         {
             if (character.CurrentData.currentMovementPoints > 0)
             {
-                int _tileDistance = FightMapManager.I != null ? FightMapManager.I.DistanceBetweenTiles(character.CurrentTile, _tile) : -1;
+                int _tileDistance = FightMapManager.I != null ? FightMapManager.I.DistanceBetweenTiles((FightMapTile)character.CurrentTile, _tile) : -1;
                 if (_tileDistance != -1 && _tileDistance <= character.CurrentData.currentMovementPoints)
                 {
                     character.CurrentData.currentMovementPoints -= _tileDistance;
@@ -387,7 +401,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (character.CurrentData.currentActionPoints >= currentSpellSelected.cost)
                 {
-                    if (FightMapManager.I.IsTileInRange(character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
+                    if (FightMapManager.I.IsTileInRange((FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.withSight))
                     {
                         character.CurrentData.currentActionPoints -= currentSpellSelected.cost;
                         FightManager.I?.CastSpell(currentSpellSelected, _tile);
@@ -400,13 +414,12 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
     private List<FightMapTile> GetTilesFromSpellSelectedRange()
     {
         List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
-            FightMapTile _centerTile = character.CurrentTile;
+            FightMapTile _centerTile = (FightMapTile)character.CurrentTile;
             int rangeMin = currentSpellSelected.rangeMin;
             int rangeMax = currentSpellSelected.rangeMax;
             _rangeTiles = FightMapManager.I?.GetTilesByRange(_centerTile, rangeMin, rangeMax);
@@ -414,14 +427,14 @@ public class PlayerController : MonoBehaviour
         }
         return _rangeTiles;
     }
-    private void SwitchCharacterPositionOnTile(FightMapTile _tile)
+    private void SwitchCharacterPositionOnFightTile(FightMapTile _tile)
     {
-        if (_tile.IsStartTile && _tile.TeamId == Character.CurrentTile.TeamId)
+        FightMapTile _currentTile = (FightMapTile)character.CurrentTile;
+        if (_tile.IsStartTile && _tile.TeamId == _currentTile.TeamId)
         {
             FightMapManager.I?.SwitchTileCharacter(Character, _tile);
         }
     }
-    #region Fight
     internal void ReadyToFight()
     {
         isReadyToFight = true;

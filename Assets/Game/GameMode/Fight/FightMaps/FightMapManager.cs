@@ -164,7 +164,7 @@ public class FightMapManager : Singleton<FightMapManager>
 
     internal void SwitchTileCharacter(Character character, FightMapTile tile, bool _canSwitch = false)
     {
-        FightMapTile _oldTile = character.CurrentTile;
+        FightMapTile _oldTile = (FightMapTile)character.CurrentTile;
         Character _oldCharacter = tile.character;
 
         if (!_canSwitch && _oldCharacter != null)

@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class Map : MonoBehaviour
 {
-    public Vector2 matrixPosition = Vector2.zero;
+    public Vector2Int matrixPosition = Vector2Int.zero;
     public List<MapTile> mapTiles = new();
     public List<MapTile> GetTileOfYPosition(int _y)
     {
@@ -36,7 +37,7 @@ public class Map : MonoBehaviour
     {
         for(int _i = 0; _i < mapTiles.Count; _i++)
         {
-            mapTiles[_i].MatrixPosition = new Vector2(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
+            mapTiles[_i].MatrixPosition = new Vector2Int(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
             mapTiles[_i].MatrixPositionBase = mapTiles[_i].MatrixPosition;
             mapTiles[_i].ID = _i;
             mapTiles[_i].name = $"Tile_{(mapTiles[_i].IsWalkable ? "Walkable" : "Hole")}_{mapTiles[_i].MatrixPosition.x}_{mapTiles[_i].MatrixPosition.y}";
@@ -47,7 +48,12 @@ public class Map : MonoBehaviour
     {
         for(int _i = 0; _i < mapTiles.Count; _i++)
         {
-            mapTiles[_i].MatrixPosition = new Vector2(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
+            mapTiles[_i].MatrixPosition = new Vector2Int(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
         }
+    }
+
+    internal MapTile GetTileByMatrixPosition(Vector2Int _matrixPosition)
+    {
+        return mapTiles[_matrixPosition.x + _matrixPosition.y * MapSizeData.SIZE];
     }
 }
