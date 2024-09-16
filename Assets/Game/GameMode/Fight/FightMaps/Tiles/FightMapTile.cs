@@ -4,7 +4,6 @@ public partial class FightMapTile : MapTile
 {
     private Vector3 position;
     public Vector3 Position => position;
-    [SerializeField] public int tileID;
     [SerializeField] public bool isWalkable;
     public override bool IsWalkable => isWalkable;
     public override bool IsOccupied => character != null;
@@ -18,7 +17,7 @@ public partial class FightMapTile : MapTile
     public SpriteRenderer VisualTop => visualTop;
     [SerializeField] private SpriteRenderer highlight;
     public SpriteRenderer Highlight => highlight;
-    
+
     [SerializeField] private SpriteRenderer highlightTips;
     [SerializeField] private Sprite defaultSprite;
     [SerializeField] private Sprite blindSprite;

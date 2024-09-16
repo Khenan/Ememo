@@ -7,7 +7,7 @@ public class GameSceneManager : Singleton<GameSceneManager>
         base.Awake();
         root.gameObject.SetActive(false);
     }
-    public void StartScene()
+    public virtual void StartScene()
     {
         root.gameObject.SetActive(true);
     }

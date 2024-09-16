@@ -54,7 +54,6 @@ public class FightMapManager : Singleton<FightMapManager>
         List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
         currentMap = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
         FightManager.I.AddGarbage(currentMap.gameObject);
-        currentMap.Init();
         SetMapColor(currentMap);
         ShowStartTiles(currentMap);
         SetCameraPosition();
@@ -203,9 +202,9 @@ public class FightMapManager : Singleton<FightMapManager>
     internal FightMapTile GetTileByMatrixPosition(Vector2 _matrixPosition)
     {
         FightMapTile _tile = null;
-        if (_matrixPosition.x >= 0 && _matrixPosition.x < currentMap.Size.x && _matrixPosition.y >= 0 && _matrixPosition.y < currentMap.Size.y)
+        if (_matrixPosition.x >= 0 && _matrixPosition.x < MapSizeData.SIZE && _matrixPosition.y >= 0 && _matrixPosition.y < MapSizeData.SIZE)
         {
-            int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * (int)currentMap.Size.x;
+            int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * MapSizeData.SIZE;
             if (indexPos >= 0 && indexPos < currentMap.GetMapTileCount())
                 _tile = currentMap.GetTiles()[indexPos];
         }
