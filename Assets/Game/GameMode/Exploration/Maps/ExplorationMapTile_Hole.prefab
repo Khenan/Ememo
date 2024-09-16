@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: isWalkable
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4267011144730326953, guid: d9dcd6e38b2aa8f4190bc069b96535f9, type: 3}
+      propertyPath: hideVisualsOnStart
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
