@@ -9,7 +9,7 @@ public class SpellManager : Singleton<SpellManager>
     {
         foreach (SpellData spellData in spellDatas)
         {
-            if (spellName == spellData.name)
+            if (spellName == spellData.spellName)
             {
                 return spellData;
             }
