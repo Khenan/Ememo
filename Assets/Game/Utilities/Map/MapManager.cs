@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 public class MapManager : Singleton<MapManager>
 {
@@ -30,27 +32,27 @@ public class MapManager : Singleton<MapManager>
     {
         return Mathf.Abs(currentTile.MatrixPositionWorld.x - tile.MatrixPositionWorld.x) + Mathf.Abs(currentTile.MatrixPositionWorld.y - tile.MatrixPositionWorld.y);
     }
-    internal bool IsTileInRange(Map _map, MapTile _centerTile, MapTile _targetTile, int _rangeMin, int _rangeMax, bool _sight = false, bool _inFight = false)
+    internal bool IsTileInRange(List<MapTile> _tiles, MapTile _centerTile, MapTile _targetTile, int _rangeMin, int _rangeMax, bool _sight = false, bool _inFight = false)
     {
         bool _valueToReturn = false;
         bool _isInRangeMin = DistanceBetweenTiles(_centerTile, _targetTile) >= _rangeMin;
         bool _isInRangeMax = DistanceBetweenTiles(_centerTile, _targetTile) <= _rangeMax;
         bool _isInRange = _isInRangeMin && _isInRangeMax;
-        if (_isInRange && (_sight ? LineOfSight(_map, _centerTile, _targetTile, _inFight) : true))
+        if (_isInRange && (_sight ? LineOfSight(_tiles, _centerTile, _targetTile, _inFight) : true))
         {
             _valueToReturn = true;
         }
         return _valueToReturn;
     }
-    public bool LineOfSight(Map _map, MapTile _centerTile, MapTile _targetTile, bool _inFight = false)
+    public bool LineOfSight(List<MapTile> _tiles, MapTile _centerTile, MapTile _targetTile, bool _inFight = false)
     {
         if (_centerTile == null || _targetTile == null)
         {
             throw new ArgumentNullException("Les tuiles ne doivent pas être nulles è_é.");
         }
 
-        Vector2 centerPos = _centerTile.MatrixPositionWorld;
-        Vector2 targetPos = _targetTile.MatrixPositionWorld;
+        Vector2 centerPos = _centerTile.MatrixPositionLocalTemporary;
+        Vector2 targetPos = _targetTile.MatrixPositionLocalTemporary;
 
         int dx = (int)Mathf.Abs(targetPos.x - centerPos.x);
         int dy = (int)Mathf.Abs(targetPos.y - centerPos.y);
@@ -70,11 +72,11 @@ public class MapManager : Singleton<MapManager>
         {
             if (!(currentX == (int)centerPos.x && currentY == (int)centerPos.y))
             {
-                MapTile currentTile = GetTileByMatrixPosition(_map, new Vector2(currentX, currentY));
+                MapTile currentTile = GetFightTileByMatrixPositionTemporaryInList(_tiles, new Vector2Int(currentX, currentY));
                 if (currentTile != null && currentTile.BlockLineOfSight)
                 {
                     FightMapTile _characterTile = (FightMapTile)currentTile;
-                    if (_inFight && currentTile.MatrixPositionWorld == _characterTile.MatrixPositionWorld && _characterTile.character != null)
+                    if (_inFight && currentTile.MatrixPositionLocalTemporary == _characterTile.MatrixPositionLocalTemporary && _characterTile.character != null)
                     {
                         return true;
                     }
@@ -109,40 +111,59 @@ public class MapManager : Singleton<MapManager>
         return true;
     }
 
-    internal FightMapTile GetTileByMatrixPosition(Map _map, Vector2 _matrixPosition)
-    {
-        FightMapTile _tile = null;
-        if (_matrixPosition.x >= 0 && _matrixPosition.x < MapSizeData.SIZE && _matrixPosition.y >= 0 && _matrixPosition.y < MapSizeData.SIZE)
-        {
-            int indexPos = (int)_matrixPosition.x + (int)_matrixPosition.y * MapSizeData.SIZE;
-            if (indexPos >= 0 && indexPos < _map.mapTiles.Count)
-                _tile = (FightMapTile)_map.mapTiles[indexPos];
-        }
-        return _tile;
-    }
-
-    internal List<MapTile> GetTilesByRange(Map _map, MapTile _centerTile, int _rangeMin, int _rangeMax, bool _canWalk = false)
+    internal List<MapTile> GetTilesByRangeInTemporaryList(List<MapTile> _tiles, MapTile _centerTile, int _rangeMin, int _rangeMax, bool _canWalk = false)
     {
         List<MapTile> _rangeTiles = new();
-        int _startX = _centerTile.MatrixPositionWorld.x;
-        int _startY = _centerTile.MatrixPositionWorld.y;
-        for (int _x = _startX - _rangeMax; _x <= _startX + _rangeMax; _x++)
+        int _startX = _centerTile.MatrixPositionLocalTemporary.x;
+        int _startY = _centerTile.MatrixPositionLocalTemporary.y;
+        // Get max Y or X in tiles
+        int _rangeTilesMaxX = _tiles.Max(_t => _t.MatrixPositionLocalTemporary.x);
+        int _rangeTilesMaxY = _tiles.Max(_t => _t.MatrixPositionLocalTemporary.y);
+        int _rangeMaxTiles = Mathf.Max(_rangeTilesMaxX, _rangeTilesMaxY);
+        Debug.Log("_rangeMaxTiles: " + _rangeMaxTiles);
+        Debug.Log("_tiles.Count: " + _tiles.Count);
+
+        int _i = 0;
+        for (int _x = 0; _x <= _rangeTilesMaxX; _x++)
         {
-            for (int _y = _startY - _rangeMax; _y <= _startY + _rangeMax; _y++)
+            for (int _y = 0; _y <= _rangeTilesMaxY; _y++)
             {
                 int _sum = Mathf.Abs(_x - _startX) + Mathf.Abs(_y - _startY);
-
+                _i++;
                 if (_sum >= _rangeMin && _sum <= _rangeMax)
                 {
-                    MapTile _tile = GetTileByMatrixPosition(_map, new Vector2Int(_x, _y));
-                    if (_tile != null && _canWalk ? !_tile.IsOccupied : true)
+                    MapTile _tile = GetFightTileByMatrixPositionTemporaryInList(_tiles, new Vector2Int(_x, _y));
+                    if (_tile != null)
                     {
+                        if(_canWalk && (!_tile.IsWalkable || _tile.IsOccupied))
+                        {
+                            continue;
+                        }
                         _rangeTiles.Add(_tile);
                     }
                 }
             }
         }
+        Debug.Log("_i: " + _i);
         return _rangeTiles;
     }
 
+    private MapTile GetFightTileByMatrixPositionTemporaryInList(List<MapTile> _tiles, Vector2Int _matrixPositionTemporary)
+    {
+        MapTile _tile = null;
+        foreach (MapTile _mapTile in _tiles)
+        {
+            if (_mapTile.MatrixPositionLocalTemporary == _matrixPositionTemporary)
+            {
+                _tile = _mapTile;
+                break;
+            }
+        }
+        return _tile;
+    }
+
+    internal bool IsDiagonal(MapTile _startTile, MapTile _endTile)
+    {
+        return Mathf.Abs(_startTile.MatrixPositionWorld.x - _endTile.MatrixPositionWorld.x) == 1 && Mathf.Abs(_startTile.MatrixPositionWorld.y - _endTile.MatrixPositionWorld.y) == 1;
+    }
 }

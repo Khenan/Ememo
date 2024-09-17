@@ -46,8 +46,8 @@ public class Map : MonoBehaviour
     {
         for (int _i = 0; _i < mapTiles.Count; _i++)
         {
-            mapTiles[_i].MatrixPositionLocalTemporary = Vector2Int.zero;
             mapTiles[_i].MatrixPositionLocal = new Vector2Int(_i % MapSizeData.SIZE, _i / MapSizeData.SIZE);
+            mapTiles[_i].MatrixPositionLocalTemporary = mapTiles[_i].MatrixPositionLocal;
             int _worldX = mapTiles[_i].MatrixPositionLocal.x + (MapSizeData.SIZE * matrixPosition.x);
             int _worldY = mapTiles[_i].MatrixPositionLocal.y + (MapSizeData.SIZE * matrixPosition.y);
             mapTiles[_i].MatrixPositionWorld = new Vector2Int(_worldX, _worldY);
