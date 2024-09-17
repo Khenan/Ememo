@@ -10,13 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d6a599df5bdfc0478f104dd8247cb00, type: 3}
-  m_Name: SpellData_FireBall
+  m_Name: SpellData_WaterBall
   m_EditorClassIdentifier: 
-  name: Fire Ball
-  description: Une boule de feu
-  cost: 3
-  level: 1
-  withSight: 1
-  rangeMin: 1
-  rangeMax: 10
-  damage: 10
+  spellName: WaterBall
+  description: 
+  apCost: 0
+  extraCosts: []
+  isLignOfSight: 0
+  isChangeableRange: 0
+  rangeMin: 0
+  rangeMax: 0
+  targetTypes: []
+  isTargetRequired: 0
+  castPerTurn: 0
+  castPerTarget: 0
+  cooldown: 0
+  zones: []
+  caster: {fileID: 0}
+  targetedTiles: []
+  effects: []
+  damage: 0

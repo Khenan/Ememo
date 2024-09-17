@@ -201,7 +201,7 @@ GameObject:
   - component: {fileID: 1430534583662621305}
   - component: {fileID: 4858684018122643145}
   m_Layer: 5
-  m_Name: HealthBar
+  m_Name: HealthBar_Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -226,7 +226,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 130}
+  m_AnchoredPosition: {x: 0, y: 92.795}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4858684018122643145
@@ -241,8 +241,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca66cd5ffb564f64b8895fb323f5d416, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxValue: 100
-  Value: 100
   barCursor: {fileID: 1218902804597561468}
 --- !u!1 &2146346179731535903
 GameObject:
@@ -546,9 +544,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 100}
-  m_SizeDelta: {x: 250, y: 200}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 298.247, y: 168.488}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &5785803967049199934
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -748,7 +746,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8113541796271648799}
   m_Layer: 5
-  m_Name: MPCounter
+  m_Name: MP_Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -771,8 +769,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 50, y: -50}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 89, y: -39.35}
+  m_SizeDelta: {x: 100, y: 121.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7399281468071641120
 GameObject:
@@ -784,7 +782,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1614103135911888505}
   m_Layer: 5
-  m_Name: APCounter
+  m_Name: AP_Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -807,8 +805,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -50, y: -50}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: -99, y: -39.35}
+  m_SizeDelta: {x: 100, y: 121.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &8179690385308104243
 GameObject:
@@ -859,8 +857,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2bfbe494480fc4790e1658d3cc6805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  apPanel: {fileID: 1614103135911888505}
   apValue: {fileID: 7352320624641305577}
+  mpPanel: {fileID: 8113541796271648799}
   mpValue: {fileID: 903803366862926814}
+  hpPanel: {fileID: 1430534583662621305}
   hpValue: {fileID: 3198720674643873962}
 --- !u!1 &8360591619353652951
 GameObject:
