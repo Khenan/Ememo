@@ -20,7 +20,7 @@ public abstract class MapTile : MonoBehaviour
 
         bool _odd = (MatrixPositionWorld.x + MatrixPositionWorld.y) % 2 == 0;
         SpriteRenderer _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        if (_spriteRenderer != null) _spriteRenderer.color = _odd ? Colors.I.FloorOdd : Colors.I.FloorEven;
+        if (_spriteRenderer != null && IsWalkable) _spriteRenderer.color = _odd ? Colors.I.FloorOdd : Colors.I.FloorEven;
     }
 
     private void HideVisuals()
