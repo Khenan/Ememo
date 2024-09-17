@@ -6,7 +6,6 @@ public static class ConcatenatorMapList
 {
     public static List<MapTile> ConcatenateMaps(List<Map> _mapList)
     {
-        Debug.Log(_mapList.Count);
         List<MapTile> _concatenatedMap = new();
         List<Map> _orderedMapList = OrderByMatrixPosition(_mapList);
         ResetMatrixPositionOfAllTiles(_orderedMapList);
