@@ -128,7 +128,7 @@ public class PlayerController : MonoBehaviour
 
     private void ShowPMPath(FightMapTile _tile)
     {
-        List<FightMapTile> _tiles = AStar.FindPath(character.CurrentTile, _tile);
+        List<FightMapTile> _tiles = TestAStar.SearchPath(character.CurrentTile, _tile);
         if (_tiles != null && _tiles.Count > 0 && _tiles.Count <= character.CurrentData.currentMovementPoints)
         {
             canMoveOnThisTile = true;
@@ -353,7 +353,7 @@ public class PlayerController : MonoBehaviour
     }
     internal void StartTurn()
     {
-        
+
     }
     internal void EndTurn()
     {
