@@ -28,7 +28,6 @@ public class Character : MonoBehaviour
 
     // Visual
     [SerializeField] private Transform visualRoot;
-    [SerializeField] private float visualCharacterSpeed = 15f;
 
     // Actions
     public Action OnStartTurn;
@@ -155,11 +154,24 @@ public class Character : MonoBehaviour
         IdleAnimationStretchAndSquashScale();
     }
 
-    internal void ChangeVisualDirection(MapTile _mapTile)
+    internal void ChangeVisualDirection(Direction _direction)
     {
-        if (visualRoot == null || _mapTile == null) return;
+        if (visualRoot == null) return;
 
-        Vector3 _direction = _mapTile.transform.position - visualRoot.position;
-        visualRoot.forward = _direction;
+        switch (_direction)
+        {
+            case Direction.Up:
+                visualRoot.forward = Vector3.forward;
+                break;
+            case Direction.Down:
+                visualRoot.forward = Vector3.back;
+                break;
+            case Direction.Left:
+                visualRoot.forward = Vector3.left;
+                break;
+            case Direction.Right:
+                visualRoot.forward = Vector3.right;
+                break;
+        }
     }
 }
