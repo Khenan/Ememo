@@ -89,7 +89,7 @@ public class TestAStar : MonoBehaviour
 
     internal static FightMapTile GetNeighboorTile(FightMapTile _tile, Vector2 _direction)
     {
-        FightMapTile _neighboorTile = FightMapManager.I.GetTileByMatrixPosition(_tile.MatrixPosition + _direction);
+        FightMapTile _neighboorTile = MapManager.I.GetTileByMatrixPosition(_tile.map, _tile.MatrixPositionLocalTemporary + _direction);
         return _neighboorTile;
     }
 
@@ -136,6 +136,6 @@ public class TestAStar : MonoBehaviour
     }
     internal static int GetDistance(FightMapTile _currentTile, FightMapTile _goalTile)
     {
-        return (int)Mathf.Abs(_currentTile.MatrixPosition.x - _goalTile.MatrixPosition.x) + (int)Mathf.Abs(_currentTile.MatrixPosition.y - _goalTile.MatrixPosition.y);
+        return (int)Mathf.Abs(_currentTile.MatrixPositionLocalTemporary.x - _goalTile.MatrixPositionLocalTemporary.x) + (int)Mathf.Abs(_currentTile.MatrixPositionLocalTemporary.y - _goalTile.MatrixPositionLocalTemporary.y);
     }
 }
