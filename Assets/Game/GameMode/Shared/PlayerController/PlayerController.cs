@@ -123,7 +123,6 @@ public class PlayerController : MonoBehaviour
                 // Show PM remaining of Hover Character
                 if (currentSpellSelected == null && _tile.character != null)
                 {
-                    Debug.Log("_tile.character: " + _tile.character);
                     HoverHighlightPMOfCharacter(_tile);
                     _highlight = true;
                 }
@@ -198,9 +197,7 @@ public class PlayerController : MonoBehaviour
         int _currentPM = _tile.character.CurrentData.currentMovementPoints;
 
         List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(FightManager.I.currentMaps.ConvertAll(_m => (Map)_m));
-        Debug.Log("Before _rangeTiles.Count");
         List<FightMapTile> _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, _tile, 1, _currentPM, true).ConvertAll(_t => (FightMapTile)_t);
-        Debug.Log("_rangeTiles.Count: " + _rangeTiles.Count);
         _rangeTiles.Add(_tile);
         FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.PMPathHoverCharacter);
     }
@@ -250,8 +247,6 @@ public class PlayerController : MonoBehaviour
     }
     private List<MapTile> GetAllTilesBetweenTwoTiles(MapTile _currentTile, MapTile _targetTile)
     {
-        Debug.Log("_currentTile: " + _currentTile);
-        Debug.Log("_targetTile: " + _targetTile);
         List<Map> _maps = new();
         if (_currentTile.map.matrixPosition == _targetTile.map.matrixPosition)
         {
@@ -274,8 +269,6 @@ public class PlayerController : MonoBehaviour
             {
                 List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(_startTile, _targetTile);
                 _mapTiles = AStar.FindPath(_allTiles, _startTile, _targetTile, true);
-                Debug.Log(_mapTiles[^1], _mapTiles[^1]);
-                Debug.Log(_mapTiles.Count);
             }
         }
         return _mapTiles;

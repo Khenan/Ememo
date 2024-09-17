@@ -120,16 +120,12 @@ public class MapManager : Singleton<MapManager>
         int _rangeTilesMaxX = _tiles.Max(_t => _t.MatrixPositionLocalTemporary.x);
         int _rangeTilesMaxY = _tiles.Max(_t => _t.MatrixPositionLocalTemporary.y);
         int _rangeMaxTiles = Mathf.Max(_rangeTilesMaxX, _rangeTilesMaxY);
-        Debug.Log("_rangeMaxTiles: " + _rangeMaxTiles);
-        Debug.Log("_tiles.Count: " + _tiles.Count);
 
-        int _i = 0;
         for (int _x = 0; _x <= _rangeTilesMaxX; _x++)
         {
             for (int _y = 0; _y <= _rangeTilesMaxY; _y++)
             {
                 int _sum = Mathf.Abs(_x - _startX) + Mathf.Abs(_y - _startY);
-                _i++;
                 if (_sum >= _rangeMin && _sum <= _rangeMax)
                 {
                     MapTile _tile = GetFightTileByMatrixPositionTemporaryInList(_tiles, new Vector2Int(_x, _y));
@@ -144,7 +140,6 @@ public class MapManager : Singleton<MapManager>
                 }
             }
         }
-        Debug.Log("_i: " + _i);
         return _rangeTiles;
     }
 
