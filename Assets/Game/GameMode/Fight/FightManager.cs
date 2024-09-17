@@ -162,15 +162,12 @@ public class FightManager : Singleton<FightManager>
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
-    {
-        Debug.Log("Cast spell " + _currentSpellSelected.spellName + " on tile " + _tile.Position);
-        // On check si il y a un character sur la tile
-        if (_tile.character != null)
-        {
-            Debug.Log("Target: " + _tile.character.CharacterName);
-            _tile.character.TakeDamage(_currentSpellSelected.damage);
-            UpdateUILocalPlayer();
-        }
+    {      
+        SpellEffectData _data = new(){
+            target= _tile.character
+        };
+        _currentSpellSelected.CastSpell(_data);
+        UpdateUILocalPlayer();
     }
 
     #region Initialisation Methods
