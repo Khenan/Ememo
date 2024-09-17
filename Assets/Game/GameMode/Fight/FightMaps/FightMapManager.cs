@@ -12,7 +12,7 @@ public class FightMapManager : Singleton<FightMapManager>
     public FightMapTile lastTileHovered;
     private List<FightMapTile> lastTilesHighlighted = new();
 
-    private FightMap currentMap;
+    private List<FightMap> currentMaps = new();
 
     private class OldHighlight
     {
@@ -33,7 +33,7 @@ public class FightMapManager : Singleton<FightMapManager>
     //     }
     // }
 
-    internal FightMap GetMap(int _areaId)
+    internal FightMap GetMapPrefab(int _areaId)
     {
         List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
         return possibleMaps[Random.Range(0, possibleMaps.Count)];
@@ -42,11 +42,12 @@ public class FightMapManager : Singleton<FightMapManager>
     public FightMap InitMap(int _areaId)
     {
         List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
-        currentMap = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
-        FightManager.I.AddGarbage(currentMap.gameObject);
-        SetMapColor(currentMap);
-        ShowStartTiles(currentMap);
-        return currentMap;
+        FightMap _map = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
+        currentMaps.Add(_map);
+        FightManager.I.AddGarbage(_map.gameObject);
+        SetMapColor(_map);
+        ShowStartTiles(_map);
+        return _map;
     }
 
     private void SetMapColor(FightMap _map)
@@ -143,7 +144,10 @@ public class FightMapManager : Singleton<FightMapManager>
 
     public void StartFight()
     {
-        currentMap.GetStartTiles().ForEach(tile => tile.HideStartTile());
+        foreach (FightMap _map in currentMaps)
+        {
+            _map.GetStartTiles().ForEach(tile => tile.HideStartTile());
+        }
     }
 
     internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
@@ -186,5 +190,10 @@ public class FightMapManager : Singleton<FightMapManager>
         {
             _oldTile.character = null;
         }
+    }
+
+    internal List<FightMap> GetAllCurrentFightMaps()
+    {
+        return currentMaps;
     }
 }
