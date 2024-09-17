@@ -18,7 +18,8 @@ public class PlayerController : MonoBehaviour
     public Character Character => character;
 
     // Path
-    private List<MapTile> lastPath;
+    private List<MapTile> nextPath;
+    private bool newPathOnCurrentPath = false;
     private List<MapTile> currentPath;
     private int currentPathIndex = 0;
     private bool onMove = false;
@@ -151,11 +152,9 @@ public class PlayerController : MonoBehaviour
 
                 currentMoveTimer += Time.deltaTime / _speedMultiplier;
 
-                if (temporaryPositionEnable)
-                {
-                    character.transform.position = Vector3.Lerp(temporaryPosition, currentPath[currentPathIndex].transform.position, currentMoveTimer / maxMoveTimer);
-                }
-                else character.transform.position = Vector3.Lerp(character.CurrentTile.transform.position, currentPath[currentPathIndex].transform.position, currentMoveTimer / maxMoveTimer);
+                Vector3 _startPosition = temporaryPositionEnable ? temporaryPosition : character.CurrentTile.transform.position;
+                Vector3 _nextPosition = currentPath[currentPathIndex].transform.position;
+                character.transform.position = Vector3.Lerp(_startPosition, _nextPosition, currentMoveTimer / maxMoveTimer);
             }
             else
             {
@@ -163,14 +162,23 @@ public class PlayerController : MonoBehaviour
                 currentMoveTimer = 0;
                 SwitchTileCharacterOnExploTile(currentPath[currentPathIndex] as ExplorationMapTile);
                 currentPathIndex++;
+                if (newPathOnCurrentPath)
+                {
+                    currentPath = nextPath;
+                    newPathOnCurrentPath = false;
+                    currentPathIndex = 0;
+                }
 
                 if (currentPathIndex >= currentPath.Count)
                 {
-                    onMove = false;
-                    currentPath = null;
                     directionCharacterVisualInit = false;
                     currentPathIndex = 0;
                     currentMoveTimer = 0;
+
+                    currentPath = null;
+                    nextPath = null;
+                    newPathOnCurrentPath = false;
+                    onMove = false;
                 }
                 else
                 {
@@ -225,11 +233,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private List<MapTile> GetPathInExploration(MapTile _tile)
+    private List<MapTile> GetPathInExploration(MapTile _startTile, MapTile _targetTile)
     {
         List<Map> _maps = new();
-        Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
-        Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
+        Vector2 _mapTargetMatrix = _targetTile.map.matrixPosition;
+        Vector2 _mapCurrentMatrix = _startTile.map.matrixPosition;
 
         // Get all maps between the current map and the target map
         int _minX = (int)Mathf.Min(_mapTargetMatrix.x, _mapCurrentMatrix.x);
@@ -242,8 +250,8 @@ public class PlayerController : MonoBehaviour
                 _mapsBetween.Add(_map);
         _mapsBetween.ForEach(_m => _maps.Add(_m));
 
-        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
-        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile, true);
+        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, _startTile, _targetTile);
+        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, _startTile, _targetTile, true);
         Debug.Log(_mapTiles[^1], _mapTiles[^1]);
         Debug.Log(_mapTiles.Count);
         return _mapTiles;
@@ -353,7 +361,10 @@ public class PlayerController : MonoBehaviour
 
                     if (_tile != null && _tile.IsWalkable && !_tile.IsOccupied)
                     {
-                        List<MapTile> _path = GetPathInExploration(_tile);
+                        List<MapTile> _path;
+                        if (onMove) _path = GetPathInExploration(currentPath[currentPathIndex], _tile);
+                        else _path = GetPathInExploration(character.CurrentTile, _tile);
+
                         if (_path != null && _path.Count > 0)
                         {
                             if (onMove)
@@ -361,9 +372,14 @@ public class PlayerController : MonoBehaviour
                                 temporaryPosition = character.transform.position;
                                 temporaryPositionEnable = true;
                                 directionCharacterVisualInit = false;
+                                newPathOnCurrentPath = true;
+                                nextPath = _path;
                             }
-                            currentPath = _path;
-                            currentPathIndex = 0;
+                            else
+                            {
+                                currentPath = _path;
+                                currentPathIndex = 0;
+                            }
                             onMove = true;
                         }
                     }
