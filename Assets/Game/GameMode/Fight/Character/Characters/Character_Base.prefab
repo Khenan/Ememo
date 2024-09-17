@@ -340,7 +340,7 @@ MonoBehaviour:
     defaultHealth: 10
     defaultInitiative: 0
     defaultActionPoints: 6
-    defaultMovementPoints: 300
+    defaultMovementPoints: 3
   teamId: 0
   isMyTurn: 0
   isHumanController: 0
