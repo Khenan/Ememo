@@ -436,9 +436,36 @@ public class PlayerController : MonoBehaviour
     {
         if (_tile.IsWalkable)
         {
+            ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
             WorldTileMatrixPositionBase = _tile.MatrixPositionWorld;
             WorlMapMatrixPosition = _tile.map.matrixPosition;
-            ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
+            CheckLineOfSightExploration();
+        }
+    }
+
+    private void CheckLineOfSightExploration()
+    {
+        if (character != null)
+        {
+            int _range = 20;
+            int _lineOfSight = 10;
+            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(WorldMapManager.I.CurrentMaps);
+            List<MapTile> _tiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, 0, _range);
+            Debug.Log("_tiles.Count: " + _tiles.Count);
+            foreach (MapTile _tile in _tiles)
+            {
+                if (_tile != null && _tile != character.CurrentTile)
+                {
+                    if (!MapManager.I.IsTileInRange(_tiles, character.CurrentTile, _tile, 0, _lineOfSight, true))
+                    {
+                        _tile.DisplayTips(true, Colors.I.Dark, TipsType.Blind);
+                    }
+                    else
+                    {
+                        _tile.DisplayTips(false);
+                    }
+                }
+            }
         }
     }
     #endregion
@@ -514,7 +541,7 @@ public class PlayerController : MonoBehaviour
                 {
                     if (_pathTiles.Count > 1) ChangeCharacterDirection(_pathTiles[^2], _pathTiles[^1]);
                     else if (_pathTiles.Count == 1) ChangeCharacterDirection(character.CurrentTile, _tile);
-                    
+
                     character.CurrentData.currentMovementPoints -= _pmCountToMove;
                     FightMapManager.I?.SwitchTileCharacter(Character, _tile);
                     character.UpdateAllUI();

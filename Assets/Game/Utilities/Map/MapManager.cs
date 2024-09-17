@@ -75,10 +75,17 @@ public class MapManager : Singleton<MapManager>
                 MapTile currentTile = GetFightTileByMatrixPositionTemporaryInList(_tiles, new Vector2Int(currentX, currentY));
                 if (currentTile != null && currentTile.BlockLineOfSight)
                 {
-                    FightMapTile _characterTile = (FightMapTile)currentTile;
-                    if (_inFight && currentTile.MatrixPositionLocalTemporary == _characterTile.MatrixPositionLocalTemporary && _characterTile.character != null)
+                    if (_inFight)
                     {
-                        return true;
+                        FightMapTile _characterTile = (FightMapTile)currentTile;
+                        if (_inFight && currentTile.MatrixPositionLocalTemporary == _characterTile.MatrixPositionLocalTemporary && _characterTile.character != null)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                     else
                     {
@@ -131,7 +138,7 @@ public class MapManager : Singleton<MapManager>
                     MapTile _tile = GetFightTileByMatrixPositionTemporaryInList(_tiles, new Vector2Int(_x, _y));
                     if (_tile != null)
                     {
-                        if(_canWalk && (!_tile.IsWalkable || _tile.IsOccupied))
+                        if (_canWalk && (!_tile.IsWalkable || _tile.IsOccupied))
                         {
                             continue;
                         }
