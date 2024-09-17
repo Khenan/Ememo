@@ -35,8 +35,6 @@ public class PlayerController : MonoBehaviour
     private bool isReadyToFight = false;
     public bool IsReadyToFight => isReadyToFight;
     public Action OnPlayerReady;
-    private bool canMoveOnThisTile = false;
-    private int pmCountToMove = 0;
 
     // Spell 
     private SpellData currentSpellSelected;
@@ -140,7 +138,7 @@ public class PlayerController : MonoBehaviour
         {
             if (!directionCharacterVisualInit)
             {
-                character.ChangeVisualDirection(currentPath[currentPathIndex]);
+                ChangeCharacterDirection(character.CurrentTile, currentPath[currentPathIndex]);
                 directionCharacterVisualInit = true;
             }
             if (currentMoveTimer < maxMoveTimer)
@@ -185,7 +183,7 @@ public class PlayerController : MonoBehaviour
                 {
                     // direction of character
                     if (character.CurrentTile.MatrixPositionWorld != currentPath[currentPathIndex].MatrixPositionWorld)
-                        character.ChangeVisualDirection(currentPath[currentPathIndex]);
+                        ChangeCharacterDirection(character.CurrentTile, currentPath[currentPathIndex]);
                 }
             }
         }
@@ -216,14 +214,10 @@ public class PlayerController : MonoBehaviour
 
         if (_pathTiles != null && _pathTiles.Count > 0 && _pathTiles.Count <= character.CurrentData.currentMovementPoints)
         {
-            canMoveOnThisTile = true;
-            pmCountToMove = _pathTiles.Count;
             FightMapManager.I.ShowHighlightTiles(_pathTiles, Colors.I.PMPath);
         }
         else
         {
-            canMoveOnThisTile = false;
-            pmCountToMove = 0;
             FightMapManager.I.HideHighlightTiles();
         }
     }
@@ -506,19 +500,41 @@ public class PlayerController : MonoBehaviour
 
     private void MoveOnFightTile(FightMapTile _tile)
     {
-        if (character.isMyTurn && canMoveOnThisTile && _tile.IsWalkable && !_tile.IsOccupied)
+
+        if (character.isMyTurn && _tile.IsWalkable && !_tile.IsOccupied)
         {
-            if (character.CurrentData.currentMovementPoints >= pmCountToMove)
+            List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
+            List<MapTile> _path = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+            List<FightMapTile> _pathTiles = _path.ConvertAll(_t => (FightMapTile)_t);
+            int _pmCountToMove = _pathTiles.Count;
+            if (_pmCountToMove <= 0) return;
+            if (character.CurrentData.currentMovementPoints >= _pmCountToMove)
             {
-                int _tileDistance = pmCountToMove;
-                if (_tileDistance != -1 && _tileDistance <= character.CurrentData.currentMovementPoints)
+                if (_pmCountToMove <= character.CurrentData.currentMovementPoints)
                 {
-                    character.CurrentData.currentMovementPoints -= _tileDistance;
+                    if (_pathTiles.Count > 1) ChangeCharacterDirection(_pathTiles[^2], _pathTiles[^1]);
+                    else if (_pathTiles.Count == 1) ChangeCharacterDirection(character.CurrentTile, _tile);
+                    
+                    character.CurrentData.currentMovementPoints -= _pmCountToMove;
                     FightMapManager.I?.SwitchTileCharacter(Character, _tile);
                     character.UpdateAllUI();
                     FightMapManager.I?.HideHighlightTiles();
                 }
             }
+        }
+    }
+
+    private void ChangeCharacterDirection(MapTile _startTile, MapTile _endTile)
+    {
+        if (_startTile != null && _endTile != null)
+        {
+            Vector2Int _vectorDirection = _endTile.MatrixPositionWorld - _startTile.MatrixPositionWorld;
+            Direction _direction = Direction.Up;
+            if (_vectorDirection == Vector2Int.up) _direction = Direction.Down;
+            else if (_vectorDirection == Vector2Int.down) _direction = Direction.Up;
+            else if (_vectorDirection == Vector2Int.left) _direction = Direction.Left;
+            else if (_vectorDirection == Vector2Int.right) _direction = Direction.Right;
+            character.ChangeVisualDirection(_direction);
         }
     }
 

@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2450514541865617099, guid: 19f08c0856eacf04483cf8eac2f0e7e8, type: 3}
       propertyPath: data.defaultMovementPoints
-      value: 50
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2533884528056837967, guid: 19f08c0856eacf04483cf8eac2f0e7e8, type: 3}
       propertyPath: m_Name
