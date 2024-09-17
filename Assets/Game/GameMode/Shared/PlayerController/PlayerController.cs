@@ -122,7 +122,7 @@ public class PlayerController : MonoBehaviour
                 }
                 // Show PM remaining of Hover Character
                 if (currentSpellSelected == null && _tile.character != null)
-                {                    
+                {
                     Debug.Log("_tile.character: " + _tile.character);
                     HoverHighlightPMOfCharacter(_tile);
                     _highlight = true;
@@ -551,16 +551,12 @@ public class PlayerController : MonoBehaviour
     }
     private List<FightMapTile> GetTilesFromSpellSelectedRange()
     {
+        FightMapManager.I.HideHighlightTiles();
         List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
-            FightMapTile _centerTile = (FightMapTile)character.CurrentTile;
-            int rangeMin = currentSpellSelected.rangeMin;
-            int rangeMax = currentSpellSelected.rangeMax;
-            List<FightMap> _fightMaps = FightMapManager.I?.GetAllCurrentFightMaps();
-            List<Map> _maps = _fightMaps.ConvertAll(_m => (Map)_m);
-            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps);
-            _rangeTiles = MapManager.I?.GetTilesByRangeInTemporaryList(_allTiles, _centerTile, rangeMin, rangeMax).ConvertAll(_t => (FightMapTile)_t);
+            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(FightManager.I.currentMaps.ConvertAll(_m => (Map)_m));
+            _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax).ConvertAll(_t => (FightMapTile)_t);
             return _rangeTiles;
         }
         return _rangeTiles;
