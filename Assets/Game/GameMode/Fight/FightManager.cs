@@ -22,29 +22,22 @@ public class FightManager : Singleton<FightManager>
     private bool onFight = false;
     private bool fightIsOver = false;
 
+    // Garbage
+    private List<GameObject> garbage = new();
+
     [SerializeField] private FightData fightData;
     private FightMap currentMap;
+    public List<FightMap> currentMaps = new();
 
-    private void Start()
+    public void EnterFight(FightData _fightData)
     {
+        fightData = _fightData;
         InitFight(fightData);
+        fightIsOver = false;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (!onFight)
-            {
-                players.ForEach(player => player.ReadyToFight());
-                CheckAllPlayersReady();
-            }
-            else
-            {
-                if (currentCharacter != null && currentCharacter.isHumanController) EndTurn(currentCharacter);
-            }
-        }
-
         if (currentCharacter != null && !currentCharacter.isHumanController)
         {
             currentTimer += Time.deltaTime;
@@ -109,7 +102,8 @@ public class FightManager : Singleton<FightManager>
     internal void OnCharacterDead(Character _character)
     {
         if (InitiativeUIManager.I != null) InitiativeUIManager.I.CharacterDead(characters.IndexOf(_character));
-        _character.CurrentTile.character = null;
+        FightMapTile _tile = (FightMapTile)_character.CurrentTile;
+        _tile.character = null;
         CheckEndFight();
     }
 
@@ -122,6 +116,35 @@ public class FightManager : Singleton<FightManager>
             fightIsOver = true;
             Debug.Log("Fight is over");
             Debug.Log("Team " + characters.First(character => !character.IsDead).teamId + " wins");
+            EndFight();
+        }
+    }
+
+    private void EndFight()
+    {
+        ClearGarbage();
+        UnlockAllPlayersOnFight();
+        GameManager.I.ExitFightMode();
+    }
+
+    private void UnlockAllPlayersOnFight()
+    {
+        foreach (PlayerController _player in players)
+        {
+            _player.EndFight();
+        }
+    }
+
+    public void AddGarbage(GameObject _go)
+    {
+        garbage.Add(_go);
+    }
+
+    private void ClearGarbage()
+    {
+        foreach (GameObject _go in garbage)
+        {
+            Destroy(_go);
         }
     }
 
@@ -139,15 +162,12 @@ public class FightManager : Singleton<FightManager>
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
-    {
-        Debug.Log("Cast spell " + _currentSpellSelected.name + " on tile " + _tile.Position);
-        // On check si il y a un character sur la tile
-        if (_tile.character != null)
-        {
-            Debug.Log("Target: " + _tile.character.CharacterName);
-            _tile.character.TakeDamage(_currentSpellSelected.damage);
-            UpdateUILocalPlayer();
-        }
+    {      
+        SpellEffectData _data = new(){
+            target= _tile.character
+        };
+        _currentSpellSelected.CastSpell(_data);
+        UpdateUILocalPlayer();
     }
 
     #region Initialisation Methods
@@ -239,13 +259,9 @@ public class FightManager : Singleton<FightManager>
         {
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             int _randomCharacterIndex = UnityEngine.Random.Range(0, _characters.Count);
-
-            Character _character = Instantiate(_characters[_randomCharacterIndex]);
-            _character.transform.position = _teamTiles[_randomTileIndex].transform.position;
-            _teamTiles[_randomTileIndex].character = _character;
-            _character.CurrentTile = _teamTiles[_randomTileIndex];
-            SetCharacterOnTile(_character, _teamTiles[_randomTileIndex], currentMap);
+            Character _character = InstantiateCharacter(_characters[_randomCharacterIndex], _teamTiles, _randomTileIndex);
             characters.Add(_character);
+            AddGarbage(_character.gameObject);
 
             _characters.RemoveAt(_randomCharacterIndex);
             _teamTiles.RemoveAt(_randomTileIndex);
@@ -287,6 +303,8 @@ public class FightManager : Singleton<FightManager>
         _tiles[_tileIndex].character = _character;
         _character.CurrentTile = _tiles[_tileIndex];
         SetCharacterOnTile(_character, _tiles[_tileIndex], currentMap);
+        AddGarbage(_character.gameObject);
+        _character.SetCharacterMode(CharacterMode.Fight);
         return _character;
     }
     #endregion

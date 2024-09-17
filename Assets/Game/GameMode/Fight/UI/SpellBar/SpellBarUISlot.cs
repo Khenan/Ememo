@@ -28,7 +28,7 @@ internal class SpellBarUISlot : MonoBehaviour, IPointerClickHandler
     internal void UpdateAble(int _currentPAOfCharacter)
     {
         isAble = _currentPAOfCharacter >= cost;
-        disableImage.gameObject.SetActive(!isAble);
+        if(disableImage != null) disableImage.gameObject.SetActive(!isAble);
     }
 
     public void OnPointerClick(PointerEventData eventData)

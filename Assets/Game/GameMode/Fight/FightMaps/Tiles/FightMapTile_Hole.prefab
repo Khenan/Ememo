@@ -36,10 +36,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: FightMapTile_Hole
       objectReference: {fileID: 0}
+    - target: {fileID: 2934233592071123807, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: hideVisualsOnStart
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3702393626836357443, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: -876546973899608171, guid: 3739e562a03fc0b4982d8aa66cc50865, type: 3}
+    - target: {fileID: 4563354431741310419, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7094299921221513896, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -79,6 +87,10 @@ PrefabInstance:
     - target: {fileID: 7094299921221513896, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7937880212516149629, guid: 087e3bff01c83584d8792251a6ce8345, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

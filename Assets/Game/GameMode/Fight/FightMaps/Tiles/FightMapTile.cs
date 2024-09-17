@@ -1,17 +1,16 @@
 using UnityEngine;
 
-public partial class FightMapTile : MonoBehaviour
+public partial class FightMapTile : MapTile
 {
     private Vector3 position;
     public Vector3 Position => position;
-    public Vector2 MatrixPosition { get; set; }
-    [SerializeField] public int tileID;
-    [SerializeField] private bool isWalkable;
-    public bool IsWalkable => isWalkable;
-    [SerializeField] private bool isOccupied;
-    public bool IsOccupied => isOccupied || character != null;
+    [SerializeField] public bool isWalkable;
+    [SerializeField] public bool isBlock;
+    public override bool IsWalkable => isWalkable;
+    public override bool IsOccupied => character != null;
     [SerializeField] private bool blockLineOfSight;
-    public bool BlockLineOfSight => blockLineOfSight || character != null;
+    public override bool BlockLineOfSight => blockLineOfSight || character != null || isBlock;
+    public override bool IsBlock => isBlock;
     [SerializeField] private bool isStartTile;
     public bool IsStartTile => isStartTile;
     [SerializeField] private int teamId;
@@ -20,15 +19,16 @@ public partial class FightMapTile : MonoBehaviour
     public SpriteRenderer VisualTop => visualTop;
     [SerializeField] private SpriteRenderer highlight;
     public SpriteRenderer Highlight => highlight;
-    
+
     [SerializeField] private SpriteRenderer highlightTips;
     [SerializeField] private Sprite defaultSprite;
     [SerializeField] private Sprite blindSprite;
 
     public Character character;
 
-    private void Start()
+    public override void Start()
     {
+        base.Start();
         position = gameObject.transform.position;
         if(highlight != null) highlight.gameObject.SetActive(false);
         if(highlightTips != null) highlightTips.gameObject.SetActive(false);
@@ -61,7 +61,7 @@ public partial class FightMapTile : MonoBehaviour
     {
         if (visualTop != null)
         {
-            bool _odd = (MatrixPosition.x + MatrixPosition.y) % 2 == 0;
+            bool _odd = (MatrixPositionWorld.x + MatrixPositionWorld.y) % 2 == 0;
             VisualTop.color = _odd ? Colors.I.FloorOdd : Colors.I.FloorEven;
         }
     }
