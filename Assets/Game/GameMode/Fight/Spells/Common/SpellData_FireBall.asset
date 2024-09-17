@@ -14,18 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spellName: Fire Ball
   description: Une boule de feu
-  apCost: 3
+  apCost: 0
   extraCosts: []
   isLignOfSight: 0
-  isChangableRange: 0
+  isChangeableRange: 0
   rangeMin: 1
   rangeMax: 10
-  targets: []
   isTargetRequired: 0
   castPerTurn: 0
   castPerTarget: 0
   cooldown: 0
+  targetType: 0
   zones: []
   caster: {fileID: 0}
   targetedTiles: []
-  damage: 8
+  effects:
+  - type: 1
+    value: 1
+  scalingAttribute: 0
+  scalingFactor: 1.5
