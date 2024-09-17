@@ -21,9 +21,9 @@ public static class ConcatenatorMapList
             {
                 for (int _index = 0; _index < _orderedMapList.Count; _index++)
                 {
-                    if ((int)_orderedMapList[_index].matrixPosition.y == _mapY)
+                    if (_orderedMapList[_index].matrixPosition.y == _mapY)
                     {
-                        List<MapTile> _tiles = _orderedMapList[_index].GetTileOfYPosition(_y);
+                        List<MapTile> _tiles = _orderedMapList[_index].GetTileOfYLocalPosition(_y);
                         _concatenatedMap.AddRange(_tiles);
                     }
                 }
@@ -33,7 +33,7 @@ public static class ConcatenatorMapList
         // Set the matrix position of each tile in the concatenated map
         for (int _i = 0; _i < _concatenatedMap.Count; _i++)
         {
-            _concatenatedMap[_i].MatrixPosition = new Vector2Int(_i % (MapSizeData.SIZE * (_diffX + 1)), _i / (MapSizeData.SIZE * (_diffX + 1)));
+            _concatenatedMap[_i].MatrixPositionLocalTemporary = new Vector2Int(_i % (MapSizeData.SIZE * (_diffX + 1)), _i / (MapSizeData.SIZE * (_diffX + 1)));
         }
 
         return _concatenatedMap;
@@ -43,7 +43,7 @@ public static class ConcatenatorMapList
     {
         foreach (Map _map in orderedMapList)
         {
-            _map.SetTileMatrixPositions();
+            _map.ResetTileMatrixPositionsLocalTemporary();
         }
     }
 
