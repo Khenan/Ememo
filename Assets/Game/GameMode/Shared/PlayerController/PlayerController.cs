@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public Character Character => character;
 
     // Path
+    private List<MapTile> lastPath;
     private List<MapTile> currentPath;
     private int currentPathIndex = 0;
     private bool onMove = false;
@@ -163,7 +164,7 @@ public class PlayerController : MonoBehaviour
                 SwitchTileCharacterOnExploTile(currentPath[currentPathIndex] as ExplorationMapTile);
                 currentPathIndex++;
 
-                if (currentPathIndex >= currentPath.Count - 1)
+                if (currentPathIndex >= currentPath.Count)
                 {
                     onMove = false;
                     currentPath = null;
@@ -243,6 +244,8 @@ public class PlayerController : MonoBehaviour
 
         List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
         List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile, true);
+        Debug.Log(_mapTiles[^1], _mapTiles[^1]);
+        Debug.Log(_mapTiles.Count);
         return _mapTiles;
     }
 

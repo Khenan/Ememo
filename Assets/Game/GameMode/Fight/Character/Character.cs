@@ -37,11 +37,6 @@ public class Character : MonoBehaviour
     private void Awake()
     {
         characterUI = GetComponent<CharacterUI>();
-        visualRoot.parent = null;
-    }
-
-    private void OnDestroy() {
-        if(visualRoot != null) Destroy(visualRoot.gameObject);
     }
 
     internal void StartFight()
@@ -157,13 +152,6 @@ public class Character : MonoBehaviour
     private void Update()
     {
         IdleAnimationStretchAndSquashScale();
-        MoveToVisualCharacter();
-    }
-
-    private void MoveToVisualCharacter()
-    {
-        if(visualRoot == null) return;
-        visualRoot.position = Vector3.Lerp(visualRoot.position, transform.position, Time.deltaTime * visualCharacterSpeed);
     }
 
     internal void ChangeVisualDirection(MapTile _mapTile)
