@@ -24,6 +24,7 @@ public class Character : MonoBehaviour
     public int teamId = 0;
     public bool isMyTurn = false;
     public bool isHumanController = false;
+    public TargetType targetType = new();
 
     // Actions
     public Action OnStartTurn;
