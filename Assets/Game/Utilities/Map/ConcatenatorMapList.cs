@@ -4,15 +4,22 @@ using UnityEngine;
 
 public static class ConcatenatorMapList
 {
-    public static List<MapTile> ConcatenateMaps(List<Map> _mapList, MapTile _currentTile, MapTile _targetTile)
+    public static List<MapTile> ConcatenateMaps(List<Map> _mapList)
     {
+        Debug.Log(_mapList.Count);
         List<MapTile> _concatenatedMap = new();
         List<Map> _orderedMapList = OrderByMatrixPosition(_mapList);
         ResetMatrixPositionOfAllTiles(_orderedMapList);
+
+        if (_mapList.Count == 1)
+        {
+            return _mapList[0].mapTiles;
+        }
+
         int _maxMapY = GetMaxMapY(_orderedMapList);
         int _minMapY = GetMinMapY(_orderedMapList);
-        int _diffY = (int)GetMapDiff(_currentTile, _targetTile).y;
-        int _diffX = (int)GetMapDiff(_currentTile, _targetTile).x;
+        int _diffY = GetMapDiff(_mapList).y;
+        int _diffX = GetMapDiff(_mapList).x;
 
         // We take the range of tile lists from each map and add them to the concatenated list
         for (int _mapY = _minMapY; _mapY <= _maxMapY; _mapY++)
@@ -52,9 +59,9 @@ public static class ConcatenatorMapList
         return (int)orderedMapList.Min(_m => _m.matrixPosition.y);
     }
 
-    private static int GetMaxMapY(List<Map> orderedMapList)
+    private static int GetMaxMapY(List<Map> _orderedMapList)
     {
-        return (int)orderedMapList.Max(_m => _m.matrixPosition.y);
+        return _orderedMapList.Max(_m => _m.matrixPosition.y);
     }
 
     private static List<Map> OrderByMatrixPosition(List<Map> _mapList)
@@ -62,11 +69,18 @@ public static class ConcatenatorMapList
         return _mapList.OrderBy(_m => _m.matrixPosition.y).ThenBy(_m => _m.matrixPosition.x).ToList();
     }
 
-    private static Vector2 GetMapDiff(MapTile _currentTile, MapTile _targetTile)
+    private static Vector2Int GetMapDiff(List<Map> _mapList)
     {
-        Vector2 _mapDiff = new Vector2();
-        _mapDiff.x = Mathf.Abs((int)_targetTile.map.matrixPosition.x - (int)_currentTile.map.matrixPosition.x);
-        _mapDiff.y = Mathf.Abs((int)_targetTile.map.matrixPosition.y - (int)_currentTile.map.matrixPosition.y);
+        Vector2Int _mapDiff = new Vector2Int();
+        // Get min and max x of Matrix position in Maps
+        int _minX = _mapList.Min(_m => _m.matrixPosition.x);
+        int _maxX = _mapList.Max(_m => _m.matrixPosition.x);
+        // Get min and max y of Matrix position in Maps
+        int _minY = _mapList.Min(_m => _m.matrixPosition.y);
+        int _maxY = _mapList.Max(_m => _m.matrixPosition.y);
+        // Get the difference between the min and max x and y
+        _mapDiff.x = Mathf.Abs(_minX - _maxX);
+        _mapDiff.y = Mathf.Abs(_minY - _maxY);
         return _mapDiff;
     }
 }

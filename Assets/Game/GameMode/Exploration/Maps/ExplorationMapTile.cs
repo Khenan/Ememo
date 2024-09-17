@@ -7,7 +7,7 @@ public partial class ExplorationMapTile : MapTile
     [SerializeField] private bool isWalkable;
     [SerializeField] private bool isBlock;
     public override bool IsWalkable => isWalkable;
-    public override bool IsOccupied => characters.Count > 0;
+    public override bool IsOccupied => isBlock;
     public override bool BlockLineOfSight => isBlock;
     public override bool IsBlock => isBlock;
 }

@@ -55,7 +55,7 @@ public class ExplorationManager : Singleton<ExplorationManager>
         return WorldMapManager.I.GetMapByMatrixPosition(_matrixPosition);
     }
 
-    internal void SwitchTileCharacter(Character _character, ExplorationMapTile _tile)
+    internal void SwitchTileCharacter(Character _character, ExplorationMapTile _tile, bool _moveCharacter = true)
     {
         if(_character == null || _tile == null)
         {
@@ -67,7 +67,7 @@ public class ExplorationManager : Singleton<ExplorationManager>
 
         _character.CurrentTile = _tile;
         _tile.characters.Add(_character);
-        _character.transform.position = _tile.transform.position;
+        if(_moveCharacter) _character.transform.position = _tile.transform.position;
         if(_oldTile != null && _oldTile.characters.Contains(_character)) _oldTile.characters.Remove(_character);
 
         CheckIfMapChange(_tile);

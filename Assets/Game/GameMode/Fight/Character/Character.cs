@@ -24,6 +24,11 @@ public class Character : MonoBehaviour
     public int teamId = 0;
     public bool isMyTurn = false;
     public bool isHumanController = false;
+    public TargetType targetType = new();
+
+    // Visual
+    [SerializeField] private Transform visualRoot;
+    [SerializeField] private float visualCharacterSpeed = 15f;
 
     // Actions
     public Action OnStartTurn;
@@ -121,5 +126,40 @@ public class Character : MonoBehaviour
     {
         int _currentPA = CurrentData.currentActionPoints;
         SpellBarUIManager.I.UpdateSpellBar(_currentPA);
+    }
+
+    // Animation
+    [SerializeField] private AnimationCurve idleYScaleCurve;
+    [SerializeField] private AnimationCurve idleXZScaleCurve;
+    [SerializeField] private float idleScaleSpeed = 1f;
+    private float idleScaleTime = 0f;
+    private float idleScaleMaxTime = 1f;
+
+    private void IdleAnimationStretchAndSquashScale()
+    {
+        if(visualRoot == null) return;
+
+        idleScaleTime += Time.deltaTime * idleScaleSpeed;
+        if (idleScaleTime > idleScaleMaxTime)
+        {
+            idleScaleTime = 0f;
+        }
+
+        float _yScale = idleYScaleCurve.Evaluate(idleScaleTime);
+        float _xzScale = idleXZScaleCurve.Evaluate(idleScaleTime);
+        visualRoot.localScale = new Vector3(_xzScale, _yScale, _xzScale);
+    }
+
+    private void Update()
+    {
+        IdleAnimationStretchAndSquashScale();
+    }
+
+    internal void ChangeVisualDirection(MapTile _mapTile)
+    {
+        if (visualRoot == null || _mapTile == null) return;
+
+        Vector3 _direction = _mapTile.transform.position - visualRoot.position;
+        visualRoot.forward = _direction;
     }
 }

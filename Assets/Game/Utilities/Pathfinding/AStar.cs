@@ -22,49 +22,46 @@ public class Node
 
 public static class AStar
 {
-    private static List<Node> openList = new();
-    private static HashSet<MapTile> closedList = new();
-
-    public static List<MapTile> FindPath(List<MapTile> _tiles, MapTile _startTile, MapTile _goalTile)
+    public static List<MapTile> FindPath(List<MapTile> _tiles, MapTile _startTile, MapTile _goalTile, bool _canDiagonal = false)
     {
-        openList.Clear();
-        closedList.Clear();
+        List<Node> _openList = new();
+        HashSet<MapTile> _closedList = new();
 
         Node _startNode = new(_startTile, 0, CalculateHeuristic(_startTile, _goalTile));
-        openList.Add(_startNode);
+        _openList.Add(_startNode);
 
-        while (openList.Count > 0)
+        while (_openList.Count > 0)
         {
             // Sélectionner le Node avec le plus petit fCost
-            Node _currentNode = GetLowestFCostNode(openList);
+            Node _currentNode = GetLowestFCostNode(_openList);
             if (_currentNode.tile == _goalTile)
             {
                 // On a trouvé le chemin, on le retrace
                 return RetracePath(_currentNode);
             }
 
-            openList.Remove(_currentNode);
-            closedList.Add(_currentNode.tile);
+            _openList.Remove(_currentNode);
+            _closedList.Add(_currentNode.tile);
 
             // Explorer les voisins de la tuile actuelle
-            foreach (MapTile _neighborTile in GetNeighborTiles(_currentNode.tile, _tiles))
+            foreach (MapTile _neighborTile in GetNeighborTiles(_currentNode.tile, _tiles, _canDiagonal))
             {
-                if (closedList.Contains(_neighborTile)) continue;
+                if (_closedList.Contains(_neighborTile)) continue;
 
                 int _tentativeGCost = _currentNode.gCost + CalculateDistanceCost(_currentNode.tile, _neighborTile);
                 Node _neighborNode = new(_neighborTile, _tentativeGCost, CalculateHeuristic(_neighborTile, _goalTile), _currentNode);
 
                 // Si un meilleur chemin est trouvé ou si le voisin n'est pas dans la liste ouverte
-                if (_tentativeGCost < _neighborNode.gCost || !openList.Exists(n => n.tile == _neighborTile))
+                if (_tentativeGCost < _neighborNode.gCost || !_openList.Exists(n => n.tile == _neighborTile))
                 {
                     _neighborNode.gCost = _tentativeGCost;
                     _neighborNode.fCost = _neighborNode.gCost + _neighborNode.hCost;
                     _neighborNode.parentNode = _currentNode;
 
                     // Ajouter à la liste ouverte si le voisin n'y est pas déjà
-                    if (!openList.Exists(n => n.tile == _neighborTile))
+                    if (!_openList.Exists(n => n.tile == _neighborTile))
                     {
-                        openList.Add(_neighborNode);
+                        _openList.Add(_neighborNode);
                     }
                 }
             }
@@ -75,14 +72,19 @@ public static class AStar
 
     private static int CalculateHeuristic(MapTile _tileA, MapTile _tileB)
     {
-        int _dx = Math.Abs((int)_tileA.MatrixPositionLocalTemporary.x - (int)_tileB.MatrixPositionLocalTemporary.x);
-        int _dy = Math.Abs((int)_tileA.MatrixPositionLocalTemporary.y - (int)_tileB.MatrixPositionLocalTemporary.y);
+        int _dx = Math.Abs(_tileA.MatrixPositionLocalTemporary.x - _tileB.MatrixPositionLocalTemporary.x);
+        int _dy = Math.Abs(_tileA.MatrixPositionLocalTemporary.y - _tileB.MatrixPositionLocalTemporary.y);
         return _dx + _dy;
     }
 
     private static int CalculateDistanceCost(MapTile _fromTile, MapTile _toTile)
     {
-        return 1; // C'est 1 car les tuiles sont adjacentes et qu'on ne fait pas de déplacement en diagonale
+        int dstX = Mathf.Abs(_fromTile.MatrixPositionLocalTemporary.x - _toTile.MatrixPositionLocalTemporary.x);
+        int dstY = Mathf.Abs(_fromTile.MatrixPositionLocalTemporary.y - _toTile.MatrixPositionLocalTemporary.y);
+
+        if (dstX > dstY)
+            return 14 * dstY + 10 * (dstX - dstY);
+        return 14 * dstX + 10 * (dstY - dstX);
     }
 
     // Sélectionner le Node avec le plus petit fCost dans la liste ouverte
@@ -100,21 +102,29 @@ public static class AStar
     }
 
     // Récupère les voisins adjacents (haut, bas, gauche, droite)
-    private static List<MapTile> GetNeighborTiles(MapTile _currentTile, List<MapTile> _tiles)
+    private static List<MapTile> GetNeighborTiles(MapTile _currentTile, List<MapTile> _tiles, bool _canDiagonal = false)
     {
         List<MapTile> _neighbors = new();
 
-        AddNeighborIfValid(_currentTile, 1, 0, _neighbors, _tiles);   // Droite
-        AddNeighborIfValid(_currentTile, -1, 0, _neighbors, _tiles);  // Gauche
-        AddNeighborIfValid(_currentTile, 0, 1, _neighbors, _tiles);   // Haut
-        AddNeighborIfValid(_currentTile, 0, -1, _neighbors, _tiles);  // Bas
+        bool _right = AddNeighborIfValid(_currentTile, 1, 0, _neighbors, _tiles);   // Droite
+        bool _left = AddNeighborIfValid(_currentTile, -1, 0, _neighbors, _tiles);  // Gauche
+        bool _top = AddNeighborIfValid(_currentTile, 0, 1, _neighbors, _tiles);   // Haut
+        bool _bottom = AddNeighborIfValid(_currentTile, 0, -1, _neighbors, _tiles);  // Bas
 
+        if (_canDiagonal)
+        {
+            if (_right && _top) AddNeighborIfValid(_currentTile, 1, 1, _neighbors, _tiles); // Haut Droite
+            if (_right && _bottom) AddNeighborIfValid(_currentTile, 1, -1, _neighbors, _tiles); // Bas Droite
+            if (_left && _top) AddNeighborIfValid(_currentTile, -1, 1, _neighbors, _tiles); // Haut Gauche
+            if (_left && _bottom) AddNeighborIfValid(_currentTile, -1, -1, _neighbors, _tiles); // Bas Gauche
+        }
         return _neighbors;
     }
 
     // Ajoute une tuile voisine si elle est valide
-    private static void AddNeighborIfValid(MapTile _currentTile, int _offsetX, int _offsetY, List<MapTile> _neighbors, List<MapTile> _tiles)
+    private static bool AddNeighborIfValid(MapTile _currentTile, int _offsetX, int _offsetY, List<MapTile> _neighbors, List<MapTile> _tiles)
     {
+        bool _valid = false;
         Vector2 _neighborPos = new Vector2(
             _currentTile.MatrixPositionLocalTemporary.x + _offsetX,
             _currentTile.MatrixPositionLocalTemporary.y + _offsetY
@@ -123,7 +133,9 @@ public static class AStar
         if (_neighborTile != null && _neighborTile.IsWalkable && !_neighborTile.IsOccupied)
         {
             _neighbors.Add(_neighborTile);
+            _valid = true;
         }
+        return _valid;
     }
 
     private static MapTile GetTileByMatrixPosition(List<MapTile> _tiles, Vector2 _mPos)
