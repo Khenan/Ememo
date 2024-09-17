@@ -449,6 +449,8 @@ public class PlayerController : MonoBehaviour
     {
         if (_tile.IsWalkable)
         {
+            WorldTileMatrixPositionBase = _tile.MatrixPositionWorld;
+            WorlMapMatrixPosition = _tile.map.matrixPosition;
             ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
         }
     }
