@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public partial class PlayerController : MonoBehaviour // Master
+public partial class PlayerController : MonoBehaviourPunCallbacks // Master
 {
     [SerializeField] private bool isLocalPlayer;
     public bool IsLocalPlayer => isLocalPlayer;
@@ -49,7 +50,7 @@ public partial class PlayerController : MonoBehaviour // Master
     }
     private void Start()
     {
-        if (!isLocalPlayer) return;
+        if (!photonView.IsMine) return;
         AssignInputActions();
         AssignInputActivations();
         UpdateHUDUI();
@@ -57,7 +58,7 @@ public partial class PlayerController : MonoBehaviour // Master
 
     private void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!photonView.IsMine) return;
 
         if (onFight) UpdateFight();
         else UpdateExploration();
@@ -196,7 +197,7 @@ public partial class PlayerController : MonoBehaviour // Master
     }
 }
 
-public partial class PlayerController : MonoBehaviour // Fight
+public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
 {
     public bool onFight = false;
     internal bool lockOnFight = false;
@@ -447,7 +448,7 @@ public partial class PlayerController : MonoBehaviour // Fight
     }
 }
 
-public partial class PlayerController : MonoBehaviour // Exploration
+public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
 {
     public Vector2Int WorlMapMatrixPosition;
     public Vector2Int WorldTileMatrixPositionBase;

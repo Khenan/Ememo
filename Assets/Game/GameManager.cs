@@ -26,7 +26,9 @@ public class GameManager : SingletonPunCallbacks<GameManager>
     #region GameManager Methods
     public void LaunchGame()
     {
-        if(_playerControllerPrefab != null) _playerController = Instantiate(_playerControllerPrefab);
+        int _x = PlayerPrefs.GetInt("PlayerXWorldPosition", 0);
+        int _z = PlayerPrefs.GetInt("PlayerYWorldPosition", 0);
+        if(_playerControllerPrefab != null) _playerController = PhotonNetwork.Instantiate(_playerControllerPrefab.name, new Vector3(_x, 0, _z), Quaternion.identity).GetComponent<PlayerController>();
         int _sceneCount = _allGameSceneToLoad.Count;
         for (int _i = 0; _i < _sceneCount; _i++)
         {
