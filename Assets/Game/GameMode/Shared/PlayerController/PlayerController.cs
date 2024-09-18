@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public partial class PlayerController : MonoBehaviourPunCallbacks // Master
+public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservable // Master
 {
     [SerializeField] private bool isLocalPlayer;
     public bool IsLocalPlayer => isLocalPlayer;
@@ -195,9 +196,33 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Master
         if (character != null && character.CurrentData != null)
             CharacterDataUIManager.I?.SetHudValues(onFight, character.CurrentData.currentHealth, character.CurrentData.currentActionPoints, character.CurrentData.currentMovementPoints);
     }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // We own this player: send the others our data
+            stream.SendNext(character.CurrentData.maxHealth);
+            stream.SendNext(character.CurrentData.currentHealth);
+            stream.SendNext(character.CurrentData.maxActionPoints);
+            stream.SendNext(character.CurrentData.currentActionPoints);
+            stream.SendNext(character.CurrentData.maxMovementPoints);
+            stream.SendNext(character.CurrentData.currentMovementPoints);
+        }
+        else
+        {
+            // Network player, receive data
+            character.CurrentData.maxHealth = (int)stream.ReceiveNext();
+            character.CurrentData.currentHealth = (int)stream.ReceiveNext();
+            character.CurrentData.maxActionPoints = (int)stream.ReceiveNext();
+            character.CurrentData.currentActionPoints = (int)stream.ReceiveNext();
+            character.CurrentData.maxMovementPoints = (int)stream.ReceiveNext();
+            character.CurrentData.currentMovementPoints = (int)stream.ReceiveNext();
+        }
+    }
 }
 
-public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
+public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservable // Fight
 {
     public bool onFight = false;
     internal bool lockOnFight = false;
@@ -446,9 +471,10 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
     {
         UpdateHUDUI();
     }
+
 }
 
-public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
+public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservable // Exploration
 {
     public Vector2Int WorlMapMatrixPosition;
     public Vector2Int WorldTileMatrixPositionBase;
