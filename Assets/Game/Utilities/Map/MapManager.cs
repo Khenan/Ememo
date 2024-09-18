@@ -26,8 +26,6 @@ public class MapManager : Singleton<MapManager>
         }
         return _rangeTiles;
     }
-
-
     internal int DistanceBetweenTiles(MapTile currentTile, MapTile tile)
     {
         return Mathf.Abs(currentTile.MatrixPositionWorld.x - tile.MatrixPositionWorld.x) + Mathf.Abs(currentTile.MatrixPositionWorld.y - tile.MatrixPositionWorld.y);
@@ -117,7 +115,6 @@ public class MapManager : Singleton<MapManager>
 
         return true;
     }
-
     internal List<MapTile> GetTilesByRangeInTemporaryList(List<MapTile> _tiles, MapTile _centerTile, int _rangeMin, int _rangeMax, bool _canWalk = false)
     {
         List<MapTile> _rangeTiles = new();
@@ -149,7 +146,6 @@ public class MapManager : Singleton<MapManager>
         }
         return _rangeTiles;
     }
-
     private MapTile GetFightTileByMatrixPositionTemporaryInList(List<MapTile> _tiles, Vector2Int _matrixPositionTemporary)
     {
         MapTile _tile = null;
@@ -163,7 +159,6 @@ public class MapManager : Singleton<MapManager>
         }
         return _tile;
     }
-
     internal bool IsDiagonal(MapTile _startTile, MapTile _endTile)
     {
         return Mathf.Abs(_startTile.MatrixPositionWorld.x - _endTile.MatrixPositionWorld.x) == 1 && Mathf.Abs(_startTile.MatrixPositionWorld.y - _endTile.MatrixPositionWorld.y) == 1;

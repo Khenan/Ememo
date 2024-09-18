@@ -229,7 +229,7 @@ public class FightManager : Singleton<FightManager>
 
         for (int i = 1; i < _teamCount; i++)
         {
-            List<FightCharacter> _teamCharacters = fightData.CharactersToInstantiate.Where(fCharacter => fCharacter.teamId == i).ToList();
+            List<FightCharacter> _teamCharacters = fightData.charactersToInstantiate.Where(fCharacter => fCharacter.teamId == i).ToList();
             List<FightMapTile> _teamTiles = _tiles.Where(tile => tile.TeamId == i).ToList();
             SetAllFightCharactersOfTeam(_teamCharacters, _teamTiles);
         }
@@ -246,6 +246,7 @@ public class FightManager : Singleton<FightManager>
         List<Character> _teamCharacters = new();
         foreach (FightCharacter _fCharacter in _fCharacters)
         {
+            if(_fCharacter.character == null) continue;
             _fCharacter.character.teamId = _fCharacter.teamId;
             _teamCharacters.Add(_fCharacter.character);
         }
@@ -282,6 +283,7 @@ public class FightManager : Singleton<FightManager>
         {
             int _randomTileIndex = UnityEngine.Random.Range(0, _teamTiles.Count);
             Character _character = InstantiateCharacter(_teamPlayers[0].CharacterToInstantiate, _teamTiles, _randomTileIndex);
+            _character.teamId = 0;
             characters.Add(_character);
             _teamPlayers[0].SetCharacter(_character);
 

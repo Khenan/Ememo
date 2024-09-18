@@ -15,6 +15,9 @@ public abstract class MapTile : MonoBehaviour
     public abstract bool BlockLineOfSight { get; }
 
     [SerializeField] private SpriteRenderer tips;
+    public bool IsVisible = true;
+    private bool tipsActive = false;
+    private float tipsAlpha = 0f;
 
     public virtual void Start()
     {
@@ -35,10 +38,16 @@ public abstract class MapTile : MonoBehaviour
         map = _map;
     }
 
-    internal void DisplayTips(bool _active, Color? _color = null, TipsType _tipsType = TipsType.Default)
+    internal void DisplayTips(bool _active, Color? _color = null, TipsType _tipsType = TipsType.Default, bool _hardDisplay = false)
     {
-        tips.gameObject.SetActive(_active);
-        if(_active == false) return;
+        tipsActive = _active;
+        if (!_active) return;
+        else tips.gameObject.SetActive(true);
+        if (_hardDisplay)
+        {
+            tipsAlpha = 1;
+            tips.gameObject.SetActive(_active);
+        }
         tips.color = _color.Value;
         tips.sprite = _tipsType switch
         {
@@ -46,5 +55,21 @@ public abstract class MapTile : MonoBehaviour
             TipsType.Default => SpriteManager.I.TipsSprite.Default,
             _ => throw new NotImplementedException()
         };
+    }
+
+    internal void UpdateTile()
+    {
+        DisplayFadeTips(tipsActive);
+    }
+
+    private void DisplayFadeTips(bool tipsActive)
+    {
+        if (tips.gameObject.activeSelf)
+        {
+            tipsAlpha += tipsActive ? Time.deltaTime : -Time.deltaTime;
+            tipsAlpha = Mathf.Clamp(tipsAlpha, 0, 1);
+            tips.color = new Color(tips.color.r, tips.color.g, tips.color.b, tipsAlpha);
+            if (tipsAlpha == 0) tips.gameObject.SetActive(false);
+        }
     }
 }

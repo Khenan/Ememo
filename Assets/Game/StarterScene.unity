@@ -309,6 +309,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &353736716
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 353736718}
+  - component: {fileID: 353736717}
+  m_Layer: 0
+  m_Name: CharacterDataBase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &353736717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 353736716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: febc5b6845b0a894891d747fb736f810, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characters:
+  - {fileID: 7498344041894870875, guid: 7846ef15b36b9f84d8cf5521a95c933d, type: 3}
+  - {fileID: 7498344041894870875, guid: 05a6bbbbd8d3c27499a2a8604a7d15ef, type: 3}
+--- !u!4 &353736718
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 353736716}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.4489381, y: -0.38400114, z: 0.86767775}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &409486687
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,10 +728,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isLocalPlayer: 1
-  WorlMapMatrixPosition: {x: 0, y: 0}
-  WorldTileMatrixPositionBase: {x: 1, y: 1}
   characterToInstantiate: {fileID: 7498344041894870875, guid: 05a6bbbbd8d3c27499a2a8604a7d15ef, type: 3}
   onFight: 0
+  WorlMapMatrixPosition: {x: 0, y: 0}
+  WorldTileMatrixPositionBase: {x: 1, y: 1}
 --- !u!4 &1584847466
 Transform:
   m_ObjectHideFlags: 0
@@ -791,7 +838,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 100
   field of view: 60
   orthographic: 1
   orthographic size: 5
@@ -1346,3 +1393,4 @@ SceneRoots:
   - {fileID: 8272645773388567336}
   - {fileID: 219935768}
   - {fileID: 1821830145}
+  - {fileID: 353736718}

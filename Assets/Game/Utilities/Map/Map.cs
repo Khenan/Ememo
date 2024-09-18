@@ -78,8 +78,24 @@ public class Map : MonoBehaviour
         }
     }
 
-    internal MapTile GetTileByMatrixPosition(Vector2Int _matrixPosition)
+    internal MapTile GetTileByMatrixPositionWorld(Vector2Int _matrixPosition)
     {
-        return mapTiles[_matrixPosition.x + _matrixPosition.y * MapSizeData.SIZE];
+        MapTile _tileToReturn = null;
+        foreach (MapTile _tile in mapTiles)
+        {
+            if (_tile.MatrixPositionWorld == _matrixPosition)
+            {
+                _tileToReturn = _tile;
+            }
+        }
+        return _tileToReturn;
+    }
+
+    internal void UpdateMap()
+    {
+        for (int _i = 0; _i < mapTiles.Count; _i++)
+        {
+            mapTiles[_i].UpdateTile();
+        }
     }
 }

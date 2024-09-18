@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : Singleton<GameManager>
+public partial class GameManager : Singleton<GameManager>
 {
     private Dictionary<string, GameSceneManager> _gameSceneManagers = new();
     [SerializeField] private List<string> _gameSceneToStart = new();

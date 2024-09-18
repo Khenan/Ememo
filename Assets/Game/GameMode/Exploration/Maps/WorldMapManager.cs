@@ -7,7 +7,7 @@ public class WorldMapManager : Singleton<WorldMapManager>
     [SerializeField] private List<Map> createdMaps = new();
     [SerializeField] private List<Map> currentMaps = new();
     public List<Map> CurrentMaps => currentMaps;
-    
+
     public void LoadMapAndAroundByMatrixPosition(Vector2Int _matrixPosition)
     {
         LoadMapAssetByMatrixPosition(_matrixPosition);
@@ -67,9 +67,12 @@ public class WorldMapManager : Singleton<WorldMapManager>
     public Map GetMapAssetByMatrixPosition(Vector2Int _matrixPosition)
     {
         Map _map = Resources.Load<Map>("MapPrefabs/ExploMap_" + _matrixPosition.x + "_" + _matrixPosition.y);
-        if(_map == null) _map = Resources.Load<Map>("MapPrefabs/ExploMap_OnlyHole");
-        _map.matrixPosition = _matrixPosition;
-        _map.InitAll();
+        if (_map == null)
+        {
+            _map = Resources.Load<Map>("MapPrefabs/ExploMap_OnlyHole");
+            _map.matrixPosition = _matrixPosition;
+            _map.InitAll();
+        }
         return _map;
     }
 
@@ -80,6 +83,14 @@ public class WorldMapManager : Singleton<WorldMapManager>
 
     internal Map GetMapByMatrixPosition(Vector2Int _matrixPosition)
     {
-        return currentMaps.Find(_m => _m.matrixPosition == _matrixPosition);
+        Map _mapToReturn = null;
+        foreach (Map _map in currentMaps)
+        {
+            if (_map.matrixPosition == _matrixPosition)
+            {
+                _mapToReturn = _map;
+            }
+        }
+        return _mapToReturn;
     }
 }

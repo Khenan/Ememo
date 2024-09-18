@@ -438,6 +438,8 @@ MonoBehaviour:
   - {fileID: 2062205958659823378}
   - {fileID: 1133193599937731484}
   - {fileID: 6286175178156412217}
+  AreaId: 0
+  fightDataPrefab: {fileID: 3048071456403542590, guid: 9f94eaf77e8d96041ba50b3bd9403c97, type: 3}
 --- !u!1001 &55460829811485392
 PrefabInstance:
   m_ObjectHideFlags: 0
