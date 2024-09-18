@@ -21,7 +21,8 @@ public class ExplorationManager : Singleton<ExplorationManager>
 
     private void InitWorldMaps()
     {
-        WorldMapManager.I.LoadMapAndAroundByMatrixPosition(playerController.WorlMapMatrixPosition);
+        if(playerController == null) Debug.LogError("PlayerController is null");
+        else WorldMapManager.I.LoadMapAndAroundByMatrixPosition(playerController.WorlMapMatrixPosition);
     }
 
     private void InitPlayerCharacter()

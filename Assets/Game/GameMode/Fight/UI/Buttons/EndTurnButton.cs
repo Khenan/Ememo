@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-public class ButtonBehaviour : MonoBehaviour
+public class ButtonBehaviour : Singleton
 {
     private Button button;
     private TextMeshProUGUI textMeshProUGUI;
@@ -17,10 +17,17 @@ public class ButtonBehaviour : MonoBehaviour
     private void Start()
     {
         button.onClick.AddListener(OnClick);
+        SetPlayerController(GameManager.I.PlayerController);
+    }
+
+    public void SetPlayerController(PlayerController _playerController)
+    {
+        playerController = _playerController;
     }
 
     private void Update()
     {
+        if(playerController == null) return;
         if (playerController.onFight && !playerController.lockOnFight)
         {
             textMeshProUGUI.text = "Ready";

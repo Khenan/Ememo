@@ -504,7 +504,7 @@ public partial class PlayerController : MonoBehaviour // Exploration
                 {
                     ClearExplorationMovement();
                 }
-                else
+                else if (character != null && character.CurrentTile != null && currentPath != null && currentPathIndex < currentPath.Count)
                 {
                     // direction of character
                     if (character.CurrentTile.MatrixPositionWorld != currentPath[currentPathIndex].MatrixPositionWorld)
@@ -583,7 +583,7 @@ public partial class PlayerController : MonoBehaviour // Exploration
         {
             ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
             bool _fightDataOnTile = ExplorationManager.I.CheckIfFightOnWorldTile(_tile.MatrixPositionWorld);
-            if(_fightDataOnTile) ClearExplorationMovement();
+            if (_fightDataOnTile) ClearExplorationMovement();
             WorldTileMatrixPositionBase = _tile.MatrixPositionWorld;
             WorlMapMatrixPosition = _tile.map.matrixPosition;
         }

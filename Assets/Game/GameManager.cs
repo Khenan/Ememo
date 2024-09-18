@@ -1,26 +1,38 @@
-using System;
 using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public partial class GameManager : Singleton<GameManager>
+public class GameManager : SingletonPunCallbacks<GameManager>
 {
     private Dictionary<string, GameSceneManager> _gameSceneManagers = new();
-    [SerializeField] private List<string> _gameSceneToStart = new();
+    [SerializeField] private List<string> _loadedGameSceneToStart = new();
+    [SerializeField] private List<string> _allGameSceneToLoad = new();
 
+    [SerializeField] private PlayerController _playerControllerPrefab;
     private PlayerController _playerController;
     public PlayerController PlayerController => _playerController;
 
-    private Vector3 lastCameraPosition;
-
-    private void Start()
+    public override void Awake()
     {
-        int _sceneCount = SceneManager.sceneCountInBuildSettings;
-        for (int _i = 1; _i < _sceneCount; _i++)
+        base.Awake();
+        DontDestroyOnLoad(gameObject);
+    }
+    private void Start() {
+        LaunchGame();
+    }
+
+    #region GameManager Methods
+    public void LaunchGame()
+    {
+        if(_playerControllerPrefab != null) _playerController = Instantiate(_playerControllerPrefab);
+        int _sceneCount = _allGameSceneToLoad.Count;
+        for (int _i = 0; _i < _sceneCount; _i++)
         {
-            AsyncOperation _op = SceneManager.LoadSceneAsync(_i, LoadSceneMode.Additive);
-            int _id = _i;
-            _op.completed += (op) => AddGameSceneManager(_id);
+            AsyncOperation _op = SceneManager.LoadSceneAsync(_allGameSceneToLoad[_i], LoadSceneMode.Additive);
+            string _sceneName = _allGameSceneToLoad[_i];
+            _op.completed += (op) => AddGameSceneManager(_sceneName);
         }
     }
 
@@ -29,11 +41,11 @@ public partial class GameManager : Singleton<GameManager>
         SceneManager.SetActiveScene(SceneManager.GetSceneByName(_sceneName));
     }
 
-    public void AddGameSceneManager(int _id)
+    public void AddGameSceneManager(string _name)
     {
-        Scene _scene = SceneManager.GetSceneAt(_id);
+        Scene _scene = SceneManager.GetSceneByName(_name);
         _gameSceneManagers.Add(_scene.name, _scene.GetRootGameObjects()[0].GetComponent<GameSceneManager>());
-        if (_gameSceneToStart.Contains(_scene.name)) _gameSceneManagers[_scene.name].StartScene();
+        if (_loadedGameSceneToStart.Contains(_scene.name)) _gameSceneManagers[_scene.name].StartScene();
     }
 
     #region Fight
@@ -59,4 +71,25 @@ public partial class GameManager : Singleton<GameManager>
     {
         this._playerController = _playerController;
     }
+    #endregion
+
+    #region Photon Callbacks
+    public override void OnLeftRoom()
+    {
+        SceneManager.LoadScene(0);
+    }
+    public override void OnPlayerEnteredRoom(Player _newPlayer)
+    {
+        Debug.Log("A new player has joined the room");
+        if(PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log("MasterClient is loading the game");
+        }
+    }
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+    #endregion
+
 }

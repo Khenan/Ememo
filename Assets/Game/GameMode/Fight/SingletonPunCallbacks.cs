@@ -1,8 +1,7 @@
+using Photon.Pun;
 using UnityEngine;
-public class Singleton : MonoBehaviour {
 
-}
-public class Singleton<T> : Singleton where T: Singleton<T>
+public class SingletonPunCallbacks<T> : MonoBehaviourPunCallbacks where T: SingletonPunCallbacks<T>
 {
     private static T instance;
     public static T I
