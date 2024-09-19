@@ -9,6 +9,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2450514541865617099, guid: 19f08c0856eacf04483cf8eac2f0e7e8, type: 3}
+      propertyPath: teamId
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2450514541865617099, guid: 19f08c0856eacf04483cf8eac2f0e7e8, type: 3}
       propertyPath: characterName
       value: Elfe
       objectReference: {fileID: 0}

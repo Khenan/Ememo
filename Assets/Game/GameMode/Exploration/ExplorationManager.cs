@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class ExplorationManager : Singleton<ExplorationManager>
 {
-    private PlayerController playerController;
+    private PlayerController playerControllerLocal;
     public List<GameObject> garbage = new();
+    public List<PhotonView> photonGarbage = new();
 
     public override void Awake()
     {
@@ -14,41 +16,46 @@ public class ExplorationManager : Singleton<ExplorationManager>
 
     public void StartExploration()
     {
-        playerController = GameManager.I.PlayerController;
+        playerControllerLocal = GameManager.I.PlayerControllerLocal;
+        if(playerControllerLocal.GetComponent<PhotonView>().IsMine) Debug.Log("PlayerControllerLocal: " + playerControllerLocal.name, playerControllerLocal);
+        else Debug.LogError("PlayerControllerLocal is not mine");
         InitWorldMaps();
         InitPlayerCharacter();
     }
 
     private void InitWorldMaps()
     {
-        if(playerController == null) Debug.LogError("PlayerController is null");
-        else WorldMapManager.I.LoadMapAndAroundByMatrixPosition(playerController.WorlMapMatrixPosition);
+        if(playerControllerLocal == null) Debug.LogError("PlayerControllerLocal is null");
+        else WorldMapManager.I.LoadMapAndAroundByMatrixPosition(playerControllerLocal.WorlMapMatrixPosition);
     }
 
     private void InitPlayerCharacter()
     {
-        Map _map = GetMapAssetByMatrixPosition(playerController.WorlMapMatrixPosition);
-        if (playerController == null)
+        Map _map = GetMapAssetByMatrixPosition(playerControllerLocal.WorlMapMatrixPosition);
+        if (playerControllerLocal == null)
         {
             Debug.LogError("PlayerController is null");
         }
         else
         {
-            Character _characterToInstantiate = playerController.CharacterToInstantiate;
+            Character _characterToInstantiate = playerControllerLocal.CharacterToInstantiate;
             if (_characterToInstantiate == null)
             {
                 Debug.LogError("CharacterToInstantiate is null");
             }
             else
             {
-                Character _character = Instantiate(_characterToInstantiate.gameObject).GetComponent<Character>();
-                playerController.SetCharacter(_character);
+                int _x = PlayerPrefs.GetInt("PlayerXWorldPosition", 0);
+                int _z = PlayerPrefs.GetInt("PlayerYWorldPosition", 0);
+                Character _character = PhotonNetwork.Instantiate(_characterToInstantiate.name, new Vector3(_x, 0, _z), Quaternion.identity).GetComponent<Character>();
+                playerControllerLocal.SetCharacter(_character);
                 _character.teamId = 0;
-                ExplorationMapTile _tile = (ExplorationMapTile)_map.GetTileByMatrixPositionWorld(playerController.WorldTileMatrixPositionBase);
+                _character.SetCharacterName(PhotonNetwork.NickName);
+                ExplorationMapTile _tile = (ExplorationMapTile)_map.GetTileByMatrixPositionWorld(playerControllerLocal.WorldTileMatrixPositionBase);
                 if (_tile != null) SwitchTileCharacter(_character, _tile);
                 else Debug.LogError("Player WorldTile is null");
                 _character.SetCharacterMode(CharacterMode.Exploration);
-                AddGarbage(_character.gameObject);
+                AddPhotonGarbage(_character.GetComponent<PhotonView>());
             }
         }
     }
@@ -78,9 +85,9 @@ public class ExplorationManager : Singleton<ExplorationManager>
 
     private void CheckIfMapChange(ExplorationMapTile tile)
     {
-        if (tile.map.matrixPosition != playerController.WorlMapMatrixPosition)
+        if (tile.map.matrixPosition != playerControllerLocal.WorlMapMatrixPosition)
         {
-            playerController.WorlMapMatrixPosition = tile.map.matrixPosition;
+            playerControllerLocal.WorlMapMatrixPosition = tile.map.matrixPosition;
             InitWorldMaps();
         }
     }
@@ -94,7 +101,7 @@ public class ExplorationManager : Singleton<ExplorationManager>
     public FightData GetFightDataByMatrixPositionWorld(Vector2Int _matrixPositionWorld)
     {
         FightData _fightDataToReturn = null;
-        Map _map = WorldMapManager.I.GetMapByMatrixPosition(playerController.WorlMapMatrixPosition);
+        Map _map = WorldMapManager.I.GetMapByMatrixPosition(playerControllerLocal.WorlMapMatrixPosition);
         if (_map != null)
         {
             List<FightData> _fightDatas = ((ExplorationMap)_map).CurrentFightDatas;
@@ -158,5 +165,22 @@ public class ExplorationManager : Singleton<ExplorationManager>
         {
             Destroy(_go);
         }
+    }
+    public void AddPhotonGarbage(PhotonView _view)
+    {
+        photonGarbage.Add(_view);
+    }
+
+    public void ClearPhotonGarbage()
+    {
+        foreach (PhotonView _view in photonGarbage)
+        {
+            PhotonNetwork.Destroy(_view);
+        }
+    }
+    public void ClearAllGarbage()
+    {
+        ClearGarbage();
+        ClearPhotonGarbage();
     }
 }

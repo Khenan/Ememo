@@ -1,11 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using Photon.Pun;
+using TMPro;
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
-public class Character : MonoBehaviour
+public class Character : MonoBehaviourPunCallbacks, IPunObservable
 {
     [SerializeField] protected string characterName;
     public string CharacterName => characterName;
+    [SerializeField] private Transform characterNameTransform;
+    private TextMeshProUGUI characterNameText;
+    public Transform CharacterNameTransform => characterNameTransform;
     [SerializeField] protected List<SpellData> spells;
     public List<SpellData> Spells => spells;
     [SerializeField] protected CharacterData data;
@@ -37,6 +44,7 @@ public class Character : MonoBehaviour
     private void Awake()
     {
         characterUI = GetComponent<CharacterUI>();
+        if (characterNameTransform != null) characterNameText = characterNameTransform.GetComponentInChildren<TextMeshProUGUI>();
     }
 
     internal void StartFight()
@@ -136,7 +144,7 @@ public class Character : MonoBehaviour
 
     private void IdleAnimationStretchAndSquashScale()
     {
-        if(visualRoot == null) return;
+        if (visualRoot == null) return;
 
         idleScaleTime += Time.deltaTime * idleScaleSpeed;
         if (idleScaleTime > idleScaleMaxTime)
@@ -173,5 +181,32 @@ public class Character : MonoBehaviour
                 visualRoot.forward = Vector3.right;
                 break;
         }
+    }
+
+    // Nickname
+    internal void SetCharacterName(string _name)
+    {
+        characterName = _name;
+        if (characterNameText != null) characterNameText.text = _name;
+    }
+    public void DisplayCharacterName(bool _display)
+    {
+        if (characterNameTransform == null) return;
+        characterNameTransform.gameObject.SetActive(_display);
+    }
+
+    public void OnPhotonSerializeView(Photon.Pun.PhotonStream stream, PhotonMessageInfo info)
+    {
+        if(currentData == null) return;
+        PhotonStream.I.StreamIntProperty(stream, ref currentData.maxHealth);
+        PhotonStream.I.StreamIntProperty(stream, ref currentData.currentHealth);
+        PhotonStream.I.StreamIntProperty(stream, ref currentData.maxActionPoints);
+        PhotonStream.I.StreamIntProperty(stream, ref currentData.currentActionPoints);
+        PhotonStream.I.StreamIntProperty(stream, ref currentData.maxMovementPoints);
+        PhotonStream.I.StreamIntProperty(stream, ref currentData.currentMovementPoints);
+        PhotonStream.I.StreamBoolProperty(stream, ref isDead);
+        PhotonStream.I.StreamBoolProperty(stream, ref isMyTurn);
+        PhotonStream.I.StreamIntProperty(stream, ref teamId);
+        PhotonStream.I.StreamStringProperty(stream, ref characterName);
     }
 }

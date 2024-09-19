@@ -17,7 +17,7 @@ public class ButtonBehaviour : Singleton
     private void Start()
     {
         button.onClick.AddListener(OnClick);
-        SetPlayerController(GameManager.I.PlayerController);
+        SetPlayerController(GameManager.I.PlayerControllerLocal);
     }
 
     public void SetPlayerController(PlayerController _playerController)

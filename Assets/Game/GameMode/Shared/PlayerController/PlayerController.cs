@@ -10,6 +10,9 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
     [SerializeField] private bool isLocalPlayer;
     public bool IsLocalPlayer => isLocalPlayer;
 
+    private string playerName = "Player";
+    public string PlayerName => playerName;
+
     // Character
     [SerializeField] private Character characterToInstantiate;
     public Character CharacterToInstantiate => characterToInstantiate;
@@ -44,10 +47,18 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
 
     private void Awake()
     {
-        if (!isLocalPlayer) return;
-        GameManager.I.SetPlayerController(this);
-        DontDestroyOnLoad(gameObject);
-        InitActionAssets();
+        if (PhotonView.Get(this).IsMine)
+        {
+            playerName = PhotonNetwork.NickName;
+            isLocalPlayer = true;
+            GameManager.I.SetPlayerController(this);
+            DontDestroyOnLoad(gameObject);
+            InitActionAssets();
+        }
+        else {
+            isLocalPlayer = false;
+        }
+        GameManager.I.AddPlayerController(this);
     }
     private void Start()
     {
@@ -197,32 +208,14 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
             CharacterDataUIManager.I?.SetHudValues(onFight, character.CurrentData.currentHealth, character.CurrentData.currentActionPoints, character.CurrentData.currentMovementPoints);
     }
 
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    public void OnPhotonSerializeView(Photon.Pun.PhotonStream stream, PhotonMessageInfo info)
     {
-        if (stream.IsWriting)
-        {
-            // We own this player: send the others our data
-            stream.SendNext(character.CurrentData.maxHealth);
-            stream.SendNext(character.CurrentData.currentHealth);
-            stream.SendNext(character.CurrentData.maxActionPoints);
-            stream.SendNext(character.CurrentData.currentActionPoints);
-            stream.SendNext(character.CurrentData.maxMovementPoints);
-            stream.SendNext(character.CurrentData.currentMovementPoints);
-        }
-        else
-        {
-            // Network player, receive data
-            character.CurrentData.maxHealth = (int)stream.ReceiveNext();
-            character.CurrentData.currentHealth = (int)stream.ReceiveNext();
-            character.CurrentData.maxActionPoints = (int)stream.ReceiveNext();
-            character.CurrentData.currentActionPoints = (int)stream.ReceiveNext();
-            character.CurrentData.maxMovementPoints = (int)stream.ReceiveNext();
-            character.CurrentData.currentMovementPoints = (int)stream.ReceiveNext();
-        }
+        PhotonStream.I.StreamStringProperty(stream, ref playerName);
+        PhotonStream.I.StreamCharacterProperty(stream, ref character);
     }
 }
 
-public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservable // Fight
+public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
 {
     public bool onFight = false;
     internal bool lockOnFight = false;
@@ -474,7 +467,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
 
 }
 
-public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservable // Exploration
+public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
 {
     public Vector2Int WorlMapMatrixPosition;
     public Vector2Int WorldTileMatrixPositionBase;

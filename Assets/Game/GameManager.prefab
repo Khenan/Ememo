@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88f6ffd1f1976d74f845fea2cdd7bd3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _loadedGameSceneToStart:
+  loadedGameSceneToStart:
   - Exploration
-  _allGameSceneToLoad:
+  allGameSceneToLoad:
   - Exploration
   - Fight
-  _playerControllerPrefab: {fileID: 8537654334179566658, guid: d644b621fc3ad35468015deaeb673e8c, type: 3}
+  playerControllerPrefab: {fileID: 8537654334179566658, guid: d644b621fc3ad35468015deaeb673e8c, type: 3}
