@@ -18,11 +18,16 @@ public class PlayerController : MonoBehaviour
     public Character Character => character;
 
     // Path
+    private List<MapTile> nextPath;
+    private bool newPathOnCurrentPath = false;
     private List<MapTile> currentPath;
     private int currentPathIndex = 0;
     private bool onMove = false;
+    private bool directionCharacterVisualInit = false;
+    private bool temporaryPositionEnable = false;
+    private Vector3 temporaryPosition;
     private float currentMoveTimer = 0f;
-    private float maxMoveTimer = 0.1f;
+    private float maxMoveTimer = 0.3f;
 
     // Fight
     public bool onFight = false;
@@ -30,8 +35,6 @@ public class PlayerController : MonoBehaviour
     private bool isReadyToFight = false;
     public bool IsReadyToFight => isReadyToFight;
     public Action OnPlayerReady;
-    private bool canMoveOnThisTile = false;
-    private int pmCountToMove = 0;
 
     // Spell 
     private SpellData currentSpellSelected;
@@ -108,13 +111,14 @@ public class PlayerController : MonoBehaviour
                     }
                     else if (currentSpellSelected != null)
                     {
-                        if (MapManager.I.IsTileInRange(character.CurrentTile.map, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
+                        List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
+                        if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.SpellHighlightHover);
                         else
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { }, Colors.I.SpellHighlightSightless);
                     }
                 }
-                // Show PM Path of Hover Character
+                // Show PM remaining of Hover Character
                 if (currentSpellSelected == null && _tile.character != null)
                 {
                     HoverHighlightPMOfCharacter(_tile);
@@ -132,20 +136,54 @@ public class PlayerController : MonoBehaviour
     {
         if (onMove && currentPath != null)
         {
+            if (!directionCharacterVisualInit)
+            {
+                ChangeCharacterDirection(character.CurrentTile, currentPath[currentPathIndex]);
+                directionCharacterVisualInit = true;
+            }
             if (currentMoveTimer < maxMoveTimer)
             {
-                currentMoveTimer += Time.deltaTime;
+                float _speedMultiplier = 1;
+                if (currentPathIndex < currentPath.Count - 1 && MapManager.I.IsDiagonal(currentPath[currentPathIndex], currentPath[currentPathIndex + 1]))
+                {
+                    _speedMultiplier = 1.4f;
+                }
+
+                currentMoveTimer += Time.deltaTime / _speedMultiplier;
+
+                Vector3 _startPosition = temporaryPositionEnable ? temporaryPosition : character.CurrentTile.transform.position;
+                Vector3 _nextPosition = currentPath[currentPathIndex].transform.position;
+                character.transform.position = Vector3.Lerp(_startPosition, _nextPosition, currentMoveTimer / maxMoveTimer);
             }
             else
             {
+                temporaryPositionEnable = false;
                 currentMoveTimer = 0;
                 SwitchTileCharacterOnExploTile(currentPath[currentPathIndex] as ExplorationMapTile);
                 currentPathIndex++;
-                if (currentPathIndex >= currentPath.Count - 1)
+                if (newPathOnCurrentPath)
                 {
-                    onMove = false;
-                    currentPath = null;
+                    currentPath = nextPath;
+                    newPathOnCurrentPath = false;
                     currentPathIndex = 0;
+                }
+
+                if (currentPathIndex >= currentPath.Count)
+                {
+                    directionCharacterVisualInit = false;
+                    currentPathIndex = 0;
+                    currentMoveTimer = 0;
+
+                    currentPath = null;
+                    nextPath = null;
+                    newPathOnCurrentPath = false;
+                    onMove = false;
+                }
+                else
+                {
+                    // direction of character
+                    if (character.CurrentTile.MatrixPositionWorld != currentPath[currentPathIndex].MatrixPositionWorld)
+                        ChangeCharacterDirection(character.CurrentTile, currentPath[currentPathIndex]);
                 }
             }
         }
@@ -154,76 +192,85 @@ public class PlayerController : MonoBehaviour
     private void HoverHighlightPMOfCharacter(FightMapTile _tile)
     {
         FightMapManager.I.HideHighlightTiles();
-        int _pmMax = _tile.character.CurrentData.currentMovementPoints;
-        List<FightMapTile> _rangeTiles = MapManager.I.GetTilesByRange(_tile.map, _tile, 1, _pmMax, true).ConvertAll(_t => (FightMapTile)_t);
+        int _currentPM = _tile.character.CurrentData.currentMovementPoints;
+
+        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(FightManager.I.currentMaps.ConvertAll(_m => (Map)_m));
+        List<FightMapTile> _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, _tile, 1, _currentPM, true).ConvertAll(_t => (FightMapTile)_t);
+        _rangeTiles.Add(_tile);
         FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.PMPathHoverCharacter);
     }
 
     private void ShowPMPathInFight(FightMapTile _tile)
     {
-        List<Map> _maps = new();
-        Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
-        Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
-
-        // Get all maps between the current map and the target map
-        int _minX = (int)Mathf.Min(_mapTargetMatrix.x, _mapCurrentMatrix.x);
-        int _maxX = (int)Mathf.Max(_mapTargetMatrix.x, _mapCurrentMatrix.x);
-        int _minY = (int)Mathf.Min(_mapTargetMatrix.y, _mapCurrentMatrix.y);
-        int _maxY = (int)Mathf.Max(_mapTargetMatrix.y, _mapCurrentMatrix.y);
-        List<FightMap> _mapsBetween = new();
-        foreach (FightMap _map in FightManager.I.currentMaps)
-            if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX && _map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
-                _mapsBetween.Add(_map);
-        _mapsBetween.ForEach(_m => _maps.Add(_m));
-
-        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
-        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
-        List<FightMapTile> _tiles = _mapTiles.ConvertAll(_t => (FightMapTile)_t);
-
-        if (_tiles != null && _tiles.Count > 0 && _tiles.Count <= character.CurrentData.currentMovementPoints)
+        if (character.CurrentTile == null || _tile == null || character.CurrentTile.MatrixPositionWorld == _tile.MatrixPositionWorld || character.CurrentData.currentMovementPoints == 0)
         {
-            canMoveOnThisTile = true;
-            pmCountToMove = _tiles.Count;
-            FightMapManager.I.ShowHighlightTiles(_tiles, Colors.I.PMPath);
+            FightMapManager.I.HideHighlightTiles();
+            return;
+        }
+
+        List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
+        List<MapTile> _path = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+        List<FightMapTile> _pathTiles = _path.ConvertAll(_t => (FightMapTile)_t);
+
+        if (_pathTiles != null && _pathTiles.Count > 0 && _pathTiles.Count <= character.CurrentData.currentMovementPoints)
+        {
+            FightMapManager.I.ShowHighlightTiles(_pathTiles, Colors.I.PMPath);
         }
         else
         {
-            canMoveOnThisTile = false;
-            pmCountToMove = 0;
             FightMapManager.I.HideHighlightTiles();
         }
     }
 
-    private List<MapTile> GetPathInExploration(MapTile _tile)
+    private List<Map> GetMapsBetweenTwoMap(Vector2Int _currentMapMatrix, Vector2Int _targetMapMatrix)
+    {
+        List<Map> _mapsBetween = new();
+        // Get all maps between the current map and the target map
+        int _minX = Mathf.Min(_currentMapMatrix.x, _targetMapMatrix.x);
+        int _maxX = Mathf.Max(_currentMapMatrix.x, _targetMapMatrix.x);
+        int _minY = Mathf.Min(_currentMapMatrix.y, _targetMapMatrix.y);
+        int _maxY = Mathf.Max(_currentMapMatrix.y, _targetMapMatrix.y);
+        List<Map> _maps = null;
+        if (onFight) _maps = FightManager.I.currentMaps.ConvertAll(_m => (Map)_m);
+        else _maps = WorldMapManager.I.CurrentMaps;
+        if (_maps != null)
+            foreach (Map _map in _maps)
+                if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX && _map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
+                    _mapsBetween.Add(_map);
+        return _mapsBetween;
+    }
+    private List<MapTile> GetAllTilesBetweenTwoTiles(MapTile _currentTile, MapTile _targetTile)
     {
         List<Map> _maps = new();
-        Vector2 _mapTargetMatrix = _tile.map.matrixPosition;
-        Vector2 _mapCurrentMatrix = character.CurrentTile.map.matrixPosition;
+        if (_currentTile.map.matrixPosition == _targetTile.map.matrixPosition)
+        {
+            _maps.Add(_currentTile.map);
+        }
+        else
+        {
+            _maps = GetMapsBetweenTwoMap(_currentTile.map.matrixPosition, _targetTile.map.matrixPosition);
+        }
+        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps);
+        return _allTiles;
+    }
 
-        // Get all maps between the current map and the target map
-        int _minX = (int)Mathf.Min(_mapTargetMatrix.x, _mapCurrentMatrix.x);
-        int _maxX = (int)Mathf.Max(_mapTargetMatrix.x, _mapCurrentMatrix.x);
-        int _minY = (int)Mathf.Min(_mapTargetMatrix.y, _mapCurrentMatrix.y);
-        int _maxY = (int)Mathf.Max(_mapTargetMatrix.y, _mapCurrentMatrix.y);
-        List<Map> _mapsBetween = new();
-        foreach (Map _map in WorldMapManager.I.CurrentMaps)
-            if (_map.matrixPosition.x >= _minX && _map.matrixPosition.x <= _maxX && _map.matrixPosition.y >= _minY && _map.matrixPosition.y <= _maxY)
-                _mapsBetween.Add(_map);
-        _mapsBetween.ForEach(_m => _maps.Add(_m));
-
-        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(_maps, character.CurrentTile, _tile);
-        List<MapTile> _mapTiles = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+    private List<MapTile> GetPathInExploration(MapTile _startTile, MapTile _targetTile)
+    {
+        List<MapTile> _mapTiles = null;
+        if (_startTile != null && _targetTile != null)
+        {
+            if (_startTile != _targetTile)
+            {
+                List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(_startTile, _targetTile);
+                _mapTiles = AStar.FindPath(_allTiles, _startTile, _targetTile, true);
+            }
+        }
         return _mapTiles;
     }
 
     private FightMapTile HoverFightTileUnderMouse()
     {
         return GetFightTileUnderMouseWithRaycast();
-    }
-
-    private ExplorationMapTile HoverExplorationTileUnderMouse()
-    {
-        return GetExplorationTileUnderMouseWithRaycast();
     }
 
     private void InitActionAssets()
@@ -325,11 +372,25 @@ public class PlayerController : MonoBehaviour
 
                     if (_tile != null && _tile.IsWalkable && !_tile.IsOccupied)
                     {
-                        List<MapTile> _path = GetPathInExploration(_tile);
+                        List<MapTile> _path;
+                        if (onMove) _path = GetPathInExploration(currentPath[currentPathIndex], _tile);
+                        else _path = GetPathInExploration(character.CurrentTile, _tile);
+
                         if (_path != null && _path.Count > 0)
                         {
-                            currentPath = _path;
-                            currentPathIndex = 0;
+                            if (onMove)
+                            {
+                                temporaryPosition = character.transform.position;
+                                temporaryPositionEnable = true;
+                                directionCharacterVisualInit = false;
+                                newPathOnCurrentPath = true;
+                                nextPath = _path;
+                            }
+                            else
+                            {
+                                currentPath = _path;
+                                currentPathIndex = 0;
+                            }
                             onMove = true;
                         }
                     }
@@ -359,6 +420,9 @@ public class PlayerController : MonoBehaviour
         character = _character;
         character.isHumanController = true;
         InitCharacterActions();
+
+        // Camera
+        CameraManager.I.SetTarget(character.transform);
     }
 
     private void InputActivation(Action<InputAction.CallbackContext> _action, InputAction.CallbackContext _context)
@@ -372,23 +436,37 @@ public class PlayerController : MonoBehaviour
     {
         if (_tile.IsWalkable)
         {
-            ExplorationManager.I.SwitchTileCharacter(Character, _tile);
+            ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
+            WorldTileMatrixPositionBase = _tile.MatrixPositionWorld;
+            WorlMapMatrixPosition = _tile.map.matrixPosition;
+            CheckLineOfSightExploration();
         }
     }
-    private ExplorationMapTile GetExplorationTileUnderMouseWithRaycast()
-    {
-        ExplorationMapTile _tileToReturn = null;
-        Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit _hit;
 
-        if (Physics.Raycast(_ray, out _hit))
+    private void CheckLineOfSightExploration()
+    {
+        if (character != null)
         {
-            if (_hit.collider.TryGetComponent(out ExplorationMapTile _tile))
+            int _range = 20;
+            int _lineOfSight = 10;
+            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(WorldMapManager.I.CurrentMaps);
+            List<MapTile> _tiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, 0, _range);
+            Debug.Log("_tiles.Count: " + _tiles.Count);
+            foreach (MapTile _tile in _tiles)
             {
-                _tileToReturn = _tile;
+                if (_tile != null && _tile != character.CurrentTile)
+                {
+                    if (!MapManager.I.IsTileInRange(_tiles, character.CurrentTile, _tile, 0, _lineOfSight, true))
+                    {
+                        _tile.DisplayTips(true, Colors.I.Dark, TipsType.Blind);
+                    }
+                    else
+                    {
+                        _tile.DisplayTips(false);
+                    }
+                }
             }
         }
-        return _tileToReturn;
     }
     #endregion
 
@@ -416,7 +494,8 @@ public class PlayerController : MonoBehaviour
             {
                 foreach (var _tile in _rangeTiles)
                 {
-                    if (_tile != null && !MapManager.I.LineOfSight(character.CurrentTile.map, (FightMapTile)character.CurrentTile, _tile))
+                    List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
+                    if (_tile != null && !MapManager.I.LineOfSight(_allTiles, (FightMapTile)character.CurrentTile, _tile))
                         _tile.DisplayHighlight(true, Colors.I.SpellHighlightSightless);
                 }
             }
@@ -448,19 +527,41 @@ public class PlayerController : MonoBehaviour
 
     private void MoveOnFightTile(FightMapTile _tile)
     {
-        if (character.isMyTurn && canMoveOnThisTile && _tile.IsWalkable && !_tile.IsOccupied)
+
+        if (character.isMyTurn && _tile.IsWalkable && !_tile.IsOccupied)
         {
-            if (character.CurrentData.currentMovementPoints >= pmCountToMove)
+            List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
+            List<MapTile> _path = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+            List<FightMapTile> _pathTiles = _path.ConvertAll(_t => (FightMapTile)_t);
+            int _pmCountToMove = _pathTiles.Count;
+            if (_pmCountToMove <= 0) return;
+            if (character.CurrentData.currentMovementPoints >= _pmCountToMove)
             {
-                int _tileDistance = pmCountToMove;
-                if (_tileDistance != -1 && _tileDistance <= character.CurrentData.currentMovementPoints)
+                if (_pmCountToMove <= character.CurrentData.currentMovementPoints)
                 {
-                    character.CurrentData.currentMovementPoints -= _tileDistance;
+                    if (_pathTiles.Count > 1) ChangeCharacterDirection(_pathTiles[^2], _pathTiles[^1]);
+                    else if (_pathTiles.Count == 1) ChangeCharacterDirection(character.CurrentTile, _tile);
+
+                    character.CurrentData.currentMovementPoints -= _pmCountToMove;
                     FightMapManager.I?.SwitchTileCharacter(Character, _tile);
                     character.UpdateAllUI();
                     FightMapManager.I?.HideHighlightTiles();
                 }
             }
+        }
+    }
+
+    private void ChangeCharacterDirection(MapTile _startTile, MapTile _endTile)
+    {
+        if (_startTile != null && _endTile != null)
+        {
+            Vector2Int _vectorDirection = _endTile.MatrixPositionWorld - _startTile.MatrixPositionWorld;
+            Direction _direction = Direction.Up;
+            if (_vectorDirection == Vector2Int.up) _direction = Direction.Down;
+            else if (_vectorDirection == Vector2Int.down) _direction = Direction.Up;
+            else if (_vectorDirection == Vector2Int.left) _direction = Direction.Left;
+            else if (_vectorDirection == Vector2Int.right) _direction = Direction.Right;
+            character.ChangeVisualDirection(_direction);
         }
     }
 
@@ -472,7 +573,8 @@ public class PlayerController : MonoBehaviour
             {
                 if (character.CurrentData.currentActionPoints >= currentSpellSelected.apCost)
                 {
-                    if (MapManager.I.IsTileInRange(character.CurrentTile.map, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
+                    List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
+                    if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
                     {
                         character.CurrentData.currentActionPoints -= currentSpellSelected.apCost;
                         FightManager.I?.CastSpell(currentSpellSelected, _tile);
@@ -487,13 +589,12 @@ public class PlayerController : MonoBehaviour
     }
     private List<FightMapTile> GetTilesFromSpellSelectedRange()
     {
+        FightMapManager.I.HideHighlightTiles();
         List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
-            FightMapTile _centerTile = (FightMapTile)character.CurrentTile;
-            int rangeMin = currentSpellSelected.rangeMin;
-            int rangeMax = currentSpellSelected.rangeMax;
-            _rangeTiles = MapManager.I?.GetTilesByRange(_centerTile.map, _centerTile, rangeMin, rangeMax).ConvertAll(_t => (FightMapTile)_t);
+            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(FightManager.I.currentMaps.ConvertAll(_m => (Map)_m));
+            _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax).ConvertAll(_t => (FightMapTile)_t);
             return _rangeTiles;
         }
         return _rangeTiles;

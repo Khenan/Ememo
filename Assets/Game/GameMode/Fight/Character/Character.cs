@@ -26,6 +26,9 @@ public class Character : MonoBehaviour
     public bool isHumanController = false;
     public TargetType targetType = new();
 
+    // Visual
+    [SerializeField] private Transform visualRoot;
+
     // Actions
     public Action OnStartTurn;
     public Action OnEndTurn;
@@ -122,5 +125,53 @@ public class Character : MonoBehaviour
     {
         int _currentPA = CurrentData.currentActionPoints;
         SpellBarUIManager.I.UpdateSpellBar(_currentPA);
+    }
+
+    // Animation
+    [SerializeField] private AnimationCurve idleYScaleCurve;
+    [SerializeField] private AnimationCurve idleXZScaleCurve;
+    [SerializeField] private float idleScaleSpeed = 1f;
+    private float idleScaleTime = 0f;
+    private float idleScaleMaxTime = 1f;
+
+    private void IdleAnimationStretchAndSquashScale()
+    {
+        if(visualRoot == null) return;
+
+        idleScaleTime += Time.deltaTime * idleScaleSpeed;
+        if (idleScaleTime > idleScaleMaxTime)
+        {
+            idleScaleTime = 0f;
+        }
+
+        float _yScale = idleYScaleCurve.Evaluate(idleScaleTime);
+        float _xzScale = idleXZScaleCurve.Evaluate(idleScaleTime);
+        visualRoot.localScale = new Vector3(_xzScale, _yScale, _xzScale);
+    }
+
+    private void Update()
+    {
+        IdleAnimationStretchAndSquashScale();
+    }
+
+    internal void ChangeVisualDirection(Direction _direction)
+    {
+        if (visualRoot == null) return;
+
+        switch (_direction)
+        {
+            case Direction.Up:
+                visualRoot.forward = Vector3.forward;
+                break;
+            case Direction.Down:
+                visualRoot.forward = Vector3.back;
+                break;
+            case Direction.Left:
+                visualRoot.forward = Vector3.left;
+                break;
+            case Direction.Right:
+                visualRoot.forward = Vector3.right;
+                break;
+        }
     }
 }

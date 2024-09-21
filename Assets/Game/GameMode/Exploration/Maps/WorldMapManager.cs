@@ -67,6 +67,9 @@ public class WorldMapManager : Singleton<WorldMapManager>
     public Map GetMapAssetByMatrixPosition(Vector2Int _matrixPosition)
     {
         Map _map = Resources.Load<Map>("MapPrefabs/ExploMap_" + _matrixPosition.x + "_" + _matrixPosition.y);
+        if(_map == null) _map = Resources.Load<Map>("MapPrefabs/ExploMap_OnlyHole");
+        _map.matrixPosition = _matrixPosition;
+        _map.InitAll();
         return _map;
     }
 
