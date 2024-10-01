@@ -14,8 +14,8 @@ public class GameManager : SingletonPunCallbacks<GameManager>
     [SerializeField] private PlayerController playerControllerPrefab;
     private PlayerController playerControllerLocal;
     public PlayerController PlayerControllerLocal => playerControllerLocal;
-    private List<PlayerController> playerControllers = new();
-    public List<PlayerController> PlayerControllers => playerControllers;
+    private Dictionary<Player, PlayerController> playerControllers = new();
+    public Dictionary<Player, PlayerController> PlayerControllers => playerControllers;
 
     public override void Awake()
     {
@@ -30,11 +30,8 @@ public class GameManager : SingletonPunCallbacks<GameManager>
     #region GameManager Methods
     public void LaunchGame()
     {
-        int _x = PlayerPrefs.GetInt("PlayerXWorldPosition", 0);
-        int _z = PlayerPrefs.GetInt("PlayerYWorldPosition", 0);
-        if (playerControllerPrefab != null) playerControllerLocal = PhotonNetwork.Instantiate(playerControllerPrefab.name, new Vector3(_x, 0, _z), Quaternion.identity).GetComponent<PlayerController>();
-        Debug.Log("PlayerControllerLocal: " + playerControllerLocal.name, playerControllerLocal);
-        playerControllerLocal.name = PhotonNetwork.NickName;
+        GetAllPlayers();
+        InitPlayer(PhotonNetwork.LocalPlayer);
         int _sceneCount = allGameSceneToLoad.Count;
         for (int _i = 0; _i < _sceneCount; _i++)
         {
@@ -42,6 +39,12 @@ public class GameManager : SingletonPunCallbacks<GameManager>
             string _sceneName = allGameSceneToLoad[_i];
             _op.completed += (op) => AddGameSceneManager(_sceneName);
         }
+    }
+
+
+    internal PlayerController GetLocalPlayerController()
+    {
+        return playerControllerLocal;
     }
 
     private void ActiveScene(string _sceneName)
@@ -57,13 +60,12 @@ public class GameManager : SingletonPunCallbacks<GameManager>
     }
 
     #region Fight
-    public void GoToFight(FightData _fightData)
+    public void GoToFight(List<PlayerController> _playerControllers, FightData _fightData)
     {
         ExplorationManager.I.ClearAllGarbage();
         gameSceneManagers["Exploration"].StopScene();
         ActiveScene("Fight");
-        FightSceneManager _manager = gameSceneManagers["Fight"] as FightSceneManager;
-        _manager.StartScene(_fightData);
+        FightManager.I.EnterFight(_playerControllers, _fightData);
     }
 
     internal void ExitFightMode()
@@ -75,18 +77,48 @@ public class GameManager : SingletonPunCallbacks<GameManager>
     }
     #endregion
 
-    public void SetPlayerController(PlayerController _playerController)
+    private void InitPlayer(Player _player)
     {
-        playerControllerLocal = _playerController;
+        if (PhotonNetwork.LocalPlayer == _player)
+        {
+            CreateLocalPlayerController(_player);
+        }
+        CreatePlayerCharacter(_player);
     }
 
-    internal void AddPlayerController(PlayerController _playerController)
+    private void GetAllPlayers()
     {
-        if (_playerController != null)
+        PlayerController[] _playerControllers = FindObjectsOfType<PlayerController>();
+        foreach (PlayerController _playerController in _playerControllers)
         {
-            playerControllers.Add(_playerController);
-            // _playerController.Character.SetCharacterName(_playerController.PlayerName);
+            if (_playerController.Player != null) playerControllers.Add(_playerController.Player, _playerController);
         }
+    }
+
+    private PlayerController GetPlayerController(Player player)
+    {
+        if (playerControllers.ContainsKey(player)) return playerControllers[player];
+        return null;
+    }
+
+    private void CreateLocalPlayerController(Player _player)
+    {
+        if (playerControllerPrefab == null) Debug.LogError("PlayerControllerPrefab is null");
+        if (_player.IsLocal)
+        {
+            int _x = PlayerPrefs.GetInt("PlayerXWorldPosition", 0);
+            int _z = PlayerPrefs.GetInt("PlayerYWorldPosition", 0);
+            playerControllerLocal = PhotonNetwork.Instantiate(playerControllerPrefab.name, new Vector3(_x, 0, _z), Quaternion.identity).GetComponent<PlayerController>();
+            playerControllerLocal.name = PhotonNetwork.NickName;
+            playerControllerLocal.SetPlayer(_player);
+            playerControllers.Add(_player, playerControllerLocal);
+        }
+    }
+
+    private void CreatePlayerCharacter(Player _player)
+    {
+        PlayerController _playerController = GetPlayerController(_player);
+        if (_playerController != null) _playerController.InitCharacter();
     }
     #endregion
 
@@ -98,14 +130,21 @@ public class GameManager : SingletonPunCallbacks<GameManager>
     public override void OnPlayerEnteredRoom(Player _newPlayer)
     {
         Debug.Log("A new player has joined the room");
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Debug.Log("MasterClient is loading the game");
-        }
+        InitPlayer(_newPlayer);
     }
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
+    }
+
+    internal List<PlayerController> GetPlayers()
+    {
+        List<PlayerController> _players = new();
+        foreach (PlayerController _playerController in playerControllers.Values)
+        {
+            _players.Add(_playerController);
+        }
+        return _players;
     }
     #endregion
 

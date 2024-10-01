@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting;
 using Random = UnityEngine.Random;
 
 public class FightMapManager : Singleton<FightMapManager>
 {
     // Liste des maps possibles
-    [SerializeField] private List<FightMap> maps;
-    private Camera cam;
+    [SerializeField] private List<FightMap> maps = new();
     [SerializeField] private FightMapTile floor, wall, hole;
     public FightMapTile lastTileHovered;
     private List<FightMapTile> lastTilesHighlighted = new();
@@ -39,12 +39,16 @@ public class FightMapManager : Singleton<FightMapManager>
         return possibleMaps[Random.Range(0, possibleMaps.Count)];
     }
 
-    public FightMap InitMap(int _areaId)
+    public FightMap InitMap(FightRoom _fightRoom, int _areaId)
     {
-        List<FightMap> possibleMaps = maps.FindAll(map => map.areaId == _areaId);
+        Debug.Log("_areaId: " + _areaId);
+        Debug.Log("maps.Count: " + maps.Count);
+        List<FightMap> possibleMaps = maps.FindAll(_map => _map.areaId == _areaId);
+        Debug.Log("possibleMaps.Count: " + possibleMaps.Count);
         FightMap _map = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
+        _map.fightRoom = _fightRoom;
         currentMaps.Add(_map);
-        FightManager.I.AddGarbage(_map.gameObject);
+        _fightRoom.garbage.Add(_map.gameObject);
         SetMapColor(_map);
         ShowStartTiles(_map);
         return _map;
@@ -150,23 +154,42 @@ public class FightMapManager : Singleton<FightMapManager>
         }
     }
 
-    internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map)
+    internal void SetCharacterOnTile(Character _character, FightMapTile _fightMapTile, FightMap _map, bool _comeToExplo = false)
     {
-        _map.GetTiles().Find(tile => tile.Position == _fightMapTile.Position).character = _character;
+        FightMapTile _tile = null;
+        foreach (FightMapTile _currentTile in _map.GetTiles())
+        {
+            if (_currentTile.MatrixPositionWorld == _fightMapTile.MatrixPositionWorld)
+            {
+                _tile = _currentTile;
+                break;
+            }
+        }
+        if (_tile != null)
+        {
+            if (_comeToExplo)
+            {
+                ExplorationMapTile _exploTile = (ExplorationMapTile)_character.CurrentTile;
+                _exploTile.characters.Remove(_character);
+            }
+            _tile.character = _character;
+            _character.CurrentTile = _tile;
+            _character.transform.position = _tile.transform.position;
+        }
     }
 
-    internal void SwitchTileCharacter(Character character, FightMapTile tile, bool _canSwitch = false)
+    internal void SwitchTileCharacter(Character _character, FightMapTile _tile, bool _canSwitch = false)
     {
-        FightMapTile _oldTile = (FightMapTile)character.CurrentTile;
-        Character _oldCharacter = tile.character;
+        FightMapTile _oldTile = (FightMapTile)_character.CurrentTile;
+        Character _oldCharacter = _tile.character;
 
         if (!_canSwitch && _oldCharacter != null)
         {
             return;
         }
 
-        character.CurrentTile = tile;
-        tile.character = character;
+        _character.CurrentTile = _tile;
+        _tile.character = _character;
 
         if (_canSwitch)
         {
@@ -177,7 +200,7 @@ public class FightMapManager : Singleton<FightMapManager>
             _oldTile.character = _oldCharacter;
         }
 
-        character.transform.position = tile.transform.position;
+        _character.transform.position = _tile.transform.position;
 
         if (_canSwitch)
         {

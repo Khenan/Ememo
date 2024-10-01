@@ -53,7 +53,7 @@ public class ButtonBehaviour : Singleton
         }
         else if (playerController.onFight && playerController.lockOnFight)
         {
-            FightManager.I.EndTurn(playerController.Character);
+            playerController.fightRoom.EndTurn(playerController.Character);
         }
     }
 }

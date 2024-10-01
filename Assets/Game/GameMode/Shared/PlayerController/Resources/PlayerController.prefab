@@ -46,8 +46,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isLocalPlayer: 1
+  groupPlayerControllers: []
   characterToInstantiate: {fileID: 7498344041894870875, guid: 05a6bbbbd8d3c27499a2a8604a7d15ef, type: 3}
   onFight: 0
+  fightRoom: {fileID: 0}
   WorlMapMatrixPosition: {x: 0, y: 0}
   WorldTileMatrixPositionBase: {x: 1, y: 1}
 --- !u!114 &-2984428041474506788

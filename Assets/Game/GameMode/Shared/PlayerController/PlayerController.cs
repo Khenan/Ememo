@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +9,11 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
 {
     [SerializeField] private bool isLocalPlayer;
     public bool IsLocalPlayer => isLocalPlayer;
+
+    private Player player;
+    public Player Player => player;
+
+    public List<PlayerController> groupPlayerControllers = new();
 
     private string playerName = "Player";
     public string PlayerName => playerName;
@@ -50,15 +55,37 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
         if (PhotonView.Get(this).IsMine)
         {
             playerName = PhotonNetwork.NickName;
+            player = PhotonNetwork.LocalPlayer;
             isLocalPlayer = true;
-            GameManager.I.SetPlayerController(this);
             DontDestroyOnLoad(gameObject);
             InitActionAssets();
         }
-        else {
+        else
+        {
             isLocalPlayer = false;
         }
-        GameManager.I.AddPlayerController(this);
+    }
+    public void SetPlayer(Player _player)
+    {
+        player = _player;
+    }
+    public void InitCharacter()
+    {
+        Character _characterToInstantiate = characterToInstantiate;
+        if (_characterToInstantiate == null)
+        {
+            Debug.LogError("CharacterToInstantiate is null");
+        }
+        else
+        {
+            int _x = PlayerPrefs.GetInt("PlayerXWorldPosition", 1);
+            int _z = PlayerPrefs.GetInt("PlayerYWorldPosition", 1);
+            Character _character = PhotonNetwork.Instantiate(_characterToInstantiate.name, new Vector3(_x, 0, _z), Quaternion.identity).GetComponent<Character>();
+            SetCharacter(_character);
+            _character.teamId = 0;
+            _character.SetCharacterName(playerName);
+            _character.SetCharacterMode(CharacterMode.Exploration);
+        }
     }
     private void Start()
     {
@@ -67,7 +94,6 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
         AssignInputActivations();
         UpdateHUDUI();
     }
-
     private void Update()
     {
         if (!photonView.IsMine) return;
@@ -99,7 +125,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
         int _minY = Mathf.Min(_currentMapMatrix.y, _targetMapMatrix.y);
         int _maxY = Mathf.Max(_currentMapMatrix.y, _targetMapMatrix.y);
         List<Map> _maps = null;
-        if (onFight) _maps = FightManager.I.currentMaps.ConvertAll(_m => (Map)_m);
+        if (onFight) _maps = fightRoom.CurrentMaps.ConvertAll(_m => (Map)_m);
         else _maps = WorldMapManager.I.CurrentMaps;
         if (_maps != null)
             foreach (Map _map in _maps)
@@ -155,7 +181,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
             }
             else if (character != null && character.isMyTurn)
             {
-                FightManager.I.EndTurn(character);
+                fightRoom.EndTurn(character);
             }
         }
     }
@@ -212,6 +238,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
     {
         PhotonStream.I.StreamStringProperty(stream, ref playerName);
         PhotonStream.I.StreamCharacterProperty(stream, ref character);
+        PhotonStream.I.StreamBoolProperty(stream, ref onFight);
     }
 }
 
@@ -221,7 +248,10 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
     internal bool lockOnFight = false;
     private bool isReadyToFight = false;
     public bool IsReadyToFight => isReadyToFight;
-    public Action OnPlayerReady;
+    public Action<FightRoom> OnPlayerReady;
+
+    // FightRoom
+    public FightRoom fightRoom = null;
 
     // Spell 
     private SpellData currentSpellSelected;
@@ -372,7 +402,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
         FightMapManager.I.HideHighlightTiles();
         int _currentPM = _tile.character.CurrentData.currentMovementPoints;
 
-        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(FightManager.I.currentMaps.ConvertAll(_m => (Map)_m));
+        List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(fightRoom.CurrentMaps.ConvertAll(_m => (Map)_m));
         List<FightMapTile> _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, _tile, 1, _currentPM, true).ConvertAll(_t => (FightMapTile)_t);
         _rangeTiles.Add(_tile);
         FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.PMPathHoverCharacter);
@@ -389,7 +419,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
                     if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
                     {
                         character.CurrentData.currentActionPoints -= currentSpellSelected.apCost;
-                        FightManager.I?.CastSpell(currentSpellSelected, _tile);
+                        FightManager.I?.CastSpell(fightRoom, currentSpellSelected, _tile);
                         character.UpdateAllUI();
                     }
                 }
@@ -409,6 +439,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
 
         List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
         List<MapTile> _path = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
+        Debug.Log("Path Count: " + _path.Count);
         List<FightMapTile> _pathTiles = _path.ConvertAll(_t => (FightMapTile)_t);
 
         if (_pathTiles != null && _pathTiles.Count > 0 && _pathTiles.Count <= character.CurrentData.currentMovementPoints)
@@ -426,7 +457,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
         List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
-            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(FightManager.I.currentMaps.ConvertAll(_m => (Map)_m));
+            List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(fightRoom.CurrentMaps.ConvertAll(_m => (Map)_m));
             _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax).ConvertAll(_t => (FightMapTile)_t);
             return _rangeTiles;
         }
@@ -443,7 +474,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
     internal void ReadyToFight()
     {
         isReadyToFight = true;
-        OnPlayerReady?.Invoke();
+        OnPlayerReady?.Invoke(fightRoom);
     }
     internal void StartFight()
     {
@@ -602,8 +633,11 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
         if (_tile.IsWalkable)
         {
             ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
-            bool _fightDataOnTile = ExplorationManager.I.CheckIfFightOnWorldTile(_tile.MatrixPositionWorld);
-            if (_fightDataOnTile) ClearExplorationMovement();
+            bool _fightDataOnTile = ExplorationManager.I.CheckIfFightOnWorldTile(this, _tile.MatrixPositionWorld);
+            if (_fightDataOnTile) {
+                onFight = true;
+                ClearExplorationMovement();
+            }
             WorldTileMatrixPositionBase = _tile.MatrixPositionWorld;
             WorlMapMatrixPosition = _tile.map.matrixPosition;
         }

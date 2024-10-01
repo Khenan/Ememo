@@ -33,6 +33,9 @@ public class Character : MonoBehaviourPunCallbacks, IPunObservable
     public bool isHumanController = false;
     public TargetType targetType = new();
 
+    // Fight Room
+    public FightRoom fightRoom;
+
     // Visual
     [SerializeField] private Transform visualRoot;
 
@@ -118,7 +121,7 @@ public class Character : MonoBehaviourPunCallbacks, IPunObservable
         characterUI.Dead();
         if (mode == CharacterMode.Fight)
         {
-            FightManager.I.OnCharacterDead(this);
+            fightRoom.OnCharacterDead(this);
         }
     }
 

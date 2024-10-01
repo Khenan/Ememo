@@ -1,63 +1,54 @@
 using System;
 using System.Collections.Generic;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
 public class ExplorationManager : Singleton<ExplorationManager>
 {
-    private PlayerController playerControllerLocal;
     public List<GameObject> garbage = new();
     public List<PhotonView> photonGarbage = new();
+    private bool _init = false;
 
-    public override void Awake()
+    private void Update()
     {
-        base.Awake();
-    }
-
-    public void StartExploration()
-    {
-        playerControllerLocal = GameManager.I.PlayerControllerLocal;
-        if(playerControllerLocal.GetComponent<PhotonView>().IsMine) Debug.Log("PlayerControllerLocal: " + playerControllerLocal.name, playerControllerLocal);
-        else Debug.LogError("PlayerControllerLocal is not mine");
-        InitWorldMaps();
-        InitPlayerCharacter();
-    }
-
-    private void InitWorldMaps()
-    {
-        if(playerControllerLocal == null) Debug.LogError("PlayerControllerLocal is null");
-        else WorldMapManager.I.LoadMapAndAroundByMatrixPosition(playerControllerLocal.WorlMapMatrixPosition);
-    }
-
-    private void InitPlayerCharacter()
-    {
-        Map _map = GetMapAssetByMatrixPosition(playerControllerLocal.WorlMapMatrixPosition);
-        if (playerControllerLocal == null)
+        if (!_init)
         {
-            Debug.LogError("PlayerController is null");
+            PlayerController _playerControllerLocal = GameManager.I.GetLocalPlayerController();
+            if (_playerControllerLocal != null)
+            {
+                InitWorldMaps(_playerControllerLocal);
+                InitPlayerCharacter(_playerControllerLocal);
+                _init = true;
+            }
         }
+    }
+
+    private void InitWorldMaps(PlayerController _playerController)
+    {
+        if (_playerController == null) Debug.LogError("PlayerControllerLocal is null");
         else
         {
-            Character _characterToInstantiate = playerControllerLocal.CharacterToInstantiate;
-            if (_characterToInstantiate == null)
+            WorldMapManager.I.LoadMapAndAroundByMatrixPosition(_playerController.WorlMapMatrixPosition);
+        }
+    }
+
+    private void InitPlayerCharacter(PlayerController _playerController)
+    {
+        if (_playerController != null)
+        {
+            Character _character = _playerController.Character;
+            if (_character != null)
             {
-                Debug.LogError("CharacterToInstantiate is null");
-            }
-            else
-            {
-                int _x = PlayerPrefs.GetInt("PlayerXWorldPosition", 0);
-                int _z = PlayerPrefs.GetInt("PlayerYWorldPosition", 0);
-                Character _character = PhotonNetwork.Instantiate(_characterToInstantiate.name, new Vector3(_x, 0, _z), Quaternion.identity).GetComponent<Character>();
-                playerControllerLocal.SetCharacter(_character);
-                _character.teamId = 0;
-                _character.SetCharacterName(PhotonNetwork.NickName);
-                ExplorationMapTile _tile = (ExplorationMapTile)_map.GetTileByMatrixPositionWorld(playerControllerLocal.WorldTileMatrixPositionBase);
+                Map _map = GetMapAssetByMatrixPosition(_playerController.WorlMapMatrixPosition);
+                ExplorationMapTile _tile = (ExplorationMapTile)_map.GetTileByMatrixPositionWorld(_playerController.WorldTileMatrixPositionBase);
                 if (_tile != null) SwitchTileCharacter(_character, _tile);
                 else Debug.LogError("Player WorldTile is null");
                 _character.SetCharacterMode(CharacterMode.Exploration);
-                AddPhotonGarbage(_character.GetComponent<PhotonView>());
             }
+            else Debug.LogError("Character is null");
         }
+        else Debug.LogError("PlayerControllerLocal is null");
     }
 
     private Map GetMapAssetByMatrixPosition(Vector2Int _matrixPosition)
@@ -85,23 +76,27 @@ public class ExplorationManager : Singleton<ExplorationManager>
 
     private void CheckIfMapChange(ExplorationMapTile tile)
     {
-        if (tile.map.matrixPosition != playerControllerLocal.WorlMapMatrixPosition)
+        PlayerController _playerControllerLocal = GameManager.I.GetLocalPlayerController();
+        if (tile.map.matrixPosition != _playerControllerLocal.WorlMapMatrixPosition)
         {
-            playerControllerLocal.WorlMapMatrixPosition = tile.map.matrixPosition;
-            InitWorldMaps();
+            _playerControllerLocal.WorlMapMatrixPosition = tile.map.matrixPosition;
+            InitWorldMaps(_playerControllerLocal);
         }
     }
 
-    public void GoToFight(FightData _fightData)
+    public void GoToFight(PlayerController _playerController, FightData _fightData)
     {
         ClearGarbage();
-        GameManager.I.GoToFight(_fightData);
+        List<PlayerController> _playerControllers = _playerController.groupPlayerControllers;
+        _playerControllers.Add(_playerController);
+        GameManager.I.GoToFight(_playerControllers, _fightData);
     }
 
     public FightData GetFightDataByMatrixPositionWorld(Vector2Int _matrixPositionWorld)
     {
         FightData _fightDataToReturn = null;
-        Map _map = WorldMapManager.I.GetMapByMatrixPosition(playerControllerLocal.WorlMapMatrixPosition);
+        PlayerController _playerControllerLocal = GameManager.I.GetLocalPlayerController();
+        Map _map = WorldMapManager.I.GetMapByMatrixPosition(_playerControllerLocal.WorlMapMatrixPosition);
         if (_map != null)
         {
             List<FightData> _fightDatas = ((ExplorationMap)_map).CurrentFightDatas;
@@ -116,13 +111,13 @@ public class ExplorationManager : Singleton<ExplorationManager>
         }
         return _fightDataToReturn;
     }
-    internal bool CheckIfFightOnWorldTile(Vector2Int _matrixPositionWorld)
+    internal bool CheckIfFightOnWorldTile(PlayerController _playerController, Vector2Int _matrixPositionWorld)
     {
         FightData _fightData = GetFightDataByMatrixPositionWorld(_matrixPositionWorld);
         if (_fightData != null)
         {
             Debug.Log(_fightData.name, _fightData);
-            GoToFight(_fightData);
+            GoToFight(_playerController, _fightData);
         }
         return _fightData != null;
     }
