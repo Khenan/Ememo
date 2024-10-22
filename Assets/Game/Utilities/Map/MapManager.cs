@@ -75,8 +75,8 @@ public class MapManager : Singleton<MapManager>
                 {
                     if (_inFight)
                     {
-                        FightMapTile _characterTile = (FightMapTile)currentTile;
-                        if (_inFight && currentTile.MatrixPositionLocalTemporary == _characterTile.MatrixPositionLocalTemporary && _characterTile.character != null)
+                        FightMapTile _characterTargetTile = (FightMapTile)_targetTile;
+                        if (_inFight && _characterTargetTile.character != null && currentTile.MatrixPositionLocalTemporary == _characterTargetTile.MatrixPositionLocalTemporary)
                         {
                             return true;
                         }

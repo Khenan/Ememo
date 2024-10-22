@@ -162,10 +162,12 @@ public class FightManager : Singleton<FightManager>
     }
 
     internal void CastSpell(SpellData _currentSpellSelected, FightMapTile _tile)
-    {      
-        SpellEffectData _data = new(){
-            target= _tile.character
+    {
+        SpellEffectData _data = new()
+        {
+            target = _tile.character
         };
+        Debug.Log("CastSpell");
         _currentSpellSelected.CastSpell(_data);
         UpdateUILocalPlayer();
     }
@@ -246,7 +248,7 @@ public class FightManager : Singleton<FightManager>
         List<Character> _teamCharacters = new();
         foreach (FightCharacter _fCharacter in _fCharacters)
         {
-            if(_fCharacter.character == null) continue;
+            if (_fCharacter.character == null) continue;
             _fCharacter.character.teamId = _fCharacter.teamId;
             _teamCharacters.Add(_fCharacter.character);
         }

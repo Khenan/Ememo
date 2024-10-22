@@ -16,17 +16,18 @@ MonoBehaviour:
   description: 
   apCost: 0
   extraCosts: []
-  isLignOfSight: 0
+  isLignOfSight: 1
   isChangeableRange: 0
   rangeMin: 0
   rangeMax: 0
-  targetTypes: []
   isTargetRequired: 0
   castPerTurn: 0
   castPerTarget: 0
   cooldown: 0
+  targetType: 0
   zones: []
   caster: {fileID: 0}
   targetedTiles: []
   effects: []
-  damage: 0
+  scalingAttribute: 0
+  scalingFactor: 0

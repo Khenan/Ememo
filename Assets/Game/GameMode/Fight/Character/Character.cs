@@ -93,6 +93,7 @@ public class Character : MonoBehaviour
 
     internal void TakeDamage(int damage)
     {
+        Debug.Log("Character Take Damage");
         currentData.currentHealth -= damage;
         currentData.currentHealth = Mathf.Clamp(currentData.currentHealth, 0, currentData.maxHealth);
         if (currentData.currentHealth <= 0)

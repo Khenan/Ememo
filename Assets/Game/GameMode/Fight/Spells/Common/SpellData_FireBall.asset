@@ -16,7 +16,7 @@ MonoBehaviour:
   description: Une boule de feu
   apCost: 0
   extraCosts: []
-  isLignOfSight: 0
+  isLignOfSight: 1
   isChangeableRange: 0
   rangeMin: 1
   rangeMax: 10

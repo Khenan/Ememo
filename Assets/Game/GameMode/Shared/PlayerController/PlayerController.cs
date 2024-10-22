@@ -231,7 +231,7 @@ public partial class PlayerController : MonoBehaviour // Fight
                     else if (currentSpellSelected != null)
                     {
                         List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
-                        if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
+                        if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight, true))
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { _tile }, Colors.I.SpellHighlightHover);
                         else
                             FightMapManager.I.ColorHighlightTiles(new List<FightMapTile> { }, Colors.I.SpellHighlightSightless);
@@ -272,7 +272,7 @@ public partial class PlayerController : MonoBehaviour // Fight
                 foreach (var _tile in _rangeTiles)
                 {
                     List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
-                    if (_tile != null && !MapManager.I.LineOfSight(_allTiles, (FightMapTile)character.CurrentTile, _tile))
+                    if (_tile != null && !MapManager.I.LineOfSight(_allTiles, (FightMapTile)character.CurrentTile, _tile, true))
                         _tile.DisplayHighlight(true, Colors.I.SpellHighlightSightless);
                 }
             }
@@ -367,7 +367,7 @@ public partial class PlayerController : MonoBehaviour // Fight
                 if (character.CurrentData.currentActionPoints >= currentSpellSelected.apCost)
                 {
                     List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
-                    if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight))
+                    if (MapManager.I.IsTileInRange(_allTiles, (FightMapTile)character.CurrentTile, _tile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax, currentSpellSelected.isLignOfSight, true))
                     {
                         character.CurrentData.currentActionPoints -= currentSpellSelected.apCost;
                         FightManager.I?.CastSpell(currentSpellSelected, _tile);

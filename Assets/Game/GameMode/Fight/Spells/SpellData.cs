@@ -87,7 +87,6 @@ public class SpellZone
 [System.Serializable]
 public class SpellEffect
 {
-
     public SpellEffectType type;
     public int value;
     public void ApplyEffect(SpellEffectData _data)
@@ -108,11 +107,12 @@ public class SpellEffect
     }
     public void Damage(SpellEffectData _data)
     {
-        _data.target.TakeDamage(value);
+        Debug.Log("Damage");
+        if (_data.target != null) _data.target.TakeDamage(value);
     }
     public void Heal(SpellEffectData _data)
     {
-        _data.target.TakeDamage(-value);
+        if (_data.target != null) _data.target.TakeDamage(-value);
     }
 }
 
