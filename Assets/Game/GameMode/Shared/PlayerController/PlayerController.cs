@@ -315,6 +315,7 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
                 FightMapManager.I?.HideHighlightTiles();
             }
             List<FightMapTile> _rangeTiles = GetTilesFromSpellSelectedRange();
+
             FightMapManager.I.ShowHighlightTiles(_rangeTiles, Colors.I.SpellHighlight);
             if (currentSpellSelected.isLignOfSight)
             {
@@ -457,8 +458,14 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
         List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
+            Debug.Log("fightRoom.CurrentMaps.Count: " + fightRoom.CurrentMaps.Count);
             List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(fightRoom.CurrentMaps.ConvertAll(_m => (Map)_m));
             _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax).ConvertAll(_t => (FightMapTile)_t);
+            
+            foreach (var _t in _rangeTiles) {
+                Debug.Log(_t, _t);
+            }
+
             return _rangeTiles;
         }
         return _rangeTiles;

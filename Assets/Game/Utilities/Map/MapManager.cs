@@ -122,7 +122,9 @@ public class MapManager : Singleton<MapManager>
         int _startY = _centerTile.MatrixPositionLocalTemporary.y;
         // Get max Y or X in tiles
         int _rangeTilesMaxX = _tiles.Max(_t => _t.MatrixPositionLocalTemporary.x);
+        Debug.Log(_rangeTilesMaxX);
         int _rangeTilesMaxY = _tiles.Max(_t => _t.MatrixPositionLocalTemporary.y);
+        Debug.Log(_rangeTilesMaxY);
         int _rangeMaxTiles = Mathf.Max(_rangeTilesMaxX, _rangeTilesMaxY);
 
         for (int _x = 0; _x <= _rangeTilesMaxX; _x++)

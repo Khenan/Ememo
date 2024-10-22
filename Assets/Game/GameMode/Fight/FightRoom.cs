@@ -49,11 +49,7 @@ public class FightRoom : MonoBehaviour
 
     public void InitFight(FightData _fightData)
     {
-        FightMap _currentMap = FightMapManager.I.InitMap(this, _fightData.AreaId);
-        currentMaps = new()
-        {
-            _currentMap
-        };
+        FightMapManager.I.InitMap(this, _fightData.AreaId);
         InitAllCharactersAndPlayers();
         InitReadyPlayerActions();
         InitAllCharacterDatas();

@@ -48,6 +48,7 @@ public class FightMapManager : Singleton<FightMapManager>
         FightMap _map = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
         _map.fightRoom = _fightRoom;
         currentMaps.Add(_map);
+        _fightRoom.CurrentMaps.Add(_map);
         _fightRoom.garbage.Add(_map.gameObject);
         SetMapColor(_map);
         ShowStartTiles(_map);

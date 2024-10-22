@@ -8,7 +8,11 @@ public class FightMap : Map
     [SerializeField] internal FightRoom fightRoom;
     public void Start()
     {
-        fightRoom.CurrentMaps.Add(this);
+        // fightRoom.CurrentMaps.Add(this);
+    }
+
+    private void Update() {
+        Debug.Log("fightRoom.CurrentMaps.Count: " + fightRoom.CurrentMaps.Count);
     }
 
     private void OnDestroy()
