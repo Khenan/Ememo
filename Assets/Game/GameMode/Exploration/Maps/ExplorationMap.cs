@@ -30,7 +30,7 @@ public class ExplorationMap : Map
             _fightData.charactersToInstantiate = new();
             for (int _i = 0; _i < 3; _i++)
             {
-                Character _character = CharacterDatabase.I.GetCharacterById(Random.Range(0, CharacterDatabase.I.characters.Count));
+                Character _character = CharacterDatabaseManager.I.GetCharacterById(Random.Range(0, CharacterDatabaseManager.I.characters.Count));
                 _fightData.charactersToInstantiate.Add(new FightCharacter(1, _character));
             }
             currentFightDatas.Add(_fightData);

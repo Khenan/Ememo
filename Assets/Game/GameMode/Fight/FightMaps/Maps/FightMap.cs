@@ -5,23 +5,28 @@ using UnityEngine;
 public class FightMap : Map
 {
     [SerializeField] internal int areaId;
+    [SerializeField] internal FightRoom fightRoom;
     public void Start()
     {
-        FightManager.I.currentMaps.Add(this);
+        fightRoom.CurrentMaps.Add(this);
     }
 
     private void OnDestroy()
     {
-        FightManager.I.currentMaps.Remove(this);
+        fightRoom.CurrentMaps.Remove(this);
     }
+
     internal int GetMapTileCount()
     {
         return mapTiles.Count;
     }
+
     internal List<FightMapTile> GetTiles()
     {
         return mapTiles.ConvertAll(_tile => (FightMapTile)_tile);
     }
+
+
     internal List<FightMapTile> GetWalkableTiles()
     {
         return mapTiles.FindAll(tile => tile.IsWalkable).ConvertAll(_tile => (FightMapTile)_tile);
@@ -30,4 +35,5 @@ public class FightMap : Map
     {
         return mapTiles.ConvertAll(_tile => (FightMapTile)_tile).FindAll(tile => tile.IsStartTile);
     }
+    
 }

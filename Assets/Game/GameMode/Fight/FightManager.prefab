@@ -44,4 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee3c91d3bb888d64da0f7edc2e32310e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fightData: {fileID: 0}
+  fightRoomPrefab: {fileID: -3962547903455764289, guid: e974e0af2b58f9743a34c1fe2cf183c2, type: 3}

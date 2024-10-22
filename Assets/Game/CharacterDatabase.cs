@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterDatabase : Singleton<CharacterDatabase>
+public class CharacterDatabaseManager : Singleton<CharacterDatabaseManager>
 {
     public List<Character> characters = new();
     public Character GetCharacterById(int _id)
