@@ -178,4 +178,18 @@ public class ExplorationManager : Singleton<ExplorationManager>
         ClearGarbage();
         ClearPhotonGarbage();
     }
+
+    internal void SetAllPlayersOnExploration(List<PlayerController> _playerControllers)
+    {
+        foreach (PlayerController _player in _playerControllers)
+        {
+            _player.EndFight();
+            Map _map = GetMapAssetByMatrixPosition(_player.WorlMapMatrixPosition);
+            ExplorationMapTile _tile = (ExplorationMapTile)_map.GetTileByMatrixPositionWorld(_player.WorldTileMatrixPositionBase);
+            _tile.characters.Add(_player.Character);
+            _player.Character.CurrentTile = _tile;
+            _player.Character.transform.position = _tile.transform.position;
+            CheckIfMapChange(_tile);
+        }
+    }
 }

@@ -31,6 +31,7 @@ public class FightRoom : MonoBehaviour
     private bool onFight = false;
     private bool fightIsOver = false;
     private FightData fightData;
+    public FightData FightData => fightData;
 
     public void Init(List<PlayerController> _playerControllers, FightData _fightData)
     {

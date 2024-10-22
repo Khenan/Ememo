@@ -98,8 +98,16 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
     {
         if (!photonView.IsMine) return;
 
-        if (onFight) UpdateFight();
-        else UpdateExploration();
+        if (onFight)
+        {
+            Debug.Log("UpdateFight");
+            UpdateFight();
+        }
+        else
+        {
+            Debug.Log("UpdateExploration");
+            UpdateExploration();
+        }
     }
 
     private List<MapTile> GetAllTilesBetweenTwoTiles(MapTile _currentTile, MapTile _targetTile)
@@ -461,8 +469,9 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
             Debug.Log("fightRoom.CurrentMaps.Count: " + fightRoom.CurrentMaps.Count);
             List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(fightRoom.CurrentMaps.ConvertAll(_m => (Map)_m));
             _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax).ConvertAll(_t => (FightMapTile)_t);
-            
-            foreach (var _t in _rangeTiles) {
+
+            foreach (var _t in _rangeTiles)
+            {
                 Debug.Log(_t, _t);
             }
 
@@ -490,6 +499,9 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
     }
     internal void EndFight()
     {
+        fightRoom = null;
+        character.fightRoom = null;
+        character.SetCharacterMode(CharacterMode.Fight);
         isReadyToFight = false;
         lockOnFight = false;
         onFight = false;
@@ -584,12 +596,14 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
     }
     private void ExplorationLeftClickAction(InputAction.CallbackContext _context)
     {
+        Debug.Log("ExplorationLeftClickAction");
         Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit _hit;
         if (Physics.Raycast(_ray, out _hit))
         {
             if (_hit.collider.TryGetComponent(out ExplorationMapTile _tile))
             {
+                Debug.Log("Tile: " + _tile, _tile);
                 if (MapManager.I.lastTileHovered != _tile)
                 {
                     MapManager.I.lastTileHovered = _tile;
@@ -641,7 +655,8 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
         {
             ExplorationManager.I.SwitchTileCharacter(Character, _tile, false);
             bool _fightDataOnTile = ExplorationManager.I.CheckIfFightOnWorldTile(this, _tile.MatrixPositionWorld);
-            if (_fightDataOnTile) {
+            if (_fightDataOnTile)
+            {
                 onFight = true;
                 ClearExplorationMovement();
             }

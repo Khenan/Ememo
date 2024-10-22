@@ -68,12 +68,13 @@ public class GameManager : SingletonPunCallbacks<GameManager>
         FightManager.I.EnterFight(_playerControllers, _fightData);
     }
 
-    internal void ExitFightMode()
+    internal void ExitFightMode(List<PlayerController> _playerControllers)
     {
         gameSceneManagers["Fight"].StopScene();
         ActiveScene("Exploration");
         ExplorationSceneManager _manager = gameSceneManagers["Exploration"] as ExplorationSceneManager;
         _manager.StartScene();
+        ExplorationManager.I.SetAllPlayersOnExploration(_playerControllers);
     }
     #endregion
 

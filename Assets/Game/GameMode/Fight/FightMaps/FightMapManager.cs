@@ -46,6 +46,7 @@ public class FightMapManager : Singleton<FightMapManager>
         List<FightMap> possibleMaps = maps.FindAll(_map => _map.areaId == _areaId);
         Debug.Log("possibleMaps.Count: " + possibleMaps.Count);
         FightMap _map = Instantiate(possibleMaps[Random.Range(0, possibleMaps.Count)]);
+        _map.transform.position += _fightRoom.FightData.transform.position;
         _map.fightRoom = _fightRoom;
         currentMaps.Add(_map);
         _fightRoom.CurrentMaps.Add(_map);

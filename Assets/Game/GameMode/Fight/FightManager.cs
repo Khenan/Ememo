@@ -32,6 +32,8 @@ public class FightManager : Singleton<FightManager>
         {
             _player.onFight = true;
             _player.fightRoom = _fightRoom;
+            _player.Character.fightRoom = _fightRoom;
+            _player.Character.SetCharacterMode(CharacterMode.Fight);
         }
     }
 
@@ -40,7 +42,8 @@ public class FightManager : Singleton<FightManager>
         ClearPhotonGarbage(_fightRoom);
         ClearGarbage(_fightRoom);
         UnlockAllPlayersOnFight(_fightRoom.PlayerControllers);
-        GameManager.I.ExitFightMode();
+        GameManager.I.ExitFightMode(_fightRoom.PlayerControllers);
+        Destroy(_fightRoom.gameObject);
     }
 
     private void UnlockAllPlayersOnFight(List<PlayerController> _playerControllers)
