@@ -171,6 +171,7 @@ public class FightMapManager : Singleton<FightMapManager>
         {
             if (_comeToExplo)
             {
+                Debug.Log("_character.CurrentTile: " + _character.CurrentTile);
                 ExplorationMapTile _exploTile = (ExplorationMapTile)_character.CurrentTile;
                 _exploTile.characters.Remove(_character);
             }

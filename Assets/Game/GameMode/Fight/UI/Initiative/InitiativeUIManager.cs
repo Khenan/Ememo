@@ -20,6 +20,7 @@ public class InitiativeUIManager : Singleton<InitiativeUIManager>
 
     public void Init(List<Character> _characters)
     {
+        Debug.Log("Init Initiative UI");
         Clear();
         for (int _i = 0; _i < _characters.Count; _i++)
         {
@@ -46,7 +47,7 @@ public class InitiativeUIManager : Singleton<InitiativeUIManager>
         _visual.transform.localPosition += Vector3.left * 10;
     }
 
-    private void Clear()
+    public void Clear()
     {
         foreach (InitiativeCharacterVisual _visual in currentVisuals)
         {

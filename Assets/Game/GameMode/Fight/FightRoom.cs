@@ -50,11 +50,17 @@ public class FightRoom : MonoBehaviour
 
     public void InitFight(FightData _fightData)
     {
+        Debug.Log("InitFight");
         FightMapManager.I.InitMap(this, _fightData.AreaId);
+        Debug.Log("InitFight 2");
         InitAllCharactersAndPlayers();
+        Debug.Log("InitFight 3");
         InitReadyPlayerActions();
+        Debug.Log("InitFight 4");
         InitAllCharacterDatas();
+        Debug.Log("InitFight 5");
         InitInitiativeList();
+        Debug.Log("InitFight 6");
         FightManager.I.UpdateUILocalPlayer(this);
     }
 
@@ -88,6 +94,7 @@ public class FightRoom : MonoBehaviour
 
     private void InitInitiativeList()
     {
+        Debug.Log("Init Initiative List");
         // On trie les personnages par initiative
         characters = characters.OrderByDescending(character => character.CurrentData.currentInitiative).ToList();
         // On affiche la barre d'initiative
@@ -176,6 +183,7 @@ public class FightRoom : MonoBehaviour
 
     private void SetAllCharactersOfPlayerTeam(List<PlayerController> _players, List<FightMapTile> _tiles)
     {
+        Debug.Log("_players.Count: " + _players.Count);
         List<PlayerController> _teamPlayers = new List<PlayerController>(_players);
         List<FightMapTile> _teamTiles = new List<FightMapTile>(_tiles);
         while (_teamPlayers.Count > 0)
@@ -266,6 +274,7 @@ public class FightRoom : MonoBehaviour
 
     private void EndFight()
     {
+        if (InitiativeUIManager.I != null) InitiativeUIManager.I.Clear();
         FightManager.I.EndFight(this);
     }
 

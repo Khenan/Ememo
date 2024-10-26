@@ -100,12 +100,10 @@ public partial class PlayerController : MonoBehaviourPunCallbacks, IPunObservabl
 
         if (onFight)
         {
-            Debug.Log("UpdateFight");
-            UpdateFight();
+            if (lockOnFight) UpdateFight();
         }
         else
         {
-            Debug.Log("UpdateExploration");
             UpdateExploration();
         }
     }
@@ -448,7 +446,6 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
 
         List<MapTile> _allTiles = GetAllTilesBetweenTwoTiles(character.CurrentTile, _tile);
         List<MapTile> _path = AStar.FindPath(_allTiles, character.CurrentTile, _tile);
-        Debug.Log("Path Count: " + _path.Count);
         List<FightMapTile> _pathTiles = _path.ConvertAll(_t => (FightMapTile)_t);
 
         if (_pathTiles != null && _pathTiles.Count > 0 && _pathTiles.Count <= character.CurrentData.currentMovementPoints)
@@ -466,14 +463,8 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Fight
         List<FightMapTile> _rangeTiles = new();
         if (currentSpellSelected != null)
         {
-            Debug.Log("fightRoom.CurrentMaps.Count: " + fightRoom.CurrentMaps.Count);
             List<MapTile> _allTiles = ConcatenatorMapList.ConcatenateMaps(fightRoom.CurrentMaps.ConvertAll(_m => (Map)_m));
             _rangeTiles = MapManager.I.GetTilesByRangeInTemporaryList(_allTiles, character.CurrentTile, currentSpellSelected.rangeMin, currentSpellSelected.rangeMax).ConvertAll(_t => (FightMapTile)_t);
-
-            foreach (var _t in _rangeTiles)
-            {
-                Debug.Log(_t, _t);
-            }
 
             return _rangeTiles;
         }
@@ -596,14 +587,12 @@ public partial class PlayerController : MonoBehaviourPunCallbacks // Exploration
     }
     private void ExplorationLeftClickAction(InputAction.CallbackContext _context)
     {
-        Debug.Log("ExplorationLeftClickAction");
         Ray _ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit _hit;
         if (Physics.Raycast(_ray, out _hit))
         {
             if (_hit.collider.TryGetComponent(out ExplorationMapTile _tile))
             {
-                Debug.Log("Tile: " + _tile, _tile);
                 if (MapManager.I.lastTileHovered != _tile)
                 {
                     MapManager.I.lastTileHovered = _tile;

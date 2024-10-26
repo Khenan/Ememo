@@ -8,11 +8,11 @@ public class ExplorationMap : Map
     private List<FightData> currentFightDatas = new();
     public List<FightData> CurrentFightDatas => currentFightDatas;
 
-    private void Start()
+    private void OnEnable()
     {
         CreateFightDataOnRandomFreeTile();
     }
-    private void CreateFightDataOnRandomFreeTile()
+    public void CreateFightDataOnRandomFreeTile()
     {
         if(fightDataPrefab == null)
         {
@@ -43,7 +43,7 @@ public class ExplorationMap : Map
         List<ExplorationMapTile> _freeTiles = new();
         foreach (ExplorationMapTile _tile in mapTiles)
         {
-            if (_tile.IsWalkable && _tile.characters.Count == 0) _freeTiles.Add(_tile);
+            if (_tile.IsWalkable) _freeTiles.Add(_tile);
         }
         return _freeTiles;
     }

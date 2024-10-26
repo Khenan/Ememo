@@ -87,8 +87,11 @@ public class ExplorationManager : Singleton<ExplorationManager>
     public void GoToFight(PlayerController _playerController, FightData _fightData)
     {
         ClearGarbage();
-        List<PlayerController> _playerControllers = _playerController.groupPlayerControllers;
-        _playerControllers.Add(_playerController);
+        Debug.Log("_playerController.groupPlayerControllers.Count: " + _playerController.groupPlayerControllers.Count);
+        List<PlayerController> _playerControllers = new(_playerController.groupPlayerControllers)
+        {
+            _playerController
+        };
         GameManager.I.GoToFight(_playerControllers, _fightData);
     }
 

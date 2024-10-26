@@ -13,12 +13,14 @@ public class FightManager : Singleton<FightManager>
 
     public void EnterFight(List<PlayerController> _playerControllers, FightData _fightData)
     {
+        Debug.Log("EnterFight");
         FightRoom _fightRoom = CreateFightRoom(_playerControllers, _fightData);
         fightRooms.Add(_fightRoom);
     }
 
     private FightRoom CreateFightRoom(List<PlayerController> _playerControllers, FightData _fightData)
     {
+        Debug.Log("CreateFightRoom");
         FightRoom _fightRoom = Instantiate(fightRoomPrefab);
         _fightRoom.Init(_playerControllers, _fightData);
         SetPlayersOnFight(_playerControllers, _fightRoom);
